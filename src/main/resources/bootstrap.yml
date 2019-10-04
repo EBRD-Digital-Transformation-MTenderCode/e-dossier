@@ -1,0 +1,10 @@
+server:
+  port: @project.service.port@
+
+spring:
+  application:
+    name: e-procurer
+  cloud:
+    config:
+      failFast: true
+      name: e-procurer

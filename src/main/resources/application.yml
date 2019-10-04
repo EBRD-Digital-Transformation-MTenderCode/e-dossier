@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: e-procurer
+
+ocds.prefix: ocds-t1s2t3

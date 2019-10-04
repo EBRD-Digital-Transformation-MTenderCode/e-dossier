@@ -1,0 +1,6 @@
+-Dspring.config.location=file:"path to file 'application.yml'"
+
+example
+-Dspring.config.location=file:/home/user/IdeaProjects/OCDS/e-procurer/src/main/resources/application.yml
+
+-Xmx128m -Dspring.config.location=file:/home/user/IdeaProjects/OCDS/e-procurer/src/main/resources/application.yml
