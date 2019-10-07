@@ -14,8 +14,8 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetai
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.MainProcurementCategory
-import com.procurement.procurer.infrastructure.model.dto.tender.CoefficientValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Requirement
+import com.procurement.procurer.infrastructure.model.dto.data.CoefficientValue
+import com.procurement.procurer.infrastructure.model.dto.data.Requirement
 import java.math.BigDecimal
 
 @JsonIgnoreProperties(ignoreUnknown = true)

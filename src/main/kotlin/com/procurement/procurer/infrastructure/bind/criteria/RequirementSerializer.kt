@@ -7,11 +7,11 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
-import com.procurement.procurer.infrastructure.model.dto.tender.ExpectedValue
-import com.procurement.procurer.infrastructure.model.dto.tender.MaxValue
-import com.procurement.procurer.infrastructure.model.dto.tender.MinValue
-import com.procurement.procurer.infrastructure.model.dto.tender.RangeValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Requirement
+import com.procurement.procurer.infrastructure.model.dto.data.ExpectedValue
+import com.procurement.procurer.infrastructure.model.dto.data.MaxValue
+import com.procurement.procurer.infrastructure.model.dto.data.MinValue
+import com.procurement.procurer.infrastructure.model.dto.data.RangeValue
+import com.procurement.procurer.infrastructure.model.dto.data.Requirement
 import java.io.IOException
 
 class RequirementSerializer : JsonSerializer<List<Requirement>>() {

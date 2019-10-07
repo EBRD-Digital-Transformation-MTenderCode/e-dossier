@@ -10,13 +10,13 @@ import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
-import com.procurement.procurer.infrastructure.model.dto.tender.ExpectedValue
-import com.procurement.procurer.infrastructure.model.dto.tender.MaxValue
-import com.procurement.procurer.infrastructure.model.dto.tender.MinValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Period
-import com.procurement.procurer.infrastructure.model.dto.tender.RangeValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Requirement
-import com.procurement.procurer.infrastructure.model.dto.tender.RequirementValue
+import com.procurement.procurer.infrastructure.model.dto.data.ExpectedValue
+import com.procurement.procurer.infrastructure.model.dto.data.MaxValue
+import com.procurement.procurer.infrastructure.model.dto.data.MinValue
+import com.procurement.procurer.infrastructure.model.dto.data.Period
+import com.procurement.procurer.infrastructure.model.dto.data.RangeValue
+import com.procurement.procurer.infrastructure.model.dto.data.Requirement
+import com.procurement.procurer.infrastructure.model.dto.data.RequirementValue
 import java.io.IOException
 import java.math.BigDecimal
 

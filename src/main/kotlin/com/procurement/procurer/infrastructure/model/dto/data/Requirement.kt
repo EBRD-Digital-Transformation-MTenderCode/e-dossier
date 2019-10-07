@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.model.dto.tender
+package com.procurement.procurer.infrastructure.model.dto.data
 
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
 import java.math.BigDecimal

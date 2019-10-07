@@ -5,26 +5,27 @@ import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData
+import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender
+import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender.Conversion
+import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender.Conversion.Coefficient
+import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender.Criteria
+import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender.Criteria.RequirementGroup
+import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender.Item
+import com.procurement.procurer.infrastructure.model.dto.data.CoefficientValue
+import com.procurement.procurer.infrastructure.model.dto.data.ExpectedValue
+import com.procurement.procurer.infrastructure.model.dto.data.MaxValue
+import com.procurement.procurer.infrastructure.model.dto.data.MinValue
+import com.procurement.procurer.infrastructure.model.dto.data.Period
+import com.procurement.procurer.infrastructure.model.dto.data.RangeValue
+import com.procurement.procurer.infrastructure.model.dto.data.Requirement
+import com.procurement.procurer.infrastructure.model.dto.data.RequirementValue
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.MainProcurementCategory
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
-import com.procurement.procurer.infrastructure.model.dto.tender.Coefficient
-import com.procurement.procurer.infrastructure.model.dto.tender.CoefficientValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Conversion
-import com.procurement.procurer.infrastructure.model.dto.tender.Criteria
-import com.procurement.procurer.infrastructure.model.dto.tender.ExpectedValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Item
-import com.procurement.procurer.infrastructure.model.dto.tender.MaxValue
-import com.procurement.procurer.infrastructure.model.dto.tender.MinValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Period
-import com.procurement.procurer.infrastructure.model.dto.tender.RangeValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Requirement
-import com.procurement.procurer.infrastructure.model.dto.tender.RequirementGroup
-import com.procurement.procurer.infrastructure.model.dto.tender.RequirementValue
-import com.procurement.procurer.infrastructure.model.dto.tender.Tender
 import com.procurement.procurer.infrastructure.utils.toObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -56,7 +57,7 @@ class CriteriaService {
             CheckCriteriaRequest::class.java,
             cm.data
         )
-        val tender = convertDtoTender(request.tender)
+        val tender = convertDtoTender(request.tender).tender
 
         if (tender.criteria == null && tender.conversions != null)
             throw ErrorException(
@@ -151,43 +152,35 @@ class CriteriaService {
     }
 
     private fun checkDatatypeCompliance(criteria: List<Criteria>) {
+        fun mismatchDatatypeException(rv: RequirementValue?, rDatatype: RequirementDataType): Nothing =
+            throw ErrorException(
+                ErrorType.INVALID_CRITERIA,
+                message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue. " +
+                    " \n${rv} != ${rDatatype}"
+            )
+
         fun Requirement.hasRequirementValue(): Boolean = this.value != null
         fun Requirement.validate() {
             if (!this.hasRequirementValue()) return
 
             when (this.value) {
                 is ExpectedValue.AsBoolean -> if (this.dataType != RequirementDataType.BOOLEAN)
-                    throw ErrorException(
-                        ErrorType.INVALID_CRITERIA,
-                        message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue. " +
-                            " \n${this.value} != ${this.dataType}"
-                    )
+                    mismatchDatatypeException(this.value, this.dataType)
+
                 is ExpectedValue.AsString  -> if (this.dataType != RequirementDataType.STRING)
-                    throw ErrorException(
-                        ErrorType.INVALID_CRITERIA,
-                        message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue. " +
-                            " \n${this.value} != ${this.dataType}"
-                    )
+                    mismatchDatatypeException(this.value, this.dataType)
 
                 is ExpectedValue.AsInteger,
                 is MinValue.AsInteger,
                 is MaxValue.AsInteger,
                 is RangeValue.AsInteger    -> if (this.dataType != RequirementDataType.INTEGER)
-                    throw ErrorException(
-                        ErrorType.INVALID_CRITERIA,
-                        message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue. " +
-                            " \n${this.value} != ${this.dataType}"
-                    )
+                    mismatchDatatypeException(this.value, this.dataType)
 
                 is ExpectedValue.AsNumber,
                 is MinValue.AsNumber,
                 is MaxValue.AsNumber,
                 is RangeValue.AsNumber     -> if (this.dataType != RequirementDataType.NUMBER)
-                    throw ErrorException(
-                        ErrorType.INVALID_CRITERIA,
-                        message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue." +
-                            " \n${this.value} != ${this.dataType}"
-                    )
+                    mismatchDatatypeException(this.value, this.dataType)
             }
         }
 
@@ -217,7 +210,6 @@ class CriteriaService {
             }
         }
 
-
         criteria
             .flatMap { it.requirementGroups }
             .flatMap { it.requirements }
@@ -238,7 +230,6 @@ class CriteriaService {
                     message = "startDate cannot be greater than endDate"
                 )
         }
-
 
         criteria
             .flatMap { it.requirementGroups }
@@ -355,41 +346,32 @@ class CriteriaService {
     }
 
     private fun checkCoefficientDataType(criteria: List<Criteria>, conversions: List<Conversion>) {
+        fun mismatchDataTypeException(cv: CoefficientValue, rv: RequirementValue): Nothing =
+            throw ErrorException(
+                ErrorType.INVALID_CONVERSION,
+                message = "DataType in Conversion mismatch with Requirement dataType. " +
+                    "\n ${cv} != ${rv}"
+            )
 
         fun RequirementValue.validateDataType(coefficient: Coefficient) {
             when (coefficient.value) {
                 is CoefficientValue.AsBoolean -> if (this !is ExpectedValue.AsBoolean)
-                    throw ErrorException(
-                        ErrorType.INVALID_CONVERSION,
-                        message = "DataType in Conversion mismatch with Requirement dataType. " +
-                            "\n ${coefficient.value} != ${this}"
-                    )
+                    mismatchDataTypeException(coefficient.value, this)
+
                 is CoefficientValue.AsString  -> if (this !is ExpectedValue.AsString)
-                    throw ErrorException(
-                        ErrorType.INVALID_CONVERSION,
-                        message = "DataType in Conversion mismatch with Requirement dataType. " +
-                            "\n ${coefficient.value} != ${this}"
-                    )
+                    mismatchDataTypeException(coefficient.value, this)
 
                 is CoefficientValue.AsNumber  -> if (this !is ExpectedValue.AsNumber
                     && this !is RangeValue.AsNumber
                     && this !is MinValue.AsNumber
                     && this !is MaxValue.AsNumber
-                ) throw ErrorException(
-                    ErrorType.INVALID_CONVERSION,
-                    message = "DataType in Conversion mismatch with Requirement dataType. " +
-                        "\n ${coefficient.value} != ${this.javaClass}"
-                )
+                ) mismatchDataTypeException(coefficient.value, this)
 
                 is CoefficientValue.AsInteger -> if (this !is ExpectedValue.AsInteger
                     && this !is RangeValue.AsInteger
                     && this !is MinValue.AsInteger
                     && this !is MaxValue.AsInteger
-                ) throw ErrorException(
-                    ErrorType.INVALID_CONVERSION,
-                    message = "DataType in Conversion mismatch with Requirement dataType. " +
-                        "\n ${coefficient.value} != ${this}"
-                )
+                ) mismatchDataTypeException(coefficient.value, this)
             }
         }
 
@@ -409,6 +391,12 @@ class CriteriaService {
     }
 
     private fun checkCastCoefficient(tender: Tender) {
+        fun castCoefficientException(limit: BigDecimal): Nothing =
+            throw ErrorException(
+                ErrorType.INVALID_CONVERSION,
+                message = "cast coefficient in conversion cannot be greater than ${limit} "
+            )
+
         val criteria: List<Criteria> = tender.criteria!!
         val conversions: List<Conversion> = tender.conversions!!.filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
         val items: List<Item> = tender.items
@@ -421,11 +409,11 @@ class CriteriaService {
             conversions.filter { it.relatedItem == requirement.id }
         }
 
-        val criteriaRelatedToLot = criteria.filter { it.relatesTo == CriteriaRelatesTo.LOT }
-        val criteriaRelatedToItem = criteria.filter { it.relatesTo == CriteriaRelatesTo.ITEM }
-
         fun Criteria.getRelatedItems(items: List<Item>) =
             items.filter { it.relatedLot == this.relatedItem }
+
+        val criteriaRelatedToLot = criteria.filter { it.relatesTo == CriteriaRelatesTo.LOT }
+        val criteriaRelatedToItem = criteria.filter { it.relatesTo == CriteriaRelatesTo.ITEM }
 
         criteriaRelatedToLot.forEach { lotCriteria ->
             val lotRequirement = lotCriteria.requirementGroups
@@ -451,26 +439,19 @@ class CriteriaService {
 
             val mainProcurementCategory = tender.mainProcurementCategory
 
-            val MAX_LIMIT_FOR_GOODS = 0.6
-            val MAX_LIMIT_FOR_WORKS = 0.8
-            val MAX_LIMIT_FOR_SERVICES = 0.4
+            val MAX_LIMIT_FOR_GOODS = 0.6.toBigDecimal()
+            val MAX_LIMIT_FOR_WORKS = 0.8.toBigDecimal()
+            val MAX_LIMIT_FOR_SERVICES = 0.4.toBigDecimal()
 
             when (mainProcurementCategory) {
-                MainProcurementCategory.GOODS    -> if (castCoefficient > BigDecimal(MAX_LIMIT_FOR_GOODS))
-                    throw ErrorException(
-                        ErrorType.INVALID_CONVERSION,
-                        message = "cast coefficient in conversion cannot be greater than ${MAX_LIMIT_FOR_GOODS} "
-                    )
-                MainProcurementCategory.WORKS    -> if (castCoefficient > BigDecimal(MAX_LIMIT_FOR_WORKS))
-                    throw ErrorException(
-                        ErrorType.INVALID_CONVERSION,
-                        message = "cast coefficient in conversion cannot be greater than ${MAX_LIMIT_FOR_WORKS} "
-                    )
-                MainProcurementCategory.SERVICES -> if (castCoefficient > BigDecimal(MAX_LIMIT_FOR_SERVICES))
-                    throw ErrorException(
-                        ErrorType.INVALID_CONVERSION,
-                        message = "cast coefficient in conversion cannot be greater than ${MAX_LIMIT_FOR_SERVICES} "
-                    )
+                MainProcurementCategory.GOODS    -> if (castCoefficient > MAX_LIMIT_FOR_GOODS)
+                    castCoefficientException(MAX_LIMIT_FOR_GOODS)
+
+                MainProcurementCategory.WORKS    -> if (castCoefficient > MAX_LIMIT_FOR_WORKS)
+                    castCoefficientException(MAX_LIMIT_FOR_WORKS)
+
+                MainProcurementCategory.SERVICES -> if (castCoefficient > MAX_LIMIT_FOR_SERVICES)
+                    castCoefficientException(MAX_LIMIT_FOR_SERVICES)
             }
         }
     }
@@ -566,45 +547,51 @@ class CriteriaService {
         )
     }
 
-    private fun convertDtoTender(tenderDto: CheckCriteriaRequest.Tender): Tender {
-        return Tender(
-            awardCriteria = tenderDto.awardCriteria,
-            awardCriteriaDetails = tenderDto.awardCriteriaDetails,
-            mainProcurementCategory = tenderDto.mainProcurementCategory,
-            criteria = tenderDto.criteria?.map { criteria ->
-                Criteria(
-                    id = criteria.id,
-                    relatesTo = criteria.relatesTo,
-                    relatedItem = criteria.relatedItem,
-                    requirementGroups = criteria.requirementGroups.map { rg ->
-                        RequirementGroup(
-                            id = rg.id,
-                            requirements = rg.requirements
-                        )
-                    }
-                )
-            },
-            conversions = tenderDto.conversions?.map { conversion ->
-                Conversion(
-                    id = conversion.id,
-                    relatedItem = conversion.relatedItem,
-                    rationale = conversion.rationale,
-                    coefficients = conversion.coefficients.map { coefficient ->
-                        Coefficient(
-                            id = coefficient.id,
-                            value = coefficient.value,
-                            coefficient = coefficient.coefficient
-                        )
-                    },
-                    relatesTo = conversion.relatesTo
-                )
-            },
-            items = tenderDto.items.map { item ->
-                Item(
-                    id = item.id,
-                    relatedLot = item.relatedLot
-                )
-            }
+    private fun convertDtoTender(tenderDto: CheckCriteriaRequest.Tender): CheckCriteriaData {
+        return CheckCriteriaData(
+            tender = Tender(
+                awardCriteria = tenderDto.awardCriteria,
+                awardCriteriaDetails = tenderDto.awardCriteriaDetails,
+                mainProcurementCategory = tenderDto.mainProcurementCategory,
+                criteria = tenderDto.criteria?.map { criteria ->
+                    Criteria(
+                        id = criteria.id,
+                        description = criteria.description,
+                        title = criteria.title,
+                        relatesTo = criteria.relatesTo,
+                        relatedItem = criteria.relatedItem,
+                        requirementGroups = criteria.requirementGroups.map { rg ->
+                            RequirementGroup(
+                                id = rg.id,
+                                requirements = rg.requirements,
+                                description = rg.description
+                            )
+                        }
+                    )
+                },
+                conversions = tenderDto.conversions?.map { conversion ->
+                    Conversion(
+                        id = conversion.id,
+                        relatedItem = conversion.relatedItem,
+                        rationale = conversion.rationale,
+                        coefficients = conversion.coefficients.map { coefficient ->
+                            Coefficient(
+                                id = coefficient.id,
+                                value = coefficient.value,
+                                coefficient = coefficient.coefficient
+                            )
+                        },
+                        relatesTo = conversion.relatesTo,
+                        description = conversion.description
+                    )
+                },
+                items = tenderDto.items.map { item ->
+                    Item(
+                        id = item.id,
+                        relatedLot = item.relatedLot
+                    )
+                }
+            )
         )
     }
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.procurement.procurer.infrastructure.model.dto.tender.CoefficientValue
+import com.procurement.procurer.infrastructure.model.dto.data.CoefficientValue
 import java.io.IOException
 
 class CoefficientValueSerializer : JsonSerializer<CoefficientValue>() {
