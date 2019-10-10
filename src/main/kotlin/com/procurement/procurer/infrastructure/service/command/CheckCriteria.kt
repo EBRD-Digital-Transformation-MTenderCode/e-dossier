@@ -36,14 +36,14 @@ fun CheckCriteriaData.checkActualItemRelation(): CheckCriteriaData {
     fun Map<String, CheckCriteriaData.Tender.Item>.containsElement(itemId: String) {
         if (!this.containsKey(itemId)) throw ErrorException(
             ErrorType.INVALID_CRITERIA,
-            message = "Criteria relates to item that does not exists"
+            message = "Criteria relates to item that does not exists. Item id=${itemId}, Available items: ${this.keys}"
         )
     }
 
     fun Map<String, List<CheckCriteriaData.Tender.Item>>.relatesWithLot(lotId: String) {
         if (!this.containsKey(lotId)) throw ErrorException(
             ErrorType.INVALID_CRITERIA,
-            message = "Criteria relates to lot that does not exists"
+            message = "Criteria relates to lot that does not exists. Item id=${lotId}, Available lots: ${this.keys}"
         )
     }
 
@@ -150,12 +150,15 @@ fun CheckCriteriaData.checkDateTime(): CheckCriteriaData {
         if (this.startDate.year > currentYear || this.endDate.year > currentYear)
             throw ErrorException(
                 ErrorType.INVALID_PERIOD_VALUE,
-                message = "start/endDate year cannot be greater than current year"
+                message = "start/endDate year cannot be greater than current year. " +
+                    "StartDate=${this.startDate}, " +
+                    "EndDate=${this.endDate}, " +
+                    "Current year = ${currentYear}"
             )
         if (this.startDate > this.endDate)
             throw ErrorException(
                 ErrorType.INVALID_PERIOD_VALUE,
-                message = "startDate cannot be greater than endDate"
+                message = "startDate cannot be greater than endDate. StartDate=${this.startDate}, EndDate=${this.endDate}"
             )
     }
 
@@ -186,7 +189,7 @@ fun CheckCriteriaData.checkRequirements(): CheckCriteriaData {
         if (criteriaId != null && criteriaId.size > 1)
             throw ErrorException(
                 ErrorType.INVALID_CRITERIA,
-                message = "criteria.id is not unique"
+                message = "criteria.id is not unique. Current id = ${this.id}, All ids: ${criteriaById}"
             )
     }
 
@@ -195,7 +198,7 @@ fun CheckCriteriaData.checkRequirements(): CheckCriteriaData {
         if (requirementGroup != null && requirementGroup.size > 1)
             throw ErrorException(
                 ErrorType.INVALID_CRITERIA,
-                message = "requirementGroup.id is not unique"
+                message = "requirementGroup.id is not unique. Current id = ${this.id}. All ids: ${requirementGroupById}"
             )
     }
 
@@ -204,7 +207,7 @@ fun CheckCriteriaData.checkRequirements(): CheckCriteriaData {
         if (requirement != null && requirement.size > 1)
             throw ErrorException(
                 ErrorType.INVALID_CRITERIA,
-                message = "requirement.id is not unique"
+                message = "requirement.id is not unique. Current id = ${this.id}. All ids: ${requirementById}"
             )
     }
 

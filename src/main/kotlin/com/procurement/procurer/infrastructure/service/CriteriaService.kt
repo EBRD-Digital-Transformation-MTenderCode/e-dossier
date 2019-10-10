@@ -108,7 +108,7 @@ class CriteriaService(
         fun missingArgumentException(argument: String): Nothing =
             throw ErrorException(
                 error = ErrorType.CONTEXT,
-                message = "Missing the '${argument}' attribute in context.."
+                message = "Missing the '${argument}' attribute in context."
             )
 
         val cpid = cm.context.cpid ?: missingArgumentException("cpid")

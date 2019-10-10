@@ -28,7 +28,8 @@ fun processCriteria(
         if (conversion.relatesTo == ConversionsRelatesTo.REQUIREMENT) return relations.get(conversion.relatedItem)
             ?: throw ErrorException(
                 ErrorType.INVALID_CONVERSION,
-                message = "Conversion relates to requirement that does not exists"
+                message = "Conversion relates to requirement that does not exists. " +
+                    "Conversion.id=${conversion.id}, Conversion.relatedItem=${conversion.relatedItem}"
             )
         return conversion.relatedItem
     }
