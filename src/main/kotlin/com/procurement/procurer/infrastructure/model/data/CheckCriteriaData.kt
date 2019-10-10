@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.model.dto.data
+package com.procurement.procurer.infrastructure.model.data
 
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails

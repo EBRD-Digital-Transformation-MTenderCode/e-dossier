@@ -2,5 +2,6 @@
 
 example
 -Dspring.config.location=file:/home/user/IdeaProjects/OCDS/e-procurer/src/main/resources/application.yml
+-Dspring.config.location=src/main/resources/application.yml
 
 -Xmx128m -Dspring.config.location=file:/home/user/IdeaProjects/OCDS/e-procurer/src/main/resources/application.yml

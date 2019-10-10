@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.procurement.procurer.infrastructure.exception.CoefficientValueException
-import com.procurement.procurer.infrastructure.model.dto.data.CoefficientValue
+import com.procurement.procurer.infrastructure.model.data.CoefficientValue
 import java.io.IOException
 import java.math.BigDecimal
 
@@ -21,12 +21,15 @@ class CoefficientValueDeserializer : JsonDeserializer<CoefficientValue>() {
     @Throws(IOException::class, JsonProcessingException::class)
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): CoefficientValue {
         return when (jsonParser.currentToken) {
-            JsonToken.VALUE_STRING -> deserialize(jsonParser.text)
-            JsonToken.VALUE_FALSE -> deserialize(false)
-            JsonToken.VALUE_TRUE -> deserialize(true)
-            JsonToken.VALUE_NUMBER_INT -> deserialize(jsonParser.longValue)
+            JsonToken.VALUE_STRING       -> deserialize(jsonParser.text)
+            JsonToken.VALUE_FALSE        -> deserialize(false)
+            JsonToken.VALUE_TRUE         -> deserialize(true)
+            JsonToken.VALUE_NUMBER_INT   -> deserialize(jsonParser.longValue)
             JsonToken.VALUE_NUMBER_FLOAT -> deserialize(BigDecimal(jsonParser.text))
-            else -> throw CoefficientValueException(coefficientValue = jsonParser.text, description = "Incorrect type")
+            else                         -> throw CoefficientValueException(
+                coefficientValue = jsonParser.text,
+                description = "Invalid type"
+            )
         }
     }
 }

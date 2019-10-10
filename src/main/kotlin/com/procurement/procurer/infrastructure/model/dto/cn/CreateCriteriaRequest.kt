@@ -15,11 +15,10 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
-import com.procurement.procurer.infrastructure.model.dto.ocds.MainProcurementCategory
 import java.math.BigDecimal
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class CheckCriteriaRequest(
+data class CreateCriteriaRequest(
     @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender
 ) {
     data class Tender(
@@ -28,20 +27,12 @@ data class CheckCriteriaRequest(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @field:JsonProperty("awardCriteriaDetails") @param:JsonProperty("awardCriteriaDetails") val awardCriteriaDetails: AwardCriteriaDetails?,
 
-        @field:JsonProperty("mainProcurementCategory") @param:JsonProperty("mainProcurementCategory") val mainProcurementCategory: MainProcurementCategory,
-        @field:JsonProperty("items") @param:JsonProperty("items") val items: List<Item>,
-
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("criteria") @param:JsonProperty("criteria") val criteria: List<Criteria>?,
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("conversions") @param:JsonProperty("conversions") val conversions: List<Conversion>?
     ) {
-        data class Item(
-            @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
-            @field:JsonProperty("relatedLot") @param:JsonProperty("relatedLot") val relatedLot: String
-        )
-
         data class Criteria(
             @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
             @field:JsonProperty("title") @param:JsonProperty("title") val title: String,

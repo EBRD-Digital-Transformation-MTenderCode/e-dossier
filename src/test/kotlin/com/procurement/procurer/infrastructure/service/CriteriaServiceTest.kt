@@ -2,29 +2,46 @@ package com.procurement.procurer.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.clearInvocations
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.times
+import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
+import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tender.Criteria.RequirementGroup
+import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tender.Item
+import com.procurement.procurer.infrastructure.model.data.Requirement
+import com.procurement.procurer.application.repository.CriteriaRepository
 import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
 import com.procurement.procurer.infrastructure.generator.ContextGenerator
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
-import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender.Criteria.RequirementGroup
-import com.procurement.procurer.infrastructure.model.dto.data.CheckCriteriaData.Tender.Item
+import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
+import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
+import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.procurer.infrastructure.model.dto.ocds.Operation
 import com.procurement.procurer.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
-import com.procurement.procurer.infrastructure.model.dto.data.Requirement
+import com.procurement.procurer.infrastructure.utils.toObject
+import com.procurement.procurer.json.getArray
 import com.procurement.procurer.json.getObject
 import com.procurement.procurer.json.loadJson
 import com.procurement.procurer.json.testingBindingAndMapping
+import com.procurement.procurer.json.toJson
 import com.procurement.procurer.json.toNode
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -38,19 +55,27 @@ import java.math.BigDecimal
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CriteriaServiceTest {
 
-    private val CHECK_CRITERIA_REQUEST = "json/service/criteria/check/request/request_check_criteria_full.json"
+    private val generationService: GenerationService = mock()
+    private val criteriaRepository: CriteriaRepository = mock()
 
-    private val criteriaService: CriteriaService = CriteriaService()
+    private val criteriaService: CriteriaService = CriteriaService(generationService, criteriaRepository)
     private val parseContext = JsonPath.using(Configuration.defaultConfiguration())
-    private val json = loadJson(CHECK_CRITERIA_REQUEST)
 
-    @BeforeEach
+    @AfterEach
     fun clear() {
-        testingBindingAndMapping<CheckCriteriaRequest>(CHECK_CRITERIA_REQUEST)
+        clearInvocations(generationService)
     }
 
     @Nested
     inner class CheckCriteria {
+
+        private val CHECK_CRITERIA_REQUEST = "json/service/criteria/check/request/request_check_criteria_full.json"
+        private val json = loadJson(CHECK_CRITERIA_REQUEST)
+
+        @BeforeEach
+        fun setup() {
+            testingBindingAndMapping<CheckCriteriaRequest>(CHECK_CRITERIA_REQUEST)
+        }
 
         @Nested
         inner class FReq_1_1_1_22 {
@@ -320,6 +345,152 @@ class CriteriaServiceTest {
                 val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
                 assertTrue(exception.cause is JsonMappingException)
             }
+
+            @Nested
+            inner class RangeValue {
+
+
+                @Test
+                fun `RangeValue Integer`() {
+                    val document = parseContext.parse(json)
+
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "minValue", 1)
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 3)
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","integer")
+
+                    val requestNode = document.jsonString().toNode()
+
+                    val requirement = requestNode
+                        .getObject("tender")
+                        .getArray("criteria")[3]
+                        .getArray("requirementGroups")[0]
+                        .getArray("requirements")[0]
+
+                    (requirement as ObjectNode).remove("expectedValue")
+
+                    val cm = commandMessage(
+                        CommandType.CHECK_CRITERIA,
+                        data = requestNode
+                    )
+
+                    assertDoesNotThrow { criteriaService.checkCriteria(cm) }
+                }
+
+            }
+
+            @Nested
+            inner class MinValue {
+
+                @Test
+                fun `MinValue Integer`() {
+                    val document = parseContext.parse(json)
+
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "minValue", 1)
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","integer")
+
+                    val requestNode = document.jsonString().toNode()
+
+                    val requirement = requestNode
+                        .getObject("tender")
+                        .getArray("criteria")[3]
+                        .getArray("requirementGroups")[0]
+                        .getArray("requirements")[0]
+
+                    (requirement as ObjectNode).remove("expectedValue")
+
+                    val cm = commandMessage(
+                        CommandType.CHECK_CRITERIA,
+                        data = requestNode
+                    )
+
+                    assertDoesNotThrow { criteriaService.checkCriteria(cm) }
+                }
+
+                @Test
+                fun `MinValue Number`() {
+                    val document = parseContext.parse(json)
+
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "minValue", 1.0)
+                    document.put("$.tender.conversions[3].coefficients[0]", "value", 1.0)
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","number")
+
+                    val requestNode = document.jsonString().toNode()
+
+                    val requirement = requestNode
+                        .getObject("tender")
+                        .getArray("criteria")[3]
+                        .getArray("requirementGroups")[0]
+                        .getArray("requirements")[0]
+
+                    (requirement as ObjectNode).remove("expectedValue")
+
+                    val cm = commandMessage(
+                        CommandType.CHECK_CRITERIA,
+                        data = requestNode
+                    )
+
+                    assertDoesNotThrow { criteriaService.checkCriteria(cm) }
+                }
+
+            }
+
+
+            @Nested
+            inner class MaxValue {
+
+                @Test
+                fun `MaxValue Integer`() {
+                    val document = parseContext.parse(json)
+
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 4)
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","integer")
+
+                    val requestNode = document.jsonString().toNode()
+
+                    val requirement = requestNode
+                        .getObject("tender")
+                        .getArray("criteria")[3]
+                        .getArray("requirementGroups")[0]
+                        .getArray("requirements")[0]
+
+                    (requirement as ObjectNode).remove("expectedValue")
+
+                    val cm = commandMessage(
+                        CommandType.CHECK_CRITERIA,
+                        data = requestNode
+                    )
+
+                    assertDoesNotThrow { criteriaService.checkCriteria(cm) }
+                }
+
+                @Test
+                fun `MaxValue Number`() {
+                    val document = parseContext.parse(json)
+
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 4.0)
+                    document.put("$.tender.conversions[3].coefficients[0]", "value", 4.0)
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","number")
+
+                    val requestNode = document.jsonString().toNode()
+
+                    val requirement = requestNode
+                        .getObject("tender")
+                        .getArray("criteria")[3]
+                        .getArray("requirementGroups")[0]
+                        .getArray("requirements")[0]
+
+                    (requirement as ObjectNode).remove("expectedValue")
+
+                    val cm = commandMessage(
+                        CommandType.CHECK_CRITERIA,
+                        data = requestNode
+                    )
+
+                    assertDoesNotThrow { criteriaService.checkCriteria(cm) }
+                }
+
+            }
+
         }
 
         @Nested
@@ -844,6 +1015,22 @@ class CriteriaServiceTest {
 
                 assertDoesNotThrow { criteriaService.checkCriteria(cm) }
             }
+
+            @Test
+            fun `Invalid cast coefficient`() {
+                val document = parseContext.parse(json)
+
+                document.set("$.tender.conversions[4].coefficients[0].coefficient", 0.1)
+
+                val requestNode = document.jsonString().toNode()
+
+                val cm = commandMessage(
+                    CommandType.CHECK_CRITERIA,
+                    data = requestNode
+                )
+
+                assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+            }
         }
 
         @Nested
@@ -953,6 +1140,141 @@ class CriteriaServiceTest {
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
                 assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
             }
+        }
+
+        @Nested
+        inner class Exception {
+
+            @Test
+            fun `coefficient value exeption`() {
+                val document = parseContext.parse(json)
+                document.set("$.tender.conversions[0].coefficients[0].value", emptyArray<String>())
+                val requestNode = document.jsonString().toNode()
+
+                val cm = commandMessage(
+                    CommandType.CHECK_CRITERIA,
+                    data = requestNode
+                )
+
+                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
+
+            }
+
+        }
+    }
+
+    @Nested
+    inner class CreateCriteria {
+
+        private val CREATE_CRITERIA_REQUEST = "json/service/criteria/create/request/request_create_criteria_full.json"
+        private val CREATE_CRITERIA_RESPONSE = "json/service/criteria/create/response/response_create_criteria_full.json"
+
+        private val json = loadJson(CREATE_CRITERIA_REQUEST)
+
+        @BeforeEach
+        fun setup() {
+            testingBindingAndMapping<CreateCriteriaRequest>(CREATE_CRITERIA_REQUEST)
+            testingBindingAndMapping<CreateCriteriaResponse>(CREATE_CRITERIA_RESPONSE)
+        }
+
+        @Test
+        fun `full flow`() {
+
+            val expectedCriteriaIds = listOf("c-1-001", "c-2-002", "c-3-003")
+            val expectedRgIds = listOf("rg-1-001", "rg-2-002", "rg-3-003")
+            val expectedRequirementIds = listOf("r-1-001", "r-2-002", "r-3-003", "r-4-004", "r-5-005")
+            val expectedConversionIds = listOf("cnv-1-001", "cnv-2-002")
+            val expectedCoefficientIds = listOf("cfc-1-001", "cfc-2-002", "cfc-3-003", "cfc-4-004")
+
+            whenever(generationService.generatePermanentCriteriaId())
+                .thenReturn(expectedCriteriaIds[0], expectedCriteriaIds[1], expectedCriteriaIds[2])
+
+            whenever(generationService.generatePermanentRequirementGroupId())
+                .thenReturn(expectedRgIds[0], expectedRgIds[1], expectedRgIds[2])
+
+            whenever(generationService.generatePermanentRequirementId())
+                .thenReturn(
+                    expectedRequirementIds[0],
+                    expectedRequirementIds[1],
+                    expectedRequirementIds[2],
+                    expectedRequirementIds[3],
+                    expectedRequirementIds[4]
+                )
+
+            whenever(generationService.generatePermanentConversionId())
+                .thenReturn(expectedConversionIds[0], expectedConversionIds[1])
+
+            whenever(generationService.generatePermanentCoefficientId())
+                .thenReturn(
+                    expectedCoefficientIds[0],
+                    expectedCoefficientIds[1],
+                    expectedCoefficientIds[2],
+                    expectedCoefficientIds[3]
+                )
+
+            whenever(criteriaRepository.save(any()))
+                .thenReturn(true)
+
+            val document = parseContext.parse(json)
+
+            val requestNode = document.jsonString().toNode()
+
+            requestNode.getObject("tender")
+                .put("awardCriteria", "priceOnly")
+                .put("awardCriteriaDetails", "manual")
+                .remove("criteria[0].relatesTo")
+
+            val cm = commandMessage(
+                CommandType.CREATE_CRITERIA,
+                data = requestNode
+            )
+
+            println(cm.toJson())
+
+            val response = criteriaService.createCriteria(cm)
+
+            verify(criteriaRepository, times(1))
+                .save(any())
+
+            val responseDto = response.data as CreateCriteriaResponse
+
+            val criteriaId = responseDto.criteria!!.map { it.id }
+            assertEquals(expectedCriteriaIds, criteriaId)
+
+            val requirementGroupsId = responseDto.criteria!!.flatMap { it.requirementGroups }
+                .map { it.id }
+            assertEquals(expectedRgIds, requirementGroupsId)
+
+            val requirementsId = responseDto.criteria!!
+                .flatMap { it.requirementGroups }
+                .flatMap { it.requirements }
+                .map { it.id }
+
+            assertEquals(expectedRequirementIds, requirementsId)
+
+            val conversionsId = responseDto.conversions!!.map { it.id }
+            assertEquals(expectedConversionIds, conversionsId)
+
+            val coefficientId = responseDto.conversions!!.flatMap { it.coefficients }
+                .map { it.id }
+            assertEquals(expectedCoefficientIds, coefficientId)
+
+            val criteriaSource = responseDto.criteria!![0].source
+            assertNotNull(criteriaSource)
+            assertEquals(CriteriaSource.TENDERER, criteriaSource)
+
+            val awardCriteriaDeatils = responseDto.awardCriteriaDetails
+            assertNotNull(awardCriteriaDeatils)
+            assertEquals(AwardCriteriaDetails.AUTOMATED, awardCriteriaDeatils)
+
+            val conversionRelations = responseDto.conversions!!
+                .filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
+                .map { it.relatedItem }
+
+            conversionRelations.forEach {
+                assertTrue(expectedRequirementIds.contains(it))
+            }
+
         }
     }
 }

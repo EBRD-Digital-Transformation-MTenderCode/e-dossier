@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.model.dto.data
+package com.procurement.procurer.infrastructure.model.data
 
 import java.math.BigDecimal
 

@@ -8,7 +8,6 @@ import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import java.io.IOException
 
-
 class IntDeserializer : JsonDeserializer<Int>() {
 
     @Throws(IOException::class)

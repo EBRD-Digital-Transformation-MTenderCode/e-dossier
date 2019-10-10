@@ -55,6 +55,26 @@ enum class AwardCriteriaDetails(@JsonValue val value: String) {
     }
 }
 
+enum class CriteriaSource(@JsonValue val value: String) {
+    TENDERER("tenderer"),
+    BUYER("buyer");
+
+    override fun toString(): String {
+        return this.value
+    }
+
+    companion object {
+        private val elements: Map<String, CriteriaSource> =
+            values().associateBy { it.value.toUpperCase() }
+
+        fun fromString(value: String): CriteriaSource =
+            elements[value.toUpperCase()] ?: throw EnumException(
+                enumType = CriteriaSource::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value })
+    }
+}
+
 enum class CriteriaRelatesTo(@JsonValue val value: String) {
     TENDERER("tenderer"),
     ITEM("item"),
