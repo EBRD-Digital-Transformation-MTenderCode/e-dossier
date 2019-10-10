@@ -176,8 +176,9 @@ fun CheckCriteriaData.checkRequirements(): CheckCriteriaData {
     val criteriaById = criteria.groupBy { it.id }
     val requirementGroupById = criteria.flatMap { it.requirementGroups }
         .groupBy { it.id }
-    val requirementById = criteria.flatMap { it.requirementGroups }
-        .flatMap { it.requirements }
+    val requirementById = criteria.asSequence()
+        .flatMap { it.requirementGroups.asSequence() }
+        .flatMap { it.requirements.asSequence() }
         .groupBy { it.id }
 
     fun CheckCriteriaData.Tender.Criteria.validateId() {
@@ -246,8 +247,9 @@ fun CheckCriteriaData.checkConversionRelation(): CheckCriteriaData {
     val criteria = this.tender.criteria ?: return this
     val conversions = this.tender.conversions ?: return this
 
-    val requirements = criteria.flatMap { it.requirementGroups }
-        .flatMap { it.requirements }
+    val requirements = criteria.asSequence()
+        .flatMap { it.requirementGroups.asSequence() }
+        .flatMap { it.requirements.asSequence() }
         .groupBy { it.id }
 
     val relation: MutableMap<String, List<Requirement>> = mutableMapOf()
@@ -326,8 +328,9 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
     val criteria = this.tender.criteria ?: return this
     val conversions = this.tender.conversions ?: return this
 
-    val requirements = criteria.flatMap { it.requirementGroups }
-        .flatMap { it.requirements }
+    val requirements = criteria.asSequence()
+        .flatMap { it.requirementGroups.asSequence() }
+        .flatMap { it.requirements.asSequence() }
         .associateBy { it.id }
 
     val conversionsRelatesToRequirement = conversions.filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
@@ -354,9 +357,11 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
     val conversions: List<CheckCriteriaData.Tender.Conversion> = this.tender.conversions!!.filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
     val items: List<CheckCriteriaData.Tender.Item> = this.tender.items
 
-    val tenderRequirements = criteria.filter { it.relatesTo == null }
-        .flatMap { it.requirementGroups }
-        .flatMap { it.requirements }
+    val tenderRequirements = criteria.asSequence()
+        .filter { it.relatesTo == null }
+        .flatMap { it.requirementGroups.asSequence() }
+        .flatMap { it.requirements.asSequence() }
+        .toList()
 
     val tenderConversions = tenderRequirements.flatMap { requirement ->
         conversions.filter { it.relatedItem == requirement.id }
@@ -378,9 +383,11 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
         val relatedItems = lotCriteria.getRelatedItems(items)
 
         val itemRequirement = relatedItems.flatMap { item ->
-            criteriaRelatedToItem.filter { it.relatedItem == item.id }
-                .flatMap { it.requirementGroups }
-                .flatMap { it.requirements }
+            criteriaRelatedToItem.asSequence()
+                .filter { it.relatedItem == item.id }
+                .flatMap { it.requirementGroups.asSequence() }
+                .flatMap { it.requirements.asSequence() }
+                .toList()
         }
         val itemConversions = itemRequirement.flatMap { requirement ->
             conversions.filter { it.relatedItem == requirement.id }

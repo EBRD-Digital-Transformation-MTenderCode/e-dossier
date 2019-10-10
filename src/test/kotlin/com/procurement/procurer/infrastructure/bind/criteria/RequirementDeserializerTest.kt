@@ -41,11 +41,6 @@ class RequirementDeserializerTest {
         clearInvocations(generationService)
     }
 
-    @BeforeEach
-    fun setup() {
-//            testingBindingAndMapping<CheckCriteriaRequest>(CHECK_CRITERIA_REQUEST)
-    }
-
     @Nested
     inner class ExpectedValue {
 
