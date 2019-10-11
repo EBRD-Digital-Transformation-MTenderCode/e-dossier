@@ -2,6 +2,8 @@ package com.procurement.procurer.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
@@ -17,6 +19,7 @@ import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tend
 import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tender.Item
 import com.procurement.procurer.infrastructure.model.data.Requirement
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
 import com.procurement.procurer.infrastructure.generator.ContextGenerator
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
@@ -32,6 +35,7 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.Operation
 import com.procurement.procurer.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.procurer.infrastructure.utils.toObject
+import com.procurement.procurer.json.exception.JsonBindingException
 import com.procurement.procurer.json.getArray
 import com.procurement.procurer.json.getObject
 import com.procurement.procurer.json.loadJson
@@ -50,16 +54,27 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CriteriaServiceTest {
+@SpringBootTest(classes = [ObjectMapperConfiguration::class])
+class CriteriaServiceTest{
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     private val generationService: GenerationService = mock()
     private val criteriaRepository: CriteriaRepository = mock()
 
-    private val criteriaService: CriteriaService = CriteriaService(generationService, criteriaRepository)
+    private lateinit var criteriaService: CriteriaService
     private val parseContext = JsonPath.using(Configuration.defaultConfiguration())
+
+    @BeforeEach
+    fun setup() {
+       criteriaService = CriteriaService(generationService, criteriaRepository, objectMapper)
+    }
 
     @AfterEach
     fun clear() {
@@ -268,8 +283,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
-                assertTrue(exception.cause is JsonMappingException)
+                val exception = assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -323,8 +337,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
-                assertTrue(exception.cause is JsonMappingException)
+                val exception = assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -342,8 +355,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
-                assertTrue(exception.cause is JsonMappingException)
+                val exception = assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Nested
@@ -622,8 +634,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
-                assertTrue(exception.cause is JsonMappingException)
+                val exception = assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -672,8 +683,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -736,8 +746,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                 assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -980,7 +989,7 @@ class CriteriaServiceTest {
                 document.set("$.tender.criteria[2].requirementGroups[0].requirements[0].id", UNIQUE_ID)
                 document.set(
                     "$.tender.criteria[2].requirementGroups[0].requirements[0].dataType",
-                    RequirementDataType.NUMBER
+                    RequirementDataType.NUMBER.value()
                 )
                 document.set("$.tender.criteria[2].requirementGroups[0].requirements[0].expectedValue", 123.54)
                 document.set("$.tender.conversions[1].relatedItem", UNIQUE_ID)
@@ -1048,8 +1057,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
-                assertTrue(exception.cause is JsonMappingException)
+                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
             }
         }
 
@@ -1068,8 +1076,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
-                assertTrue(exception.cause is JsonMappingException)
+                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -1084,8 +1091,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
-                assertTrue(exception.cause is JsonMappingException)
+                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
             }
         }
 
@@ -1104,8 +1110,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -1120,8 +1125,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -1156,7 +1160,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<IllegalArgumentException> { criteriaService.checkCriteria(cm) }
+                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
 
             }
 

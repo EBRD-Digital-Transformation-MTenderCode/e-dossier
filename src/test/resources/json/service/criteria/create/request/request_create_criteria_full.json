@@ -42,8 +42,8 @@
                 "id": "002-1-2",
                 "title": "The number of years for proposed product warranty",
                 "dataType": "number",
-                "minValue": 1.0,
-                "maxValue": 3.0,
+                "minValue": 1.01,
+                "maxValue": 3.01,
                 "period": {
                   "startDate": "2019-10-04T15:51:23Z",
                   "endDate": "2019-10-04T15:51:23Z"
@@ -89,17 +89,17 @@
         "coefficients": [
           {
             "id": "coefficient-1557947503428",
-            "value": 1.0,
+            "value": 1.01,
             "coefficient": 1
           },
           {
             "id": "coefficient-1557947503428",
-            "value": 2.0,
+            "value": 2.01,
             "coefficient": 0.85
           },
           {
             "id": "coefficient-1557947503428",
-            "value": 3.0,
+            "value": 3.01,
             "coefficient": 0.7
           }
         ]

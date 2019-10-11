@@ -4,7 +4,7 @@ import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
 import org.junit.jupiter.api.Test
 
-class CnOnPnRequestTest : AbstractDTOTestBase<CheckCriteriaRequest>(
+class CheckCriteriaRequestTest : AbstractDTOTestBase<CheckCriteriaRequest>(
     CheckCriteriaRequest::class.java) {
     @Test
     fun fully() {

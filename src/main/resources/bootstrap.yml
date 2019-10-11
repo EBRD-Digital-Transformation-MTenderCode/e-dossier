@@ -6,5 +6,6 @@ spring:
     name: e-procurer
   cloud:
     config:
+      enabled: false
       failFast: true
       name: e-procurer

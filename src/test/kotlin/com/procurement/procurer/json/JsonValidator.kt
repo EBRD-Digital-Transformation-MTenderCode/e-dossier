@@ -1,5 +1,7 @@
 package com.procurement.procurer.json
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.json.exception.JsonCompareException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.fail
@@ -17,6 +19,18 @@ fun <T : Any> testingBindingAndMapping(pathToJsonFile: String, target: Class<T>)
         JsonValidator.equalsJsons(expected, actual)
     } catch (exception: JsonCompareException) {
         fail<T>("Error testing binding and mapping JSON file by path: '$pathToJsonFile' to an object of type '${target.canonicalName}'.\n${exception.message}")
+    }
+}
+
+fun <T : Any> testingBindingAndMapping(jsonNode: JsonNode, target: Class<T>) {
+    val expected = jsonNode.toJson()
+    val obj = expected.toObject(target)
+    val actual = obj.toJson()
+    println(toJson(jsonNode))
+    try {
+        JsonValidator.equalsJsons(expected, actual)
+    } catch (exception: JsonCompareException) {
+        fail<T>("Error testing binding and mapping JSON to an object of type '${target.canonicalName}'.\n${exception.message}")
     }
 }
 

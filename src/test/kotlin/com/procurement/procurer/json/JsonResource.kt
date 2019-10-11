@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.procurement.procurer.json.exception.JsonBindingException
 import com.procurement.procurer.json.exception.JsonFileNotFoundException
@@ -88,7 +89,7 @@ object JsonMapper {
         configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         //TODO added ZERO to last !!!
-//        nodeFactory = JsonNodeFactory.withExactBigDecimals(true)
+        nodeFactory = JsonNodeFactory.withExactBigDecimals(true)
     }
 
     private fun extendModule() =

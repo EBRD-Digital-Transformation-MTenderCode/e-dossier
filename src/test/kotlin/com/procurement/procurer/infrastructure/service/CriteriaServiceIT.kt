@@ -7,6 +7,7 @@ import com.datastax.driver.core.PlainTextAuthProvider
 import com.datastax.driver.core.PoolingOptions
 import com.datastax.driver.core.Session
 import com.datastax.driver.core.querybuilder.QueryBuilder
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
 import com.nhaarman.mockito_kotlin.any
@@ -20,6 +21,7 @@ import com.procurement.procurer.application.model.entity.CnEntity
 import com.procurement.procurer.application.repository.CriteriaRepository
 import com.procurement.procurer.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.procurer.infrastructure.config.OCDSProperties
+import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
@@ -41,12 +43,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
-@ContextConfiguration(classes = [DatabaseTestConfiguration::class])
-class CassandraACRepositoryIT {
+@SpringBootTest(classes = [
+    DatabaseTestConfiguration::class,
+    ObjectMapperConfiguration::class
+])
+class CriteriaServiceIT {
     companion object {
         private const val CPID = "cpid-1"
         private const val OWNER = "owner-1"
@@ -58,6 +64,9 @@ class CassandraACRepositoryIT {
         private const val COLUMN_OWNER = "owner"
         private const val COLUMN_JSONDATA = "json_data"
     }
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
 
     @Autowired
     private lateinit var container: CassandraTestContainer
@@ -95,7 +104,7 @@ class CassandraACRepositoryIT {
         ocdsProperties = OCDSProperties()
         ocdsProperties.prefix = "ocds-t1s2t3"
         generationService = GenerationService(ocdsProperties)
-        criteriaService = CriteriaService(generationService, criteriaRepository)
+        criteriaService = CriteriaService(generationService, criteriaRepository, objectMapper)
     }
 
     @AfterEach

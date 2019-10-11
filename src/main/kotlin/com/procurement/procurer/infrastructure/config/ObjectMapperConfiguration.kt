@@ -1,6 +1,5 @@
 package com.procurement.procurer.infrastructure.config
 
-import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -11,19 +10,23 @@ import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDese
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.procurer.infrastructure.bind.databinding.StringsDeserializer
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.LocalDateTime
 
 @Configuration
-class ObjectMapperConfig(@Autowired objectMapper: ObjectMapper) {
-
-    init {
+class ObjectMapperConfiguration() {
+    @Bean
+    fun mapper(): ObjectMapper {
+        val objectMapper = ObjectMapper()
         val module = SimpleModule()
-        module.addSerializer(LocalDateTime::class.java,
-                             JsonDateTimeSerializer()
+        module.addSerializer(
+            LocalDateTime::class.java,
+            JsonDateTimeSerializer()
         )
-        module.addDeserializer(LocalDateTime::class.java,
-                               JsonDateTimeDeserializer()
+        module.addDeserializer(
+            LocalDateTime::class.java,
+            JsonDateTimeDeserializer()
         )
         module.addDeserializer(String::class.java,
                                StringsDeserializer()
@@ -37,5 +40,8 @@ class ObjectMapperConfig(@Autowired objectMapper: ObjectMapper) {
         objectMapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true)
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         objectMapper.nodeFactory = JsonNodeFactory.withExactBigDecimals(true)
+
+        return objectMapper
     }
+
 }

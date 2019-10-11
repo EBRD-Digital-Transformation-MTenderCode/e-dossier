@@ -1,5 +1,6 @@
 package com.procurement.procurer.infrastructure.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.repository.CriteriaRepository
@@ -29,20 +30,24 @@ import com.procurement.procurer.infrastructure.service.command.createCnEntity
 import com.procurement.procurer.infrastructure.service.command.generateCreateCriteriaResponse
 import com.procurement.procurer.infrastructure.service.command.processCriteria
 import com.procurement.procurer.infrastructure.service.command.toEntity
+import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.infrastructure.utils.toObject
+import com.worldturner.medeia.api.UrlSchemaSource
+import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class CriteriaService(
-    val generationService: GenerationService,
-    val criteriaRepository: CriteriaRepository
+    private val generationService: GenerationService,
+    private val criteriaRepository: CriteriaRepository,
+    private val objectMapper: ObjectMapper
 ) {
 
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(CriteriaService::class.java)
-    }
+    private val api = MedeiaJacksonApi()
+    private val source = UrlSchemaSource(javaClass.getResource("/json/dto/criteria/check/criteria_schema.json"))
+    private val validator = api.loadSchema(source)
 
     fun createCriteria(cm: CommandMessage): ResponseDto {
         val request: CreateCriteriaRequest = toObject(
@@ -75,10 +80,9 @@ class CriteriaService(
     }
 
     fun checkCriteria(cm: CommandMessage): ResponseDto {
-        val request: CheckCriteriaRequest = toObject(
-            CheckCriteriaRequest::class.java,
-            cm.data
-        )
+        val unvalidatedParser = objectMapper.factory.createParser(toJson(cm.data))
+        val validatedParser = api.decorateJsonParser(validator, unvalidatedParser)
+        val request = objectMapper.readValue(validatedParser, CheckCriteriaRequest::class.java)
 
         request
             .toData()
