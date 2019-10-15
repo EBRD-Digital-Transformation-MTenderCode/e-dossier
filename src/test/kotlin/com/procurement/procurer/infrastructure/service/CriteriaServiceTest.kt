@@ -283,7 +283,7 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                val exception = assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -337,7 +337,7 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                val exception = assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test
@@ -355,7 +355,7 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                val exception = assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
             }
 
             @Nested
@@ -634,7 +634,7 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                val exception = assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
+                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
             }
 
             @Test

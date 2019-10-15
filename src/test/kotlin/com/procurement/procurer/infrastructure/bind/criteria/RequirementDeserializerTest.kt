@@ -68,10 +68,6 @@ class RequirementDeserializerTest: AbstractDTOTestBase<CheckCriteriaRequest>(Che
 
             val requestNode = document.jsonString().toNode()
 
-            val cm = commandMessage(
-                CommandType.CHECK_CRITERIA,
-                data = requestNode
-            )
             assertThrows<JsonBindingException> {   testBindingAndMapping(requestNode) }
         }
 
@@ -84,40 +80,8 @@ class RequirementDeserializerTest: AbstractDTOTestBase<CheckCriteriaRequest>(Che
 
             val requestNode = document.jsonString().toNode()
 
-            val cm = commandMessage(
-                CommandType.CHECK_CRITERIA,
-                data = requestNode
-            )
-
             assertThrows<JsonBindingException> { testBindingAndMapping(requestNode) }
         }
     }
-
-    @Nested
-    inner class MinValue {
-
-    }
 }
 
-fun commandMessage(
-    command: CommandType,
-    token: String = ContextGenerator.TOKEN.toString(),
-    owner: String = ContextGenerator.OWNER,
-    pmd: String = ProcurementMethod.OT.name,
-    startDate: String = ContextGenerator.START_DATE,
-    data: JsonNode
-): CommandMessage {
-    val context = ContextGenerator.generate(
-        token = token,
-        owner = owner,
-        pmd = pmd,
-        operationType = Operation.CREATE_CN_ON_PN.value,
-        startDate = startDate
-    )
-
-    return CommandMessageGenerator.generate(
-        command = command,
-        context = context,
-        data = data
-    )
-}

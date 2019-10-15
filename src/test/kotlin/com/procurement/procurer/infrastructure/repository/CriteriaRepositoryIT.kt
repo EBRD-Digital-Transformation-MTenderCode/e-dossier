@@ -101,7 +101,7 @@ class CassandraACRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<DatabaseInteractionException> {
+        assertThrows<DatabaseInteractionException> {
             criteriaRepository.save(cnentity)
         }
     }
@@ -114,9 +114,7 @@ class CassandraACRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val exception = assertThrows<DatabaseInteractionException> {
-            criteriaRepository.findBy(cpid)
-        }
+        assertThrows<DatabaseInteractionException> {  criteriaRepository.findBy(cpid) }
     }
 
 

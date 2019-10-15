@@ -34,8 +34,6 @@ import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.infrastructure.utils.toObject
 import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -46,7 +44,7 @@ class CriteriaService(
 ) {
 
     private val api = MedeiaJacksonApi()
-    private val source = UrlSchemaSource(javaClass.getResource("/json/dto/criteria/check/criteria_schema.json"))
+    private val source = UrlSchemaSource(javaClass.getResource("/json/criteria/check/criteria_schema.json"))
     private val validator = api.loadSchema(source)
 
     fun createCriteria(cm: CommandMessage): ResponseDto {

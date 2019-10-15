@@ -363,6 +363,7 @@
                     <include>bootstrap.yml</include>
                     <include>banner.txt</include>
                     <include>git.properties</include>
+                    <include>json/</include>
                 </includes>
             </resource>
         </resources>
