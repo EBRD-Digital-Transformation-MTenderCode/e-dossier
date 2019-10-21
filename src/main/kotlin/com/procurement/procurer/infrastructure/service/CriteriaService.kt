@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
@@ -40,12 +41,8 @@ import org.springframework.stereotype.Service
 class CriteriaService(
     private val generationService: GenerationService,
     private val criteriaRepository: CriteriaRepository,
-    private val objectMapper: ObjectMapper
+    private val medeiaValidationService: JsonValidationService
 ) {
-
-    private val api = MedeiaJacksonApi()
-    private val source = UrlSchemaSource(javaClass.getResource("/json/criteria/check/criteria_schema.json"))
-    private val validator = api.loadSchema(source)
 
     fun createCriteria(cm: CommandMessage): ResponseDto {
         val request: CreateCriteriaRequest = toObject(
@@ -78,9 +75,7 @@ class CriteriaService(
     }
 
     fun checkCriteria(cm: CommandMessage): ResponseDto {
-        val unvalidatedParser = objectMapper.factory.createParser(toJson(cm.data))
-        val validatedParser = api.decorateJsonParser(validator, unvalidatedParser)
-        val request = objectMapper.readValue(validatedParser, CheckCriteriaRequest::class.java)
+        val request = medeiaValidationService.validateViaJsonSchema(cm)
 
         request
             .toData()

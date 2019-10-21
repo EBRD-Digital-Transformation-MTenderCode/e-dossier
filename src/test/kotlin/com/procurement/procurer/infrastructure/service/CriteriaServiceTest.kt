@@ -19,6 +19,7 @@ import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tend
 import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tender.Item
 import com.procurement.procurer.infrastructure.model.data.Requirement
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
 import com.procurement.procurer.infrastructure.generator.ContextGenerator
@@ -71,9 +72,12 @@ class CriteriaServiceTest{
     private lateinit var criteriaService: CriteriaService
     private val parseContext = JsonPath.using(Configuration.defaultConfiguration())
 
+    private lateinit var jsonValidationService: JsonValidationService
+
     @BeforeEach
     fun setup() {
-       criteriaService = CriteriaService(generationService, criteriaRepository, objectMapper)
+       jsonValidationService = MedeiaValidationService(objectMapper)
+       criteriaService = CriteriaService(generationService, criteriaRepository, jsonValidationService)
     }
 
     @AfterEach

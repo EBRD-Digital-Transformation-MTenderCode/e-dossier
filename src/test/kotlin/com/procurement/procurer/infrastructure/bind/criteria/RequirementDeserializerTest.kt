@@ -7,6 +7,7 @@ import com.jayway.jsonpath.JsonPath
 import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.mock
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
 import com.procurement.procurer.infrastructure.generator.ContextGenerator
@@ -18,6 +19,7 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.Operation
 import com.procurement.procurer.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.procurer.infrastructure.service.CriteriaService
 import com.procurement.procurer.infrastructure.service.GenerationService
+import com.procurement.procurer.infrastructure.service.MedeiaValidationService
 import com.procurement.procurer.json.exception.JsonBindingException
 import com.procurement.procurer.json.loadJson
 import com.procurement.procurer.json.toNode
@@ -44,11 +46,13 @@ class RequirementDeserializerTest: AbstractDTOTestBase<CheckCriteriaRequest>(Che
     private val json = loadJson(CHECK_CRITERIA_REQUEST)
     private val parseContext = JsonPath.using(Configuration.defaultConfiguration())
 
+    private lateinit var jsonValidationService: JsonValidationService
     private lateinit var criteriaService: CriteriaService
 
     @BeforeEach
     fun setup() {
-        criteriaService = CriteriaService(generationService, criteriaRepository, objectMapper)
+        jsonValidationService = MedeiaValidationService(objectMapper)
+        criteriaService = CriteriaService(generationService, criteriaRepository, jsonValidationService)
     }
 
     @AfterEach

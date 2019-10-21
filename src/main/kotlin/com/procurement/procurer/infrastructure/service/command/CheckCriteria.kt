@@ -356,7 +356,8 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
             message = "cast coefficient in conversion cannot be greater than ${limit} "
         )
 
-    val criteria: List<CheckCriteriaData.Tender.Criteria> = this.tender.criteria!!
+    val criteria: List<CheckCriteriaData.Tender.Criteria> = this.tender.criteria ?: return this
+
     val conversions: List<CheckCriteriaData.Tender.Conversion> = this.tender.conversions!!.filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
     val items: List<CheckCriteriaData.Tender.Item> = this.tender.items
 

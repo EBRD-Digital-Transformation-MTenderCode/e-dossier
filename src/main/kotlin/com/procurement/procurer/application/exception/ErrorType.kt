@@ -9,5 +9,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_PERIOD_VALUE("10.67", "Invalid period value."),
     INVALID_CRITERIA("10.68", "Invalid criteria value."),
     INVALID_CONVERSION("10.69", "Invalid conversion value."),
-    INVALID_AWARD_CRITERIA("10.70", "Invalid award criteria.");
+    INVALID_AWARD_CRITERIA("10.70", "Invalid award criteria."),
+    INVALID_JSON("10.71", "Invalid json.");
 }

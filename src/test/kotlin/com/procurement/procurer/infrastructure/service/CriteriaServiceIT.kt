@@ -19,6 +19,7 @@ import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.procurer.application.exception.DatabaseInteractionException
 import com.procurement.procurer.application.model.entity.CnEntity
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.procurer.infrastructure.config.OCDSProperties
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
@@ -76,6 +77,7 @@ class CriteriaServiceIT {
     private lateinit var criteriaService: CriteriaService
     private lateinit var generationService: GenerationService
     private lateinit var criteriaRepository: CriteriaRepository
+    private lateinit var jsonValidationService: JsonValidationService
 
     private val parseContext = JsonPath.using(Configuration.defaultConfiguration())
 
@@ -100,11 +102,12 @@ class CriteriaServiceIT {
         createKeyspace()
         createTable()
 
+        jsonValidationService = MedeiaValidationService(objectMapper)
         criteriaRepository = spy(CassandraCriteriaRepository(session))
         ocdsProperties = OCDSProperties()
         ocdsProperties.prefix = "ocds-t1s2t3"
         generationService = GenerationService(ocdsProperties)
-        criteriaService = CriteriaService(generationService, criteriaRepository, objectMapper)
+        criteriaService = CriteriaService(generationService, criteriaRepository, jsonValidationService)
     }
 
     @AfterEach
