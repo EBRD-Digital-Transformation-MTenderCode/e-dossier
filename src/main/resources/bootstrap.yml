@@ -3,9 +3,8 @@ server:
 
 spring:
   application:
-    name: e-procurer
+    name: @artifactId@
   cloud:
     config:
-      enabled: false
       failFast: true
-      name: e-procurer
+      name: @artifactId@

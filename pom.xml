@@ -38,6 +38,7 @@
 
         <!--Loggin-->
         <logstash.logback.encoder.version>5.3</logstash.logback.encoder.version>
+        <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
 
         <!--Libs-->
         <springfox-swagger2.version>2.6.1</springfox-swagger2.version>
@@ -247,7 +248,7 @@
         <dependency>
             <groupId>com.worldturner.medeia</groupId>
             <artifactId>medeia-validator-jackson</artifactId>
-            <version>1.1.1</version>
+            <version>${medeia-validator-jackson.version}</version>
         </dependency>
 
         <!--Logging-->

@@ -19,7 +19,7 @@ class RepositoryConfig constructor(private val cassandraProperties: CassandraPro
         get() = Cluster.builder()
             .addContactPoints(*cassandraProperties.getContactPoints())
             .withoutJMXReporting()
-            //.withAuthProvider(PlainTextAuthProvider(cassandraProperties.username, cassandraProperties.password))
+            .withAuthProvider(PlainTextAuthProvider(cassandraProperties.username, cassandraProperties.password))
             .build()
 
     @Bean

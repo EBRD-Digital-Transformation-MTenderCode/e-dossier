@@ -13,8 +13,8 @@ import org.springframework.stereotype.Repository
 class CassandraCriteriaRepository(private val session: Session) : CriteriaRepository {
 
     companion object {
-        private const val keySpace = "ocds"
-        private const val tableName = "procurer_tender"
+        private const val keySpace = "procurer"
+        private const val tableName = "tenders"
         private const val columnCpid = "cp_id"
         private const val columnOwner = "owner"
         private const val columnJsonData = "json_data"
