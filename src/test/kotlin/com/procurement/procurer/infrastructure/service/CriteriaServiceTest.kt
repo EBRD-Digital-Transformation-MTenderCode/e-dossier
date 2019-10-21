@@ -287,7 +287,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -341,7 +342,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -359,7 +361,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Nested
@@ -638,7 +641,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -687,7 +691,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -750,7 +755,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                 assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -1061,7 +1067,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
         }
 
@@ -1080,7 +1087,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -1095,7 +1103,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<InvalidFormatException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
         }
 
@@ -1114,7 +1123,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -1129,7 +1139,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
             }
 
             @Test
@@ -1164,7 +1175,8 @@ class CriteriaServiceTest{
                     data = requestNode
                 )
 
-                assertThrows<JsonMappingException> { criteriaService.checkCriteria(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
+                assertEquals(ErrorType.INVALID_JSON, exception.error)
 
             }
 
