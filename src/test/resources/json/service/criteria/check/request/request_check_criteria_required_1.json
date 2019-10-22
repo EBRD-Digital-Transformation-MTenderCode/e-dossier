@@ -1,21 +1,21 @@
 {
+  "mainProcurementCategory": "goods",
+  "items": [
+    {
+      "id": "d172ac05-479e-40dc-ae70-70f71d486d7c",
+      "relatedLot": "112315a4-dc87-426f-8e8a-142b7ee8b1d7"
+    },
+    {
+      "id": "001",
+      "relatedLot": "112315a4-dc87-426f-8e8a-142b7ee8b1d8"
+    },
+    {
+      "id": "002",
+      "relatedLot": "112315a4-dc87-426f-8e8a-142b7ee8b1d9"
+    }
+  ],
   "tender": {
     "awardCriteria": "costOnly",
-    "mainProcurementCategory": "goods",
-    "items": [
-      {
-        "id": "d172ac05-479e-40dc-ae70-70f71d486d7c",
-        "relatedLot": "112315a4-dc87-426f-8e8a-142b7ee8b1d7"
-      },
-      {
-        "id": "001",
-        "relatedLot": "112315a4-dc87-426f-8e8a-142b7ee8b1d8"
-      },
-      {
-        "id": "002",
-        "relatedLot": "112315a4-dc87-426f-8e8a-142b7ee8b1d9"
-      }
-    ],
     "criteria": [
       {
         "id": "d3732c09-7d62-4edc-a172-241da6636e7c",

@@ -1114,7 +1114,7 @@ class CriteriaServiceTest{
             @Test
             fun `empty items`() {
                 val document = parseContext.parse(json)
-                document.put("$.tender", "items", emptyList<Item>())
+                document.put("$", "items", emptyList<Item>())
 
                 val requestNode = document.jsonString().toNode()
 

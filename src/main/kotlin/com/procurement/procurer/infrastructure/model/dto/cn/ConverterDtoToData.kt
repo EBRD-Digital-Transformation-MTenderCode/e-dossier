@@ -5,10 +5,16 @@ import com.procurement.procurer.infrastructure.model.data.CreateCriteriaData
 
 fun CheckCriteriaRequest.toData(): CheckCriteriaData {
     return CheckCriteriaData(
+        items = this.items.map { item ->
+            CheckCriteriaData.Tender.Item(
+                id = item.id,
+                relatedLot = item.relatedLot
+            )
+        },
+        mainProcurementCategory = this.mainProcurementCategory,
         tender = CheckCriteriaData.Tender(
             awardCriteria = this.tender.awardCriteria,
             awardCriteriaDetails = this.tender.awardCriteriaDetails,
-            mainProcurementCategory = this.tender.mainProcurementCategory,
             criteria = this.tender.criteria?.map { criteria ->
                 CheckCriteriaData.Tender.Criteria(
                     id = criteria.id,
@@ -41,7 +47,7 @@ fun CheckCriteriaRequest.toData(): CheckCriteriaData {
                     description = conversion.description
                 )
             },
-            items = this.tender.items.map { item ->
+            items = this.items.map { item ->
                 CheckCriteriaData.Tender.Item(
                     id = item.id,
                     relatedLot = item.relatedLot

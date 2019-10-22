@@ -20,16 +20,20 @@ import java.math.BigDecimal
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CheckCriteriaRequest(
-    @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender
+    @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender,
+    @field:JsonProperty("mainProcurementCategory") @param:JsonProperty("mainProcurementCategory") val mainProcurementCategory: MainProcurementCategory,
+    @field:JsonProperty("items") @param:JsonProperty("items") val items: List<Item>
 ) {
+    data class Item(
+        @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
+        @field:JsonProperty("relatedLot") @param:JsonProperty("relatedLot") val relatedLot: String
+    )
+
     data class Tender(
         @field:JsonProperty("awardCriteria") @param:JsonProperty("awardCriteria") val awardCriteria: AwardCriteria,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @field:JsonProperty("awardCriteriaDetails") @param:JsonProperty("awardCriteriaDetails") val awardCriteriaDetails: AwardCriteriaDetails?,
-
-        @field:JsonProperty("mainProcurementCategory") @param:JsonProperty("mainProcurementCategory") val mainProcurementCategory: MainProcurementCategory,
-        @field:JsonProperty("items") @param:JsonProperty("items") val items: List<Item>,
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("criteria") @param:JsonProperty("criteria") val criteria: List<Criteria>?,
@@ -37,11 +41,6 @@ data class CheckCriteriaRequest(
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("conversions") @param:JsonProperty("conversions") val conversions: List<Conversion>?
     ) {
-        data class Item(
-            @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
-            @field:JsonProperty("relatedLot") @param:JsonProperty("relatedLot") val relatedLot: String
-        )
-
         data class Criteria(
             @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
             @field:JsonProperty("title") @param:JsonProperty("title") val title: String,
