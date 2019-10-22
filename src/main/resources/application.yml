@@ -11,5 +11,3 @@ cassandra:
   port: 9042
 #  username: caclient
 #  password: 6AH7vbrkMWnfK
-
-ocds.prefix: ocds-t1s2t3

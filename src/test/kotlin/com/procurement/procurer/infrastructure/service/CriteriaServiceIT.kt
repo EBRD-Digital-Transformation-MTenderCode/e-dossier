@@ -1,27 +1,20 @@
 package com.procurement.procurer.infrastructure.service
 
-import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.HostDistance
 import com.datastax.driver.core.PlainTextAuthProvider
 import com.datastax.driver.core.PoolingOptions
 import com.datastax.driver.core.Session
-import com.datastax.driver.core.querybuilder.QueryBuilder
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
 import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
-import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.procurer.application.exception.DatabaseInteractionException
-import com.procurement.procurer.application.model.entity.CnEntity
 import com.procurement.procurer.application.repository.CriteriaRepository
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.DatabaseTestConfiguration
-import com.procurement.procurer.infrastructure.config.OCDSProperties
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
@@ -32,20 +25,14 @@ import com.procurement.procurer.infrastructure.repository.CassandraTestContainer
 import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.json.getObject
 import com.procurement.procurer.json.loadJson
-import com.procurement.procurer.json.toJson
 import com.procurement.procurer.json.toNode
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
@@ -73,7 +60,6 @@ class CriteriaServiceIT {
     private lateinit var container: CassandraTestContainer
 
     private lateinit var session: Session
-    private lateinit var ocdsProperties: OCDSProperties
     private lateinit var criteriaService: CriteriaService
     private lateinit var generationService: GenerationService
     private lateinit var criteriaRepository: CriteriaRepository
@@ -104,9 +90,7 @@ class CriteriaServiceIT {
 
         jsonValidationService = MedeiaValidationService(objectMapper)
         criteriaRepository = spy(CassandraCriteriaRepository(session))
-        ocdsProperties = OCDSProperties()
-        ocdsProperties.prefix = "ocds-t1s2t3"
-        generationService = GenerationService(ocdsProperties)
+        generationService = GenerationService()
         criteriaService = CriteriaService(generationService, criteriaRepository, jsonValidationService)
     }
 
