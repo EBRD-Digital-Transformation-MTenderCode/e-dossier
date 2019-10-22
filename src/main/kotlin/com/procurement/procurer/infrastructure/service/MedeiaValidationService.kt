@@ -11,7 +11,7 @@ import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import org.springframework.stereotype.Service
 
-@Service
+
 class MedeiaValidationService(
     private val objectMapper: ObjectMapper
 ) : JsonValidationService {
