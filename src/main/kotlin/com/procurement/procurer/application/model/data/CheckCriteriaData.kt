@@ -8,12 +8,13 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.MainProcurementCat
 import java.math.BigDecimal
 
 data class CheckCriteriaData(
-    val tender: Tender
+    val tender: Tender,
+    val mainProcurementCategory: MainProcurementCategory,
+    val items: List<Tender.Item>
 ) {
     data class Tender(
         val awardCriteria: AwardCriteria,
         val awardCriteriaDetails: AwardCriteriaDetails?,
-        val mainProcurementCategory: MainProcurementCategory,
         val items: List<Item>,
         val criteria: List<Criteria>?,
         val conversions: List<Conversion>?

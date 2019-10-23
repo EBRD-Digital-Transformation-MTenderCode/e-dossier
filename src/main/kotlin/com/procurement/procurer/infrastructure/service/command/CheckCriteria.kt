@@ -59,7 +59,7 @@ fun CheckCriteriaData.checkActualItemRelation(): CheckCriteriaData {
     }
 
     val criteria = this.tender.criteria ?: return this
-    val items = this.tender.items
+    val items = this.items
 
     val itemsById = items.associateBy { it.id }
     val itemsByRelatedLot = items.groupBy { it.relatedLot }
@@ -359,7 +359,7 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
     val criteria: List<CheckCriteriaData.Tender.Criteria> = this.tender.criteria ?: return this
 
     val conversions: List<CheckCriteriaData.Tender.Conversion> = this.tender.conversions!!.filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
-    val items: List<CheckCriteriaData.Tender.Item> = this.tender.items
+    val items: List<CheckCriteriaData.Tender.Item> = this.items
 
     val tenderRequirements = criteria.asSequence()
         .filter { it.relatesTo == null }
@@ -401,7 +401,7 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
             .map { conversion -> BigDecimal(1) - conversion.coefficients.minBy { it.coefficient }!!.coefficient }
             .fold(BigDecimal.ZERO, BigDecimal::add)
 
-        val mainProcurementCategory = this.tender.mainProcurementCategory
+        val mainProcurementCategory = this.mainProcurementCategory
 
         val MAX_LIMIT_FOR_GOODS = 0.6.toBigDecimal()
         val MAX_LIMIT_FOR_WORKS = 0.8.toBigDecimal()
@@ -471,7 +471,7 @@ fun CheckCriteriaData.checkArrays(): CheckCriteriaData {
 
     val tender = this.tender
 
-    tender.items.validate()
+    this.items.validate()
 
     tender.criteria?.validate()
     tender.criteria?.forEach { it.requirementGroups.validate() }
