@@ -91,7 +91,11 @@ class CriteriaServiceIT {
         jsonValidationService = MedeiaValidationService(objectMapper)
         criteriaRepository = spy(CassandraCriteriaRepository(session))
         generationService = GenerationService()
-        criteriaService = CriteriaService(generationService, criteriaRepository, jsonValidationService)
+        criteriaService = CriteriaService(
+            generationService,
+            criteriaRepository,
+            jsonValidationService
+        )
     }
 
     @AfterEach

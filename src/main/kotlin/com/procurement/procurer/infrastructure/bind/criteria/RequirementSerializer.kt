@@ -7,11 +7,11 @@ import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
-import com.procurement.procurer.infrastructure.model.data.ExpectedValue
-import com.procurement.procurer.infrastructure.model.data.MaxValue
-import com.procurement.procurer.infrastructure.model.data.MinValue
-import com.procurement.procurer.infrastructure.model.data.RangeValue
-import com.procurement.procurer.infrastructure.model.data.Requirement
+import com.procurement.procurer.application.model.data.ExpectedValue
+import com.procurement.procurer.application.model.data.MaxValue
+import com.procurement.procurer.application.model.data.MinValue
+import com.procurement.procurer.application.model.data.RangeValue
+import com.procurement.procurer.application.model.data.Requirement
 import java.io.IOException
 import java.math.BigDecimal
 

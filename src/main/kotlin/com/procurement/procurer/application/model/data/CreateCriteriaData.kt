@@ -1,28 +1,20 @@
-package com.procurement.procurer.infrastructure.model.data
+package com.procurement.procurer.application.model.data
 
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
-import com.procurement.procurer.infrastructure.model.dto.ocds.MainProcurementCategory
 import java.math.BigDecimal
 
-data class CheckCriteriaData(
+data class CreateCriteriaData(
     val tender: Tender
 ) {
     data class Tender(
         val awardCriteria: AwardCriteria,
         val awardCriteriaDetails: AwardCriteriaDetails?,
-        val mainProcurementCategory: MainProcurementCategory,
-        val items: List<Item>,
         val criteria: List<Criteria>?,
         val conversions: List<Conversion>?
     ) {
-        data class Item(
-            val id: String,
-            val relatedLot: String
-        )
-
         data class Criteria(
             val id: String,
             val title: String,

@@ -1,13 +1,12 @@
 package com.procurement.procurer.infrastructure.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
 import com.procurement.procurer.infrastructure.model.dto.cn.toData
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
@@ -31,15 +30,10 @@ import com.procurement.procurer.infrastructure.service.command.createCnEntity
 import com.procurement.procurer.infrastructure.service.command.generateCreateCriteriaResponse
 import com.procurement.procurer.infrastructure.service.command.processCriteria
 import com.procurement.procurer.infrastructure.service.command.toEntity
-import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.infrastructure.utils.toObject
-import com.worldturner.medeia.api.UrlSchemaSource
-import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
-import org.springframework.stereotype.Service
 
-@Service
 class CriteriaService(
-    private val generationService: GenerationService,
+    private val generationService: Generable,
     private val criteriaRepository: CriteriaRepository,
     private val medeiaValidationService: JsonValidationService
 ) {
@@ -57,11 +51,7 @@ class CriteriaService(
             generationService
         )
         val createdCriteriaEntity = createdCriteria.toEntity()
-        val cn = createCnEntity(
-            createdCriteriaEntity,
-            requestData,
-            context
-        )
+        val cn = createCnEntity(createdCriteriaEntity, context)
 
         val wasApplied = criteriaRepository.save(cn)
         val cnEntity = if (!wasApplied) criteriaRepository.findBy(context.cpid) else cn

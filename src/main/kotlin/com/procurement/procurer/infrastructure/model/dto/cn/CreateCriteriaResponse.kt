@@ -9,8 +9,8 @@ import com.procurement.procurer.infrastructure.bind.coefficient.CoefficientValue
 import com.procurement.procurer.infrastructure.bind.coefficient.CoefficientValueSerializer
 import com.procurement.procurer.infrastructure.bind.criteria.RequirementDeserializer
 import com.procurement.procurer.infrastructure.bind.criteria.RequirementSerializer
-import com.procurement.procurer.infrastructure.model.data.CoefficientValue
-import com.procurement.procurer.infrastructure.model.data.Requirement
+import com.procurement.procurer.application.model.data.CoefficientValue
+import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo

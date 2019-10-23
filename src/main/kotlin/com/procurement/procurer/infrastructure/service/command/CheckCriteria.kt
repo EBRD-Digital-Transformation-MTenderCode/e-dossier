@@ -2,15 +2,15 @@ package com.procurement.procurer.infrastructure.service.command
 
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
-import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData
-import com.procurement.procurer.infrastructure.model.data.CoefficientValue
-import com.procurement.procurer.infrastructure.model.data.ExpectedValue
-import com.procurement.procurer.infrastructure.model.data.MaxValue
-import com.procurement.procurer.infrastructure.model.data.MinValue
-import com.procurement.procurer.infrastructure.model.data.Period
-import com.procurement.procurer.infrastructure.model.data.RangeValue
-import com.procurement.procurer.infrastructure.model.data.Requirement
-import com.procurement.procurer.infrastructure.model.data.RequirementValue
+import com.procurement.procurer.application.model.data.CheckCriteriaData
+import com.procurement.procurer.application.model.data.CoefficientValue
+import com.procurement.procurer.application.model.data.ExpectedValue
+import com.procurement.procurer.application.model.data.MaxValue
+import com.procurement.procurer.application.model.data.MinValue
+import com.procurement.procurer.application.model.data.Period
+import com.procurement.procurer.application.model.data.RangeValue
+import com.procurement.procurer.application.model.data.Requirement
+import com.procurement.procurer.application.model.data.RequirementValue
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo

@@ -1,24 +1,17 @@
 package com.procurement.procurer.infrastructure.bind.criteria
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
 import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.mock
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
-import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
-import com.procurement.procurer.infrastructure.generator.ContextGenerator
 import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
-import com.procurement.procurer.infrastructure.model.dto.ocds.Operation
-import com.procurement.procurer.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.procurer.infrastructure.service.CriteriaService
-import com.procurement.procurer.infrastructure.service.GenerationService
 import com.procurement.procurer.infrastructure.service.MedeiaValidationService
 import com.procurement.procurer.json.exception.JsonBindingException
 import com.procurement.procurer.json.loadJson
@@ -39,7 +32,7 @@ class RequirementDeserializerTest: AbstractDTOTestBase<CheckCriteriaRequest>(Che
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private val generationService: GenerationService = mock()
+    private val generationService: Generable = mock()
     private val criteriaRepository: CriteriaRepository = mock()
 
     private val CHECK_CRITERIA_REQUEST = "json/service/criteria/check/request/request_check_criteria_full.json"
@@ -52,7 +45,11 @@ class RequirementDeserializerTest: AbstractDTOTestBase<CheckCriteriaRequest>(Che
     @BeforeEach
     fun setup() {
         jsonValidationService = MedeiaValidationService(objectMapper)
-        criteriaService = CriteriaService(generationService, criteriaRepository, jsonValidationService)
+        criteriaService = CriteriaService(
+            generationService,
+            criteriaRepository,
+            jsonValidationService
+        )
     }
 
     @AfterEach

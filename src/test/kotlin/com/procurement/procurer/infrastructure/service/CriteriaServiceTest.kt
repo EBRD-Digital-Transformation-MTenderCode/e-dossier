@@ -1,9 +1,7 @@
 package com.procurement.procurer.infrastructure.service
 
-import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
@@ -15,14 +13,15 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
-import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tender.Criteria.RequirementGroup
-import com.procurement.procurer.infrastructure.model.data.CheckCriteriaData.Tender.Item
-import com.procurement.procurer.infrastructure.model.data.Requirement
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
 import com.procurement.procurer.infrastructure.generator.ContextGenerator
+import com.procurement.procurer.application.model.data.CheckCriteriaData.Tender.Criteria.RequirementGroup
+import com.procurement.procurer.application.model.data.CheckCriteriaData.Tender.Item
+import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
@@ -35,8 +34,6 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.procurer.infrastructure.model.dto.ocds.Operation
 import com.procurement.procurer.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
-import com.procurement.procurer.infrastructure.utils.toObject
-import com.procurement.procurer.json.exception.JsonBindingException
 import com.procurement.procurer.json.getArray
 import com.procurement.procurer.json.getObject
 import com.procurement.procurer.json.loadJson
@@ -61,12 +58,12 @@ import java.math.BigDecimal
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = [ObjectMapperConfiguration::class])
-class CriteriaServiceTest{
+class CriteriaServiceTest {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
-    private val generationService: GenerationService = mock()
+    private val generationService: Generable = mock()
     private val criteriaRepository: CriteriaRepository = mock()
 
     private lateinit var criteriaService: CriteriaService
@@ -76,8 +73,12 @@ class CriteriaServiceTest{
 
     @BeforeEach
     fun setup() {
-       jsonValidationService = MedeiaValidationService(objectMapper)
-       criteriaService = CriteriaService(generationService, criteriaRepository, jsonValidationService)
+        jsonValidationService = MedeiaValidationService(objectMapper)
+        criteriaService = CriteriaService(
+            generationService,
+            criteriaRepository,
+            jsonValidationService
+        )
     }
 
     @AfterEach
@@ -368,14 +369,13 @@ class CriteriaServiceTest{
             @Nested
             inner class RangeValue {
 
-
                 @Test
                 fun `RangeValue Integer`() {
                     val document = parseContext.parse(json)
 
                     document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "minValue", 1)
                     document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 3)
-                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","integer")
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType", "integer")
 
                     val requestNode = document.jsonString().toNode()
 
@@ -394,7 +394,6 @@ class CriteriaServiceTest{
 
                     assertDoesNotThrow { criteriaService.checkCriteria(cm) }
                 }
-
             }
 
             @Nested
@@ -405,7 +404,7 @@ class CriteriaServiceTest{
                     val document = parseContext.parse(json)
 
                     document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "minValue", 1)
-                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","integer")
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType", "integer")
 
                     val requestNode = document.jsonString().toNode()
 
@@ -431,7 +430,7 @@ class CriteriaServiceTest{
 
                     document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "minValue", 1.0)
                     document.put("$.tender.conversions[3].coefficients[0]", "value", 1.0)
-                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","number")
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType", "number")
 
                     val requestNode = document.jsonString().toNode()
 
@@ -450,9 +449,7 @@ class CriteriaServiceTest{
 
                     assertDoesNotThrow { criteriaService.checkCriteria(cm) }
                 }
-
             }
-
 
             @Nested
             inner class MaxValue {
@@ -462,7 +459,7 @@ class CriteriaServiceTest{
                     val document = parseContext.parse(json)
 
                     document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 4)
-                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","integer")
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType", "integer")
 
                     val requestNode = document.jsonString().toNode()
 
@@ -488,7 +485,7 @@ class CriteriaServiceTest{
 
                     document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 4.0)
                     document.put("$.tender.conversions[3].coefficients[0]", "value", 4.0)
-                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType","number")
+                    document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType", "number")
 
                     val requestNode = document.jsonString().toNode()
 
@@ -507,9 +504,7 @@ class CriteriaServiceTest{
 
                     assertDoesNotThrow { criteriaService.checkCriteria(cm) }
                 }
-
             }
-
         }
 
         @Nested
@@ -1177,9 +1172,7 @@ class CriteriaServiceTest{
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
                 assertEquals(ErrorType.INVALID_JSON, exception.error)
-
             }
-
         }
     }
 
@@ -1294,7 +1287,6 @@ class CriteriaServiceTest{
             conversionRelations.forEach {
                 assertTrue(expectedRequirementIds.contains(it))
             }
-
         }
     }
 }

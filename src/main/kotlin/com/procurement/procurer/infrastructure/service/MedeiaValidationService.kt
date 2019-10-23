@@ -9,8 +9,6 @@ import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
 import com.procurement.procurer.infrastructure.utils.toJson
 import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
-import org.springframework.stereotype.Service
-
 
 class MedeiaValidationService(
     private val objectMapper: ObjectMapper
