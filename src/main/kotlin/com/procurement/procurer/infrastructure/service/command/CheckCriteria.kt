@@ -357,8 +357,9 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
         )
 
     val criteria: List<CheckCriteriaData.Tender.Criteria> = this.tender.criteria ?: return this
+    val requestConversions: List<CheckCriteriaData.Tender.Conversion> = this.tender.conversions ?: return this
 
-    val conversions: List<CheckCriteriaData.Tender.Conversion> = this.tender.conversions!!.filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
+    val conversions: List<CheckCriteriaData.Tender.Conversion> = requestConversions.filter { it.relatesTo == ConversionsRelatesTo.REQUIREMENT }
     val items: List<CheckCriteriaData.Tender.Item> = this.items
 
     val tenderRequirements = criteria.asSequence()
