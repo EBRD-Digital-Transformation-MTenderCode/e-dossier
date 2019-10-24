@@ -10,5 +10,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_CRITERIA("10.68", "Invalid criteria value."),
     INVALID_CONVERSION("10.69", "Invalid conversion value."),
     INVALID_AWARD_CRITERIA("10.70", "Invalid award criteria."),
-    INVALID_JSON("10.71", "Invalid json.");
+    INVALID_JSON("10.71", "Invalid json."),
+    ENTITY_NOT_FOUND("10.72", "No entity found in db with specified parameters.");
 }
