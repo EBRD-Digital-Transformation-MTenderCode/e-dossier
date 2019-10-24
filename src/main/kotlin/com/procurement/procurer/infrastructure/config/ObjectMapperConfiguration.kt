@@ -9,7 +9,6 @@ import com.procurement.procurer.infrastructure.bind.databinding.IntDeserializer
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.procurer.infrastructure.bind.databinding.StringsDeserializer
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.LocalDateTime
@@ -28,11 +27,13 @@ class ObjectMapperConfiguration() {
             LocalDateTime::class.java,
             JsonDateTimeDeserializer()
         )
-        module.addDeserializer(String::class.java,
-                               StringsDeserializer()
+        module.addDeserializer(
+            String::class.java,
+            StringsDeserializer()
         )
-        module.addDeserializer(Int::class.java,
-                               IntDeserializer()
+        module.addDeserializer(
+            Int::class.java,
+            IntDeserializer()
         )
         objectMapper.registerModule(module)
         objectMapper.registerModule(KotlinModule())
@@ -43,5 +44,4 @@ class ObjectMapperConfiguration() {
 
         return objectMapper
     }
-
 }

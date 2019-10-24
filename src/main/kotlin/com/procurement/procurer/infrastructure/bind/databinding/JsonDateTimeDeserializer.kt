@@ -1,16 +1,15 @@
 package com.procurement.procurer.infrastructure.bind.databinding
 
 import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import java.io.IOException
 import java.time.LocalDateTime
 
 class JsonDateTimeDeserializer : JsonDeserializer<LocalDateTime>() {
     companion object {
-        fun deserialize(value: String): LocalDateTime = LocalDateTime.parse(value,
-                                                                            JsonDateTimeFormatter.formatter
+        fun deserialize(value: String): LocalDateTime = LocalDateTime.parse(
+            value,
+            JsonDateTimeFormatter.formatter
         )
     }
 
