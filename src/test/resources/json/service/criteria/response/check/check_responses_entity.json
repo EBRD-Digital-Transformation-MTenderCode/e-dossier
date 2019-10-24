@@ -1,0 +1,110 @@
+{
+  "criteria": [
+    {
+      "id": "d3732c09-7d62-4edc-a172-241da6636e7c",
+      "title": "Bankruptcy",
+      "source": "tenderer",
+      "description": "Is the economic operator bankrupt? This information needs not be given if exclusion of economic operators in this case has been made mandatory under the applicable national law without any possibility of derogation where the economic operator is nevertheless able to perform the contract.",
+      "requirementGroups": [
+        {
+          "id": "d91c11a1-f19e-4b83-8ade-c4be2bf00555",
+          "description": "criteria[0].requirementGroups[0].description",
+          "requirements": [
+            {
+              "id": "bid.requirementResponses[1].requirement.id",
+              "title": "Your answer?",
+              "dataType": "boolean",
+              "expectedValue": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "title": "Product warranty",
+      "description": "A minimum product warranty of 1 year is required for all bids.",
+      "source": "tenderer",
+      "relatesTo": "item",
+      "relatedItem": "001",
+      "requirementGroups": [
+        {
+          "id": "002-1",
+          "requirements": [
+            {
+              "id": "bid.requirementResponses[0].requirement.id",
+              "title": "The number of years for proposed product warranty",
+              "dataType": "number",
+              "minValue": 1.01,
+              "maxValue": 3.01,
+              "period": {
+                "startDate": "2019-10-04T16:15:37Z",
+                "endDate": "2019-10-04T16:15:37Z"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "004",
+      "title": "Product",
+      "description": "Country of origin",
+      "source": "tenderer",
+      "relatesTo": "item",
+      "relatedItem": "002",
+      "requirementGroups": [
+        {
+          "id": "004-1",
+          "requirements": [
+            {
+              "id": "004-1-2",
+              "title": "Country of origin",
+              "dataType": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "conversions": [
+    {
+      "id": "conversion-1557946336820",
+      "relatesTo": "requirement",
+      "relatedItem": "002-1-2",
+      "rationale": "Number of years for product guarantee",
+      "description": "conversions[0].description",
+      "coefficients": [
+        {
+          "id": "coefficient-1557947503428",
+          "value": 1.01,
+          "coefficient": 1
+        },
+        {
+          "id": "coefficient-1557947503428",
+          "value": 2.01,
+          "coefficient": 0.85
+        },
+        {
+          "id": "coefficient-1557947503428",
+          "value": 3.01,
+          "coefficient": 0.7
+        }
+      ]
+    },
+    {
+      "id": "conversion-1557946336820",
+      "relatesTo": "requirement",
+      "relatedItem": "003-1-2",
+      "rationale": "Number of Google certified staff",
+      "description": "conversions[1].description",
+      "coefficients": [
+        {
+          "id": "coefficient-1557947503428",
+          "value": 1,
+          "coefficient": 1
+        }
+      ]
+    }
+  ]
+}
