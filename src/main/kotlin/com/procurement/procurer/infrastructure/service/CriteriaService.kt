@@ -7,10 +7,13 @@ import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
+import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesRequest
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
 import com.procurement.procurer.infrastructure.model.dto.cn.toData
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
 import com.procurement.procurer.infrastructure.service.command.checkActualItemRelation
+import com.procurement.procurer.infrastructure.service.command.checkAnswerCompleteness
+import com.procurement.procurer.infrastructure.service.command.checkAnsweredOnce
 import com.procurement.procurer.infrastructure.service.command.checkArrays
 import com.procurement.procurer.infrastructure.service.command.checkAwardCriteriaDetailsAreRequired
 import com.procurement.procurer.infrastructure.service.command.checkAwardCriteriaDetailsEnum
@@ -22,14 +25,20 @@ import com.procurement.procurer.infrastructure.service.command.checkConversionRe
 import com.procurement.procurer.infrastructure.service.command.checkConversionRelation
 import com.procurement.procurer.infrastructure.service.command.checkConversionWithoutCriteria
 import com.procurement.procurer.infrastructure.service.command.checkCriteriaAndConversionAreRequired
+import com.procurement.procurer.infrastructure.service.command.checkDataTypeValue
 import com.procurement.procurer.infrastructure.service.command.checkDatatypeCompliance
 import com.procurement.procurer.infrastructure.service.command.checkDateTime
+import com.procurement.procurer.infrastructure.service.command.checkIdsUniqueness
 import com.procurement.procurer.infrastructure.service.command.checkMinMaxValue
+import com.procurement.procurer.infrastructure.service.command.checkPeriod
+import com.procurement.procurer.infrastructure.service.command.checkRequirementRelationRelevance
 import com.procurement.procurer.infrastructure.service.command.checkRequirements
 import com.procurement.procurer.infrastructure.service.command.createCnEntity
+import com.procurement.procurer.infrastructure.service.command.extractCreatedCriteria
 import com.procurement.procurer.infrastructure.service.command.generateCreateCriteriaResponse
 import com.procurement.procurer.infrastructure.service.command.processCriteria
 import com.procurement.procurer.infrastructure.service.command.toEntity
+import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.infrastructure.utils.toObject
 
 class CriteriaService(
@@ -57,9 +66,7 @@ class CriteriaService(
         val cnEntity = if (!wasApplied) criteriaRepository.findBy(context.cpid) else cn
 
         val cnResponse = toObject(CreatedCriteriaEntity::class.java, cnEntity!!.jsonData)
-        val responseData = generateCreateCriteriaResponse(
-            cnResponse
-        )
+        val responseData = generateCreateCriteriaResponse(cnResponse)
 
         return ResponseDto(id = cm.id, data = responseData)
     }
@@ -87,6 +94,30 @@ class CriteriaService(
             .checkAwardCriteriaEnum()          // FReq-1.1.1.15
             .checkAwardCriteriaDetailsEnum()   // FReq-1.1.1.15
             .checkArrays()                     // FReq-1.1.1.16
+
+        return ResponseDto(data = "ok")
+    }
+
+    fun checkResponses(cm: CommandMessage): ResponseDto {
+        val request: CheckResponsesRequest = toObject(CheckResponsesRequest::class.java, cm.data)
+        val context = context(cm)
+        val cnEntity = criteriaRepository.findBy(context.cpid) ?: throw ErrorException(
+            error = ErrorType.ENTITY_NOT_FOUND,
+            message = "Cannot found record with cpid=${context.cpid}."
+        )
+        val createdCriteria =  cnEntity
+            .extractCreatedCriteria()
+            .toData()
+
+        request
+            .toData()
+            .checkRequirementRelationRelevance(createdCriteria) // FReq-1.2.1.1
+            .checkAnswerCompleteness(createdCriteria)           // FReq-1.2.1.2
+            .checkAnsweredOnce()                                // FReq-1.2.1.3
+            .checkDataTypeValue(createdCriteria)                // FReq-1.2.1.4
+            .checkPeriod()                                      // FReq-1.2.1.5 & FReq-1.2.1.7
+            .checkIdsUniqueness()                               // FReq-1.2.1.6
+
 
         return ResponseDto(data = "ok")
     }

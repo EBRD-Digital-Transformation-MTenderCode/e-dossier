@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
@@ -13,18 +14,22 @@ import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
-import com.procurement.procurer.application.repository.CriteriaRepository
-import com.procurement.procurer.application.service.Generable
-import com.procurement.procurer.application.service.JsonValidationService
-import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
-import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
-import com.procurement.procurer.infrastructure.generator.ContextGenerator
 import com.procurement.procurer.application.model.data.CheckCriteriaData.Tender.Criteria.RequirementGroup
 import com.procurement.procurer.application.model.data.CheckCriteriaData.Tender.Item
 import com.procurement.procurer.application.model.data.Requirement
+import com.procurement.procurer.application.model.entity.CnEntity
+import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.Generable
+import com.procurement.procurer.application.service.JsonValidationService
+import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeFormatter
+import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
+import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
+import com.procurement.procurer.infrastructure.generator.ContextGenerator
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesRequest
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
@@ -37,6 +42,8 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataTyp
 import com.procurement.procurer.json.getArray
 import com.procurement.procurer.json.getObject
 import com.procurement.procurer.json.loadJson
+import com.procurement.procurer.json.putAttribute
+import com.procurement.procurer.json.putObject
 import com.procurement.procurer.json.testingBindingAndMapping
 import com.procurement.procurer.json.toJson
 import com.procurement.procurer.json.toNode
@@ -55,6 +62,8 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
+import java.time.Clock
+import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = [ObjectMapperConfiguration::class])
@@ -1288,6 +1297,540 @@ class CriteriaServiceTest {
                 assertTrue(expectedRequirementIds.contains(it))
             }
         }
+    }
+
+    @Nested
+    inner class CheckResponses {
+        private val CPID = "cpid-1"
+
+        private val CHECK_RESPONSES_REQUEST = "json/service/criteria/response/check/request/request_check_responses_full.json"
+        private val CHECK_RESPONSES_DB = "json/service/criteria/response/check/check_responses_entity.json"
+        private val json = loadJson(CHECK_RESPONSES_REQUEST)
+        private val entity = loadJson(CHECK_RESPONSES_DB)
+
+        @BeforeEach
+        fun setup() {
+            testingBindingAndMapping<CheckResponsesRequest>(CHECK_RESPONSES_REQUEST)
+        }
+
+        @AfterEach
+        fun clear() {
+            clearInvocations(criteriaRepository)
+        }
+
+        @Test
+        fun `successful | responses passed`() {
+            val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+
+            whenever(criteriaRepository.findBy(any()))
+                .thenReturn(cnEntity)
+
+            val requestNode = json.toNode()
+            val cm = commandMessage(command = CommandType.CHECK_RESPONSES, data = requestNode)
+
+            assertDoesNotThrow { criteriaService.checkResponses(cm) }
+        }
+
+        @Test
+        fun `successful | responses not passsed`() {
+            val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+
+            whenever(criteriaRepository.findBy(any()))
+                .thenReturn(cnEntity)
+
+            val requestNode = json.toNode()
+            requestNode.getObject("bid")
+                .remove("requirementResponses")
+
+            val cm = commandMessage(command = CommandType.CHECK_RESPONSES, data = requestNode)
+
+            assertDoesNotThrow { criteriaService.checkResponses(cm) }
+        }
+
+        @Nested
+        inner class FReq_1_2_1_1 {
+
+            private val INVALID_REQUIREMENT_ID = "UNKNOWN_ID"
+
+            @Test
+            fun `Passed requirement that doesn't exists`() {
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val requestNode = json.toNode()
+
+                requestNode.getObject("bid")
+                    .getArray("requirementResponses")
+                    .get(0)
+                    .getObject("requirement")
+                    .put("id", INVALID_REQUIREMENT_ID)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+            }
+        }
+
+        private fun generateLotCriteria(requestNode: JsonNode, entityNode: JsonNode): JsonNode {
+            val relatedLot = requestNode.getObject("bid").getArray("relatedLots").get(0).asText()
+            return entityNode.getArray("criteria").get(1).toObjectNode()
+                .putAttribute("relatesTo", "lot")
+                .putAttribute("relatedItem", relatedLot)
+        }
+
+        private fun getLotCriteriaRequirementId(node: JsonNode): String {
+            return node.getArray("requirementGroups").get(0).toObjectNode()
+                .getArray("requirements").get(0).toObjectNode()
+                .get("id").asText()
+        }
+
+        private fun generateItemCriteria(requestNode: JsonNode, entityNode: JsonNode): JsonNode {
+            val relatedItem = requestNode.getArray("items").get(0).get("id").asText()
+            return entityNode.getArray("criteria").get(2).toObjectNode()
+                .putAttribute("relatesTo", "item")
+                .putAttribute("relatedItem", relatedItem)
+        }
+
+        private fun getItemCriteriaRequirementId(node: JsonNode): String {
+            return node.getArray("requirementGroups").get(0).toObjectNode()
+                .getArray("requirements").get(0).toObjectNode()
+                .get("id").asText()
+        }
+
+
+        private fun getSampleRequirementResponse(requestNode: JsonNode): ObjectNode {
+            return requestNode.getObject("bid")
+                .getArray("requirementResponses").get(0).toObjectNode()
+        }
+
+        @Nested
+        inner class FReq_1_2_1_2 {
+
+            @Test
+            fun `Answered all question`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+                val THIRD_ID = "third-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", THIRD_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
+                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", itemRequirementId)
+
+                val tenderRequirementResponse = requestNode.getObject("bid")
+                    .getArray("requirementResponses").get(1).toObjectNode()
+                    .putAttribute("id", FIRST_ID)
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(tenderRequirementResponse)
+                    .putObject(lotRequirementResponse)
+                    .putObject(itemRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                assertDoesNotThrow { criteriaService.checkResponses(cm) }
+            }
+
+            @Test
+            fun `Not answer on item requirement`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val tenderRequirementResponse = requestNode.getObject("bid")
+                    .getArray("requirementResponses").get(1).toObjectNode()
+                    .putAttribute("id", FIRST_ID)
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(tenderRequirementResponse)
+                    .putObject(lotRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entityNode.toJson())
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+            }
+
+            @Test
+            fun `Not answer on tender requirement`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", FIRST_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
+                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", itemRequirementId)
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(lotRequirementResponse)
+                    .putObject(itemRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+            }
+        }
+
+        @Nested
+        inner class FReq_1_2_1_3 {
+
+            @Test
+            fun `duplicated answer`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+                val THIRD_ID = "third-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", THIRD_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
+                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", itemRequirementId)
+
+                val tenderRequirementResponse = requestNode.getObject("bid")
+                    .getArray("requirementResponses").get(1).toObjectNode()
+                    .putAttribute("id", FIRST_ID)
+
+                val duplicatedTenderRequirementResponse = tenderRequirementResponse.deepCopy()
+                    .putAttribute("id" , "ANOTHER_ID")
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(tenderRequirementResponse)
+                    .putObject(duplicatedTenderRequirementResponse)
+                    .putObject(lotRequirementResponse)
+                    .putObject(itemRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+            }
+        }
+
+        @Nested
+        inner class FReq_1_2_1_4 {
+
+            @Test
+            fun `duplicated answer`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+                val THIRD_ID = "third-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", THIRD_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
+                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", itemRequirementId)
+
+                val tenderRequirementResponse = requestNode.getObject("bid")
+                    .getArray("requirementResponses").get(1).toObjectNode()
+                    .putAttribute("value", 214.04)
+                    .putAttribute("id", FIRST_ID)
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(tenderRequirementResponse)
+                    .putObject(lotRequirementResponse)
+                    .putObject(itemRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+            }
+        }
+
+        @Nested
+        inner class FReq_1_2_1_5 {
+
+            @Test
+            fun `Period endDate greater than current time`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+                val THIRD_ID = "third-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", THIRD_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val time = JsonDateTimeSerializer.serialize(LocalDateTime.now().plusMonths(3))
+                lotRequirementResponse.getObject("period")
+                    .putAttribute("endDate", time)
+
+                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
+                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", itemRequirementId)
+
+                val tenderRequirementResponse = requestNode.getObject("bid")
+                    .getArray("requirementResponses").get(1).toObjectNode()
+                    .putAttribute("id", FIRST_ID)
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(tenderRequirementResponse)
+                    .putObject(lotRequirementResponse)
+                    .putObject(itemRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_PERIOD_VALUE, exception.error)
+            }
+        }
+
+        @Nested
+        inner class FReq_1_2_1_7 {
+
+            @Test
+            fun `Period startDate greater than endDate`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+                val THIRD_ID = "third-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", THIRD_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val startDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().plusMonths(3))
+                val endDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().minusMonths(3))
+                lotRequirementResponse.getObject("period")
+                    .putAttribute("startDate", startDate)
+                    .putAttribute("endDate", endDate)
+
+                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
+                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", itemRequirementId)
+
+                val tenderRequirementResponse = requestNode.getObject("bid")
+                    .getArray("requirementResponses").get(1).toObjectNode()
+                    .putAttribute("id", FIRST_ID)
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(tenderRequirementResponse)
+                    .putObject(lotRequirementResponse)
+                    .putObject(itemRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_PERIOD_VALUE, exception.error)
+            }
+        }
+
+        @Nested
+        inner class FReq_1_2_1_6 {
+
+            @Test
+            fun `Period startDate greater than endDate`() {
+                val FIRST_ID = "first-requirement-response-id"
+                val SECOND_ID = "second-requirement-response-id"
+                val THIRD_ID = "third-requirement-response-id"
+
+                val entityNode = entity.toNode()
+                val requestNode = json.toNode()
+
+                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
+                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
+
+                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
+                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
+
+                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
+
+                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
+                lotRequirementResponse.putAttribute("value", 23.56)
+                    .putAttribute("id", THIRD_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", lotRequirementId)
+
+                val startDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().plusMonths(3))
+                val endDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().minusMonths(3))
+                lotRequirementResponse.getObject("period")
+                    .putAttribute("startDate", startDate)
+                    .putAttribute("endDate", endDate)
+
+                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
+                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
+                    .putAttribute("id", SECOND_ID)
+                    .getObject("requirement")
+                    .putAttribute("id", itemRequirementId)
+
+                val tenderRequirementResponse = requestNode.getObject("bid")
+                    .getArray("requirementResponses").get(1).toObjectNode()
+                    .putAttribute("id", FIRST_ID)
+
+                val duplicatedTenderRequirementResponse = tenderRequirementResponse.deepCopy()
+                    .putAttribute("id" , FIRST_ID)
+
+                requestNode.getObject("bid")
+                    .putArray("requirementResponses")
+                    .putObject(tenderRequirementResponse)
+                    .putObject(duplicatedTenderRequirementResponse)
+                    .putObject(lotRequirementResponse)
+                    .putObject(itemRequirementResponse)
+
+                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
+                whenever(criteriaRepository.findBy(any()))
+                    .thenReturn(cnEntity)
+
+                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
+
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+            }
+        }
+
+        private fun JsonNode.toObjectNode() = this as ObjectNode
     }
 }
 
