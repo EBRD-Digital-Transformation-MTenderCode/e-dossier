@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "id": "020421a2-cf83-41a8-a7eb-e63562870c82"
+    }
+  ],
+  "bid": {
+    "requirementResponses": [
+      {
+        "id": "bid.requirementResponses[0].id",
+        "title": "bid.requirementResponses[0].title",
+        "description": "bid.requirementResponses[0].description",
+        "value": 23.01,
+        "requirement": {
+          "id": "bid.requirementResponses[0].requirement.id"
+        },
+        "period": {
+          "startDate": "2019-10-23T16:23:17Z",
+          "endDate": "2019-10-23T16:23:17Z"
+        }
+      },
+      {
+        "id": "bid.requirementResponses[1].id",
+        "title": "bid.requirementResponses[1].title",
+        "description": "bid.requirementResponses[1].description",
+        "value": true,
+        "requirement": {
+          "id": "bid.requirementResponses[1].requirement.id"
+        },
+        "period": {
+          "startDate": "2019-10-23T16:23:17Z",
+          "endDate": "2019-10-23T16:23:17Z"
+        }
+      }
+    ],
+    "relatedLots": [
+      "cb8b509a-89ef-4d57-9fd1-58c8e55b0b9c"
+    ]
+  }
+}

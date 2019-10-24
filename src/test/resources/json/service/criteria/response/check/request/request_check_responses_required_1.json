@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "id": "020421a2-cf83-41a8-a7eb-e63562870c82"
+    }
+  ],
+  "bid": {
+    "requirementResponses": [
+      {
+        "id": "bid.requirementResponses[0].id",
+        "title": "bid.requirementResponses[0].title",
+        "value": "bid.requirementResponses[0].value",
+        "requirement": {
+          "id": "bid.requirementResponses[0].requirement.id"
+        }
+      }
+    ],
+    "relatedLots": [
+      "cb8b509a-89ef-4d57-9fd1-58c8e55b0b9c"
+    ]
+  }
+}
