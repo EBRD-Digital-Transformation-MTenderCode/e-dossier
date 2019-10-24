@@ -92,7 +92,8 @@ data class Context @JsonCreator constructor(
 enum class CommandType(private val value: String) {
 
     CHECK_CRITERIA("checkCriteria"),
-    CREATE_CRITERIA("createCriteria");
+    CREATE_CRITERIA("createCriteria"),
+    CHECK_RESPONSES("checkResponses");
 
     @JsonValue
     fun value(): String {

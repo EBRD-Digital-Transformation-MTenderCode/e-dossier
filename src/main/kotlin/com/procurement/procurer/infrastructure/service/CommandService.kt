@@ -22,6 +22,7 @@ class CommandService(
 
             CommandType.CHECK_CRITERIA  -> criteriaService.checkCriteria(cm)
             CommandType.CREATE_CRITERIA -> criteriaService.createCriteria(cm)
+            CommandType.CHECK_RESPONSES -> criteriaService.checkResponses(cm)
         }
 
         return toObject(ResponseDto::class.java, toJson(response))
