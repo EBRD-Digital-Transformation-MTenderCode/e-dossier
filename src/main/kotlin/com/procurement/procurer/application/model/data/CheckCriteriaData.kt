@@ -9,7 +9,7 @@ import java.math.BigDecimal
 
 data class CheckCriteriaData(
     val tender: Tender,
-    val mainProcurementCategory: MainProcurementCategory,
+    val mainProcurementCategory: MainProcurementCategory?,
     val items: List<Tender.Item>
 ) {
     data class Tender(

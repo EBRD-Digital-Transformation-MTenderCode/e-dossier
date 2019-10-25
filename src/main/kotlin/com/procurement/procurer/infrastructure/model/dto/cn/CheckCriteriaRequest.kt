@@ -21,7 +21,7 @@ import java.math.BigDecimal
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CheckCriteriaRequest(
     @field:JsonProperty("tender") @param:JsonProperty("tender") val tender: Tender,
-    @field:JsonProperty("mainProcurementCategory") @param:JsonProperty("mainProcurementCategory") val mainProcurementCategory: MainProcurementCategory,
+    @field:JsonProperty("mainProcurementCategory") @param:JsonProperty("mainProcurementCategory") val mainProcurementCategory: MainProcurementCategory?,
     @field:JsonProperty("items") @param:JsonProperty("items") val items: List<Item>
 ) {
     data class Item(
