@@ -306,6 +306,13 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
                 "\n ${cv} != ${rv}"
         )
 
+    fun mismatchValueException(cv: CoefficientValue, rv: RequirementValue): Nothing =
+        throw ErrorException(
+            ErrorType.INVALID_CONVERSION,
+            message = "Value in Conversion mismatch with Requirement value. " +
+                "\n ${cv} != ${rv}"
+        )
+
     fun RequirementValue.validateDataType(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient) {
         when (coefficient.value) {
             is CoefficientValue.AsBoolean -> if (this !is ExpectedValue.AsBoolean)
@@ -328,6 +335,30 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
         }
     }
 
+    fun RequirementValue.validateValue(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient) {
+        when (coefficient.value) {
+
+            is CoefficientValue.AsBoolean -> if (this is ExpectedValue.AsBoolean && (coefficient.value.value != this.value))
+                mismatchValueException(coefficient.value, this)
+
+            is CoefficientValue.AsString  -> Unit
+
+            is CoefficientValue.AsNumber  ->
+                if ((this is ExpectedValue.AsNumber && (coefficient.value.value != this.value))
+                    || (this is RangeValue.AsNumber && (coefficient.value.value < this.minValue || coefficient.value.value > this.maxValue))
+                    || (this is MinValue.AsNumber && (coefficient.value.value < this.value))
+                    || (this is MaxValue.AsNumber && (coefficient.value.value > this.value))
+                ) mismatchValueException(coefficient.value, this)
+
+            is CoefficientValue.AsInteger ->
+                if ((this is ExpectedValue.AsInteger && (coefficient.value.value != this.value))
+                    || (this is RangeValue.AsInteger && (coefficient.value.value < this.minValue || coefficient.value.value > this.maxValue))
+                    || (this is MinValue.AsInteger && (coefficient.value.value < this.value))
+                    || (this is MaxValue.AsInteger && (coefficient.value.value > this.value))
+                ) mismatchValueException(coefficient.value, this)
+        }
+    }
+
     val criteria = this.tender.criteria ?: return this
     val conversions = this.tender.conversions ?: return this
 
@@ -343,6 +374,7 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
         it.coefficients.forEach { coefficient ->
             val requirement = requirements.get(requirementId)
             requirement?.value?.validateDataType(coefficient)
+            requirement?.value?.validateValue(coefficient)
         }
     }
 

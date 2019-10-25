@@ -293,42 +293,6 @@ class CriteriaServiceTest {
             }
 
             @Test
-            fun `Expected value without minValue || maxValue`() {
-
-                val document = parseContext.parse(json)
-                document.put("$.tender.criteria[1].requirementGroups[0].requirements[1]", "expectedValue", 2.0)
-                document.delete("$.tender.criteria[1].requirementGroups[0].requirements[1].minValue")
-                document.delete("$.tender.criteria[1].requirementGroups[0].requirements[1].maxValue")
-
-                val requestNode = document.jsonString().toNode()
-
-                val cm = commandMessage(
-                    CommandType.CHECK_CRITERIA,
-                    data = requestNode
-                )
-
-                assertDoesNotThrow { criteriaService.checkCriteria(cm) }
-            }
-
-            @Test
-            fun `Expected value == number || DataType == number`() {
-
-                val document = parseContext.parse(json)
-                document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].dataType", "number")
-                document.put("$.tender.criteria[1].requirementGroups[0].requirements[1]", "expectedValue", 25.12)
-                document.delete("$.tender.criteria[1].requirementGroups[0].requirements[1].minValue")
-                document.delete("$.tender.criteria[1].requirementGroups[0].requirements[1].maxValue")
-
-                val requestNode = document.jsonString().toNode()
-                val cm = commandMessage(
-                    CommandType.CHECK_CRITERIA,
-                    data = requestNode
-                )
-
-                assertDoesNotThrow { criteriaService.checkCriteria(cm) }
-            }
-
-            @Test
             fun `Expected value == number || DataType == boolean`() {
 
                 val document = parseContext.parse(json)
@@ -374,7 +338,7 @@ class CriteriaServiceTest {
                     val document = parseContext.parse(json)
 
                     document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "minValue", 1)
-                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 3)
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 30)
                     document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType", "integer")
 
                     val requestNode = document.jsonString().toNode()
@@ -458,7 +422,7 @@ class CriteriaServiceTest {
                 fun `MaxValue Integer`() {
                     val document = parseContext.parse(json)
 
-                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 4)
+                    document.put("$.tender.criteria[3].requirementGroups[0].requirements[0]", "maxValue", 40)
                     document.set("$.tender.criteria[3].requirementGroups[0].requirements[0].dataType", "integer")
 
                     val requestNode = document.jsonString().toNode()
@@ -515,7 +479,7 @@ class CriteriaServiceTest {
 
                 val document = parseContext.parse(json)
                 document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].dataType", "number")
-                document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].minValue", 123.0)
+                document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].minValue", 0.02)
                 document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].maxValue", 234.14)
 
                 val requestNode = document.jsonString().toNode()
@@ -550,7 +514,7 @@ class CriteriaServiceTest {
 
                 val document = parseContext.parse(json)
                 document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].dataType", "number")
-                document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].minValue", 234.14)
+                document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].minValue", 0.14)
                 document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].maxValue", 234.14)
 
                 val requestNode = document.jsonString().toNode()
@@ -865,9 +829,6 @@ class CriteriaServiceTest {
         @Nested
         inner class FReq_1_1_1_11 {
 
-            private val MAX = 2
-            private val MIN = 0.01
-
             @Test
             fun `Conversion coefficient less then MIN`() {
                 val document = parseContext.parse(json)
@@ -996,7 +957,7 @@ class CriteriaServiceTest {
                     "$.tender.criteria[2].requirementGroups[0].requirements[0].dataType",
                     RequirementDataType.NUMBER.value()
                 )
-                document.set("$.tender.criteria[2].requirementGroups[0].requirements[0].expectedValue", 123.54)
+                document.set("$.tender.criteria[2].requirementGroups[0].requirements[0].expectedValue", .50)
                 document.set("$.tender.conversions[1].relatedItem", UNIQUE_ID)
                 document.set("$.tender.conversions[1].coefficients[0].value", 0.5.toBigDecimal())
 
