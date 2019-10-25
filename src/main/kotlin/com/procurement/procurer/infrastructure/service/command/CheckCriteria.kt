@@ -321,16 +321,16 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
             is CoefficientValue.AsString  -> if (this !is ExpectedValue.AsString)
                 mismatchDataTypeException(coefficient.value, this)
 
-            is CoefficientValue.AsNumber  -> if (this !is ExpectedValue.AsNumber
-                && this !is RangeValue.AsNumber
-                && this !is MinValue.AsNumber
-                && this !is MaxValue.AsNumber
+            is CoefficientValue.AsNumber  -> if ((this !is ExpectedValue.AsNumber && this !is ExpectedValue.AsInteger)
+                && (this !is RangeValue.AsNumber && this !is RangeValue.AsInteger)
+                && (this !is MinValue.AsNumber && this !is MinValue.AsInteger)
+                && (this !is MaxValue.AsNumber && this !is MaxValue.AsInteger)
             ) mismatchDataTypeException(coefficient.value, this)
 
-            is CoefficientValue.AsInteger -> if (this !is ExpectedValue.AsInteger
-                && this !is RangeValue.AsInteger
-                && this !is MinValue.AsInteger
-                && this !is MaxValue.AsInteger
+            is CoefficientValue.AsInteger -> if ((this !is ExpectedValue.AsInteger && this !is ExpectedValue.AsNumber)
+                && (this !is RangeValue.AsInteger && this !is RangeValue.AsNumber)
+                && (this !is MinValue.AsInteger && this !is MinValue.AsNumber)
+                && (this !is MaxValue.AsInteger && this !is MaxValue.AsNumber)
             ) mismatchDataTypeException(coefficient.value, this)
         }
     }

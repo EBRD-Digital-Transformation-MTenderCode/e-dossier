@@ -315,8 +315,8 @@ class CriteriaServiceTest {
             fun `Expected value == number || DataType == integer`() {
 
                 val document = parseContext.parse(json)
-                document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].dataType", "number")
-                document.put("$.tender.criteria[1].requirementGroups[0].requirements[1]", "expectedValue", 1)
+                document.set("$.tender.criteria[1].requirementGroups[0].requirements[1].dataType", "integer")
+                document.put("$.tender.criteria[1].requirementGroups[0].requirements[1]", "expectedValue", 1.23)
                 document.delete("$.tender.criteria[1].requirementGroups[0].requirements[1].minValue")
                 document.delete("$.tender.criteria[1].requirementGroups[0].requirements[1].maxValue")
 
@@ -945,8 +945,7 @@ class CriteriaServiceTest {
                     data = requestNode
                 )
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CONVERSION, exception.error)
+                assertDoesNotThrow { criteriaService.checkCriteria(cm) }
             }
 
             @Test
