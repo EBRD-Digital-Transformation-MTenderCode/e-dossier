@@ -12,7 +12,7 @@ data class CheckResponsesData(
     )
 
     data class Bid(
-        val requirementResponses: List<RequirementResponse>?,
+        val requirementResponses: List<RequirementResponse>,
         val relatedLots: List<String>
     ) {
         data class RequirementResponse(

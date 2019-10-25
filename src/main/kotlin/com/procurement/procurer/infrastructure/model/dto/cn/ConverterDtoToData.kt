@@ -124,7 +124,7 @@ fun CheckResponsesRequest.toData(): CheckResponsesData {
                         id = requirementResponse.requirement.id
                     )
                 )
-            },
+            } ?: emptyList() ,
             relatedLots = this.bid.relatedLots
         )
     )

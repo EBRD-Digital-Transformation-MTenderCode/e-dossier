@@ -10,7 +10,6 @@ import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesData
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
-import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.infrastructure.utils.toObject
 import java.time.Clock
 import java.time.LocalDateTime
@@ -21,7 +20,9 @@ fun CnEntity.extractCreatedCriteria(): CreatedCriteriaEntity {
 
 fun CheckResponsesData.checkRequirementRelationRelevance(createdCriteria: CreatedCriteria): CheckResponsesData {
 
-    val requirementResponses = this.bid.requirementResponses ?: return this
+    if (this.bid.requirementResponses.isEmpty()) return this
+    val requirementResponses = this.bid.requirementResponses
+
     val criteriaDb = createdCriteria.criteria ?: throw ErrorException(
         error = ErrorType.ENTITY_NOT_FOUND,
         message = "Bid.RequirementResponse object is present in request but no record found in DB."
@@ -45,7 +46,9 @@ fun CheckResponsesData.checkRequirementRelationRelevance(createdCriteria: Create
 
 fun CheckResponsesData.checkAnswerCompleteness(createdCriteria: CreatedCriteria): CheckResponsesData {
 
-    val requirementResponses = this.bid.requirementResponses ?: return this
+    if (this.bid.requirementResponses.isEmpty()) return this
+    val requirementResponses = this.bid.requirementResponses
+
     val criteriaDb = createdCriteria.criteria ?: throw ErrorException(
         error = ErrorType.ENTITY_NOT_FOUND,
         message = "Bid.RequirementResponse object is present in request but no record found in DB."
@@ -57,7 +60,6 @@ fun CheckResponsesData.checkAnswerCompleteness(createdCriteria: CreatedCriteria)
         .flatMap { it.requirements.asSequence() }
         .map { it.id }
         .toList()
-
 
     val itemsRequirements = this.items.asSequence()
         .map { item ->
@@ -100,7 +102,9 @@ fun CheckResponsesData.checkAnswerCompleteness(createdCriteria: CreatedCriteria)
 }
 
 fun CheckResponsesData.checkAnsweredOnce(): CheckResponsesData {
-    val requirementResponses = this.bid.requirementResponses ?: return this
+
+    if (this.bid.requirementResponses.isEmpty()) return this
+    val requirementResponses = this.bid.requirementResponses
 
     val requirementIds = requirementResponses.asSequence()
         .map { it.requirement }
@@ -130,7 +134,8 @@ fun CheckResponsesData.checkDataTypeValue(createdCriteria: CreatedCriteria): Che
             "ReqirementResponse.requirement.id=${requirementResponse.requirement.id}\n"
     )
 
-    val requirementResponses = this.bid.requirementResponses ?: return this
+    if (this.bid.requirementResponses.isEmpty()) return this
+    val requirementResponses = this.bid.requirementResponses
 
     val criteriaDb = createdCriteria.criteria ?: throw ErrorException(
         error = ErrorType.ENTITY_NOT_FOUND,
@@ -195,7 +200,8 @@ fun CheckResponsesData.checkPeriod(): CheckResponsesData {
             "EndDate = ${JsonDateTimeSerializer.serialize(period.endDate)}"
     )
 
-    val requirementResponses = this.bid.requirementResponses ?: return this
+    if (this.bid.requirementResponses.isEmpty()) return this
+    val requirementResponses = this.bid.requirementResponses
 
     requirementResponses.map { it.period }
         .filterNotNull()
@@ -209,7 +215,8 @@ fun CheckResponsesData.checkPeriod(): CheckResponsesData {
 }
 
 fun CheckResponsesData.checkIdsUniqueness(): CheckResponsesData {
-    val requirementResponses = this.bid.requirementResponses ?: return this
+    if (this.bid.requirementResponses.isEmpty()) return this
+    val requirementResponses = this.bid.requirementResponses
 
     val requirementResponseIds = requirementResponses.map { it.id }
     val requirementResponseUniqueIds = requirementResponseIds.toSet()
