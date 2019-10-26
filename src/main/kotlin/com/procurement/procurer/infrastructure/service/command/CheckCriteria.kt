@@ -278,7 +278,7 @@ fun CheckCriteriaData.checkConversionRelation(): CheckCriteriaData {
 
 fun CheckCriteriaData.checkCoefficient(): CheckCriteriaData {
     val COEFFICIENT_MIN = 0.01.toBigDecimal()
-    val COEFFICIENT_MAX = 2.toBigDecimal()
+    val COEFFICIENT_MAX = 1.toBigDecimal()
 
     fun CheckCriteriaData.Tender.Conversion.Coefficient.validateCoefficientRate() {
         if (this.coefficient < COEFFICIENT_MIN || this.coefficient > COEFFICIENT_MAX)
@@ -390,9 +390,8 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
             is ExpectedValue.AsInteger -> Unit
 
             is RangeValue.AsInteger    -> if (this.minValue <= 0 || this.maxValue <= 0) negativeValueException(this)
-            is RangeValue.AsNumber     -> if (this.minValue <= BigDecimal.ZERO || this.maxValue <= BigDecimal.ZERO) negativeValueException(
-                this
-            )
+            is RangeValue.AsNumber     -> if (this.minValue <= BigDecimal.ZERO || this.maxValue <= BigDecimal.ZERO)
+                negativeValueException(this)
 
             is MinValue.AsInteger      -> if (this.value <= 0) negativeValueException(this)
             is MinValue.AsNumber       -> if (this.value <= BigDecimal.ZERO) negativeValueException(this)

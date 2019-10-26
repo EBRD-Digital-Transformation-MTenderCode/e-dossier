@@ -829,6 +829,9 @@ class CriteriaServiceTest {
         @Nested
         inner class FReq_1_1_1_11 {
 
+            private val COEFFICIENT_MAX_VALUE = BigDecimal(1)
+            private val COEFFICIENT_NORNAL_VALUE = BigDecimal(0.5)
+
             @Test
             fun `Conversion coefficient less then MIN`() {
                 val document = parseContext.parse(json)
@@ -879,7 +882,7 @@ class CriteriaServiceTest {
             @Test
             fun `Conversion coefficient ==  MAX`() {
                 val document = parseContext.parse(json)
-                document.set("$.tender.conversions[0].coefficients[0].coefficient", 2.toBigDecimal())
+                document.set("$.tender.conversions[0].coefficients[0].coefficient", COEFFICIENT_MAX_VALUE)
 
                 val requestNode = document.jsonString().toNode()
 
@@ -894,7 +897,7 @@ class CriteriaServiceTest {
             @Test
             fun `coefficient less than MAX, greater than MIN`() {
                 val document = parseContext.parse(json)
-                document.set("$.tender.conversions[0].coefficients[0].coefficient", 1.8.toBigDecimal())
+                document.set("$.tender.conversions[0].coefficients[0].coefficient", (0.5).toBigDecimal())
 
                 val requestNode = document.jsonString().toNode()
 
