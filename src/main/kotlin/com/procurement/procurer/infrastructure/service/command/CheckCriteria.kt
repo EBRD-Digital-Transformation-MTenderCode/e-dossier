@@ -298,6 +298,34 @@ fun CheckCriteriaData.checkCoefficient(): CheckCriteriaData {
     return this
 }
 
+
+fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
+    fun uniquenessException(coefficients: List<CheckCriteriaData.Tender.Conversion.Coefficient>): Nothing = throw ErrorException(
+        ErrorType.INVALID_CONVERSION,
+        message = "Conversion coefficients value contains not unique element: " +
+            "${coefficients.map { it.value }.groupBy { it }.filter { it.value.size > 1 }.keys}"
+    )
+
+    fun List<CheckCriteriaData.Tender.Conversion.Coefficient>.validateCoefficientValues() {
+        when (this[0].value) {
+            is CoefficientValue.AsBoolean,
+            is CoefficientValue.AsInteger,
+            is CoefficientValue.AsNumber -> {
+                if (this.map { it.value }.toSet().size != this.map { it.value }.size) uniquenessException(this)
+            }
+            is CoefficientValue.AsString -> Unit
+        }
+    }
+
+    val conversions = this.tender.conversions ?: return this
+
+    conversions
+        .map { it.coefficients }
+        .map { it.validateCoefficientValues() }
+
+    return this
+}
+
 fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
     fun mismatchDataTypeException(cv: CoefficientValue, rv: RequirementValue): Nothing =
         throw ErrorException(

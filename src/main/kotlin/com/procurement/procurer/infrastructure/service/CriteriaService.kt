@@ -18,6 +18,7 @@ import com.procurement.procurer.infrastructure.service.command.checkAwardCriteri
 import com.procurement.procurer.infrastructure.service.command.checkCastCoefficient
 import com.procurement.procurer.infrastructure.service.command.checkCoefficient
 import com.procurement.procurer.infrastructure.service.command.checkCoefficientDataType
+import com.procurement.procurer.infrastructure.service.command.checkCoefficientValueUniqueness
 import com.procurement.procurer.infrastructure.service.command.checkConversionRelatesToEnum
 import com.procurement.procurer.infrastructure.service.command.checkConversionRelation
 import com.procurement.procurer.infrastructure.service.command.checkConversionWithoutCriteria
@@ -72,6 +73,7 @@ class CriteriaService(
             .checkConversionWithoutCriteria()
             .checkAwardCriteriaDetailsAreRequired()  // FReq-1.1.1.22
             .checkCriteriaAndConversionAreRequired() // FReq-1.1.1.23
+            .checkCoefficientValueUniqueness()       // FReq-1.1.1.24
 
             .checkActualItemRelation()   // FReq-1.1.1.3
             .checkDatatypeCompliance()   // FReq-1.1.1.4
