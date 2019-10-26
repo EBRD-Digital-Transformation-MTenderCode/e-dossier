@@ -117,13 +117,13 @@ fun CheckCriteriaData.checkDatatypeCompliance(): CheckCriteriaData {
 fun CheckCriteriaData.checkMinMaxValue(): CheckCriteriaData {
     fun rangeException(): Nothing = throw ErrorException(
         ErrorType.INVALID_REQUIREMENT_VALUE,
-        message = "minValue greater than maxValue"
+        message = "minValue greater than or equals to maxValue"
     )
 
     fun <T : Number> validateRange(minValue: T, maxValue: T) {
         when (minValue) {
-            is Long       -> if (minValue > maxValue.toLong()) rangeException()
-            is BigDecimal -> if (minValue > BigDecimal(maxValue.toString())) rangeException()
+            is Long       -> if (minValue >= maxValue.toLong()) rangeException()
+            is BigDecimal -> if (minValue >= BigDecimal(maxValue.toString())) rangeException()
         }
     }
 
