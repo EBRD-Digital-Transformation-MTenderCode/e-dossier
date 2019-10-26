@@ -310,7 +310,7 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
         throw ErrorException(
             ErrorType.INVALID_CONVERSION,
             message = "Value in Conversion mismatch with Requirement value. " +
-                "${cv} != ${rv}"
+                "Coefficient value ${cv} don't satisfies the requirements  ${rv.javaClass.name.split(".").last()} -> ${rv}"
         )
 
     fun negativeValueException(rv: RequirementValue): Nothing =
