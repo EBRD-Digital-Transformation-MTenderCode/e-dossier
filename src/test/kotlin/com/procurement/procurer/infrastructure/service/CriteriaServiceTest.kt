@@ -934,9 +934,10 @@ class CriteriaServiceTest {
             fun `Conversion coefficient == number, Requirement value == integer `() {
 
                 val document = parseContext.parse(json)
+                val expectedValue = document.read<Int>("$.tender.criteria[2].requirementGroups[0].requirements[0].expectedValue")
                 document.set("$.tender.criteria[2].requirementGroups[0].requirements[0].id", UNIQUE_ID)
                 document.set("$.tender.conversions[1].relatedItem", UNIQUE_ID)
-                document.set("$.tender.conversions[1].coefficients[0].value", 0.5.toBigDecimal())
+                document.set("$.tender.conversions[1].coefficients[0].value", expectedValue)
 
                 val requestNode = document.jsonString().toNode()
 
