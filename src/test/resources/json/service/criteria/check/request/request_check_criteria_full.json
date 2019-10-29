@@ -199,7 +199,7 @@
         "coefficients": [
           {
             "id": "coefficient-1557947503428",
-            "value": true,
+            "value": false,
             "coefficient": 0.8
           }
         ]
@@ -213,7 +213,7 @@
         "coefficients": [
           {
             "id": "coefficient-1557947503428",
-            "value": 24,
+            "value": 25,
             "coefficient": 0.9
           }
         ]
@@ -227,7 +227,7 @@
         "coefficients": [
           {
             "id": "coefficient-1557947503428",
-            "value": 12,
+            "value": 25,
             "coefficient": 0.75
           }
         ]

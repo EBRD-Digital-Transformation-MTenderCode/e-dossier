@@ -3,7 +3,6 @@
   "type": "object",
   "required": [
     "tender",
-    "mainProcurementCategory",
     "items"
   ],
   "properties": {

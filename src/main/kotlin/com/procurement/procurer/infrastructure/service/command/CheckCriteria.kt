@@ -117,13 +117,13 @@ fun CheckCriteriaData.checkDatatypeCompliance(): CheckCriteriaData {
 fun CheckCriteriaData.checkMinMaxValue(): CheckCriteriaData {
     fun rangeException(): Nothing = throw ErrorException(
         ErrorType.INVALID_REQUIREMENT_VALUE,
-        message = "minValue greater than maxValue"
+        message = "minValue greater than or equals to maxValue"
     )
 
     fun <T : Number> validateRange(minValue: T, maxValue: T) {
         when (minValue) {
-            is Long       -> if (minValue > maxValue.toLong()) rangeException()
-            is BigDecimal -> if (minValue > BigDecimal(maxValue.toString())) rangeException()
+            is Long       -> if (minValue >= maxValue.toLong()) rangeException()
+            is BigDecimal -> if (minValue >= BigDecimal(maxValue.toString())) rangeException()
         }
     }
 
@@ -278,7 +278,7 @@ fun CheckCriteriaData.checkConversionRelation(): CheckCriteriaData {
 
 fun CheckCriteriaData.checkCoefficient(): CheckCriteriaData {
     val COEFFICIENT_MIN = 0.01.toBigDecimal()
-    val COEFFICIENT_MAX = 2.toBigDecimal()
+    val COEFFICIENT_MAX = 1.toBigDecimal()
 
     fun CheckCriteriaData.Tender.Conversion.Coefficient.validateCoefficientRate() {
         if (this.coefficient < COEFFICIENT_MIN || this.coefficient > COEFFICIENT_MAX)
@@ -298,12 +298,53 @@ fun CheckCriteriaData.checkCoefficient(): CheckCriteriaData {
     return this
 }
 
+
+fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
+    fun uniquenessException(coefficients: List<CheckCriteriaData.Tender.Conversion.Coefficient>): Nothing = throw ErrorException(
+        ErrorType.INVALID_CONVERSION,
+        message = "Conversion coefficients value contains not unique element: " +
+            "${coefficients.map { it.value }.groupBy { it }.filter { it.value.size > 1 }.keys}"
+    )
+
+    fun List<CheckCriteriaData.Tender.Conversion.Coefficient>.validateCoefficientValues() {
+        when (this[0].value) {
+            is CoefficientValue.AsBoolean,
+            is CoefficientValue.AsInteger,
+            is CoefficientValue.AsNumber -> {
+                if (this.map { it.value }.toSet().size != this.map { it.value }.size) uniquenessException(this)
+            }
+            is CoefficientValue.AsString -> Unit
+        }
+    }
+
+    val conversions = this.tender.conversions ?: return this
+
+    conversions
+        .map { it.coefficients }
+        .map { it.validateCoefficientValues() }
+
+    return this
+}
+
 fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
     fun mismatchDataTypeException(cv: CoefficientValue, rv: RequirementValue): Nothing =
         throw ErrorException(
             ErrorType.INVALID_CONVERSION,
             message = "DataType in Conversion mismatch with Requirement dataType. " +
-                "\n ${cv} != ${rv}"
+                "${cv} != ${rv}"
+        )
+
+    fun mismatchValueException(cv: CoefficientValue, rv: RequirementValue): Nothing =
+        throw ErrorException(
+            ErrorType.INVALID_CONVERSION,
+            message = "Value in Conversion mismatch with Requirement value. " +
+                "Coefficient value ${cv} don't satisfies the requirements  ${rv.javaClass.name.split(".").last()} -> ${rv}"
+        )
+
+    fun negativeValueException(rv: RequirementValue): Nothing =
+        throw ErrorException(
+            ErrorType.INVALID_CONVERSION,
+            message = "Value in Requirement must be greater than 0. ${rv}"
         )
 
     fun RequirementValue.validateDataType(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient) {
@@ -314,17 +355,78 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
             is CoefficientValue.AsString  -> if (this !is ExpectedValue.AsString)
                 mismatchDataTypeException(coefficient.value, this)
 
-            is CoefficientValue.AsNumber  -> if (this !is ExpectedValue.AsNumber
-                && this !is RangeValue.AsNumber
-                && this !is MinValue.AsNumber
-                && this !is MaxValue.AsNumber
+            is CoefficientValue.AsNumber  -> if ((this !is ExpectedValue.AsNumber && this !is ExpectedValue.AsInteger)
+                && (this !is RangeValue.AsNumber && this !is RangeValue.AsInteger)
+                && (this !is MinValue.AsNumber && this !is MinValue.AsInteger)
+                && (this !is MaxValue.AsNumber && this !is MaxValue.AsInteger)
             ) mismatchDataTypeException(coefficient.value, this)
 
-            is CoefficientValue.AsInteger -> if (this !is ExpectedValue.AsInteger
-                && this !is RangeValue.AsInteger
-                && this !is MinValue.AsInteger
-                && this !is MaxValue.AsInteger
+            is CoefficientValue.AsInteger -> if ((this !is ExpectedValue.AsInteger && this !is ExpectedValue.AsNumber)
+                && (this !is RangeValue.AsInteger && this !is RangeValue.AsNumber)
+                && (this !is MinValue.AsInteger && this !is MinValue.AsNumber)
+                && (this !is MaxValue.AsInteger && this !is MaxValue.AsNumber)
             ) mismatchDataTypeException(coefficient.value, this)
+        }
+    }
+
+    fun RequirementValue.validateValueCompatibility(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient) {
+        when (coefficient.value) {
+
+            is CoefficientValue.AsBoolean -> if (this is ExpectedValue.AsBoolean && (coefficient.value.value != this.value))
+                mismatchValueException(coefficient.value, this)
+
+            is CoefficientValue.AsString  -> Unit
+
+            is CoefficientValue.AsNumber  ->
+                if ((this is ExpectedValue.AsNumber && (coefficient.value.value != this.value))
+                    || (this is ExpectedValue.AsInteger && (coefficient.value.value != this.value.toBigDecimal()))
+
+                    || (this is RangeValue.AsNumber && (coefficient.value.value < this.minValue || coefficient.value.value > this.maxValue))
+                    || (this is RangeValue.AsInteger
+                        && (coefficient.value.value < this.minValue.toBigDecimal() || coefficient.value.value > this.maxValue.toBigDecimal()))
+
+                    || (this is MinValue.AsNumber && (coefficient.value.value < this.value))
+                    || (this is MinValue.AsInteger && (coefficient.value.value < this.value.toBigDecimal()))
+
+                    || (this is MaxValue.AsNumber && (coefficient.value.value > this.value))
+                    || (this is MaxValue.AsInteger && (coefficient.value.value > this.value.toBigDecimal()))
+                ) mismatchValueException(coefficient.value, this)
+
+            is CoefficientValue.AsInteger ->
+                if ((this is ExpectedValue.AsInteger && (coefficient.value.value != this.value))
+                    || (this is ExpectedValue.AsNumber && (coefficient.value.value.toBigDecimal() != this.value))
+
+                    || ((this is RangeValue.AsInteger) && (coefficient.value.value < this.minValue || coefficient.value.value > this.maxValue))
+                    || ((this is RangeValue.AsNumber)
+                        && (coefficient.value.value.toBigDecimal() < this.minValue || coefficient.value.value.toBigDecimal() > this.maxValue))
+
+                    || (this is MinValue.AsInteger && (coefficient.value.value < this.value))
+                    || (this is MinValue.AsNumber && (coefficient.value.value.toBigDecimal() < this.value))
+
+                    || (this is MaxValue.AsInteger && (coefficient.value.value > this.value))
+                    || (this is MaxValue.AsNumber && (coefficient.value.value.toBigDecimal() > this.value))
+                ) mismatchValueException(coefficient.value, this)
+        }
+    }
+
+    fun RequirementValue.validateNonNegativeValue() {
+
+        when (this) {
+            is ExpectedValue.AsBoolean,
+            is ExpectedValue.AsString,
+            is ExpectedValue.AsNumber,
+            is ExpectedValue.AsInteger -> Unit
+
+            is RangeValue.AsInteger    -> if (this.minValue <= 0 || this.maxValue <= 0) negativeValueException(this)
+            is RangeValue.AsNumber     -> if (this.minValue <= BigDecimal.ZERO || this.maxValue <= BigDecimal.ZERO)
+                negativeValueException(this)
+
+            is MinValue.AsInteger      -> if (this.value <= 0) negativeValueException(this)
+            is MinValue.AsNumber       -> if (this.value <= BigDecimal.ZERO) negativeValueException(this)
+
+            is MaxValue.AsInteger      -> if (this.value <= 0) negativeValueException(this)
+            is MaxValue.AsNumber       -> if (this.value <= BigDecimal.ZERO) negativeValueException(this)
+
         }
     }
 
@@ -343,6 +445,8 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
         it.coefficients.forEach { coefficient ->
             val requirement = requirements.get(requirementId)
             requirement?.value?.validateDataType(coefficient)
+            requirement?.value?.validateValueCompatibility(coefficient)
+            requirement?.value?.validateNonNegativeValue()
         }
     }
 
