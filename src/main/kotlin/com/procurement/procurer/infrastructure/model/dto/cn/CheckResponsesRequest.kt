@@ -1,5 +1,6 @@
 package com.procurement.procurer.infrastructure.model.dto.cn
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -11,6 +12,7 @@ import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDese
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
 import java.time.LocalDateTime
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class CheckResponsesRequest(
     @field:JsonProperty("items") @param:JsonProperty("items") val items: List<Item>,
     @field:JsonProperty("bid") @param:JsonProperty("bid") val bid: Bid
