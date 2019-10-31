@@ -154,19 +154,22 @@
                               "number",
                               "integer",
                               "boolean"
-                            ]
+                            ],
+                            "multipleOf": 0.001
                           },
                           "minValue": {
                             "type": [
                               "integer",
                               "number"
-                            ]
+                            ],
+                            "multipleOf": 0.001
                           },
                           "maxValue": {
                             "type": [
                               "integer",
                               "number"
-                            ]
+                            ],
+                            "multipleOf": 0.001
                           }
                         },
                         "dependencies": {
@@ -288,7 +291,8 @@
                         "number",
                         "string",
                         "boolean"
-                      ]
+                      ],
+                      "multipleOf": 0.001
                     },
                     "coefficient": {
                       "type": [

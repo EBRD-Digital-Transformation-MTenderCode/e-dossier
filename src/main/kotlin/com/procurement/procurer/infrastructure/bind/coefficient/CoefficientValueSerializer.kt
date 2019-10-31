@@ -11,7 +11,7 @@ class CoefficientValueSerializer : JsonSerializer<CoefficientValue>() {
     companion object {
         fun serialize(coefficientValue: CoefficientValue.AsString): String = coefficientValue.value
         fun serialize(coefficientValue: CoefficientValue.AsBoolean): Boolean = coefficientValue.value
-        fun serialize(coefficientValue: CoefficientValue.AsNumber): String = "%.2f".format(coefficientValue.value)
+        fun serialize(coefficientValue: CoefficientValue.AsNumber): String = "%.3f".format(coefficientValue.value)
         fun serialize(coefficientValue: CoefficientValue.AsInteger): Long = coefficientValue.value
     }
 

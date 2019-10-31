@@ -303,15 +303,22 @@ fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
     fun uniquenessException(coefficients: List<CheckCriteriaData.Tender.Conversion.Coefficient>): Nothing = throw ErrorException(
         ErrorType.INVALID_CONVERSION,
         message = "Conversion coefficients value contains not unique element: " +
-            "${coefficients.map { it.value }.groupBy { it }.filter { it.value.size > 1 }.keys}"
+            "${coefficients.map { it.value }
+                .map { if (it is CoefficientValue.AsNumber) it.value.stripTrailingZeros() else it}
+                .groupBy { it }
+                .filter { it.value.size > 1 }.keys}"
     )
 
     fun List<CheckCriteriaData.Tender.Conversion.Coefficient>.validateCoefficientValues() {
         when (this[0].value) {
             is CoefficientValue.AsBoolean,
-            is CoefficientValue.AsInteger,
+            is CoefficientValue.AsInteger -> {
+                val values = this.map { it.value }
+                if (values.toSet().size != values.size) uniquenessException(this)
+            }
             is CoefficientValue.AsNumber -> {
-                if (this.map { it.value }.toSet().size != this.map { it.value }.size) uniquenessException(this)
+                val values = this.map { it.value as CoefficientValue.AsNumber }.map { it.value }.map { it.stripTrailingZeros() }
+                if (values.toSet().size != values.size) uniquenessException(this)
             }
             is CoefficientValue.AsString -> Unit
         }
@@ -319,11 +326,19 @@ fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
 
     val conversions = this.tender.conversions ?: return this
 
-    conversions
-        .map { it.coefficients }
-        .map { it.validateCoefficientValues() }
+    conversions.forEach { conversion ->
+        conversion.coefficients.validateCoefficientValues()
+    }
 
     return this
+}
+
+
+fun main() {
+    val list = listOf(BigDecimal("2.2"),BigDecimal("2.20"))
+    val set = list.toSet()
+    println(list)
+    println(set)
 }
 
 fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {

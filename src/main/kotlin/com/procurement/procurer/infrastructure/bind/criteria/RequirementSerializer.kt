@@ -18,7 +18,7 @@ import java.math.BigDecimal
 class RequirementSerializer : JsonSerializer<List<Requirement>>() {
     companion object {
         fun serialize(requirements: List<Requirement>): ArrayNode {
-            fun BigDecimal.jsonFormat() = BigDecimal("%.2f".format(this))
+            fun BigDecimal.jsonFormat() = BigDecimal("%.3f".format(this))
 
             val serializedRequirements = JsonNodeFactory.withExactBigDecimals(true).arrayNode()
 

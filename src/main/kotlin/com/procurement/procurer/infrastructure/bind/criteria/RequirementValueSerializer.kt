@@ -11,7 +11,7 @@ class RequirementValueSerializer : JsonSerializer<RequirementRsValue>() {
     companion object {
         fun serialize(requirementValue: RequirementRsValue.AsString): String = requirementValue.value
         fun serialize(requirementValue: RequirementRsValue.AsBoolean): Boolean = requirementValue.value
-        fun serialize(requirementValue: RequirementRsValue.AsNumber): String = "%.2f".format(requirementValue.value)
+        fun serialize(requirementValue: RequirementRsValue.AsNumber): String = "%.3f".format(requirementValue.value)
         fun serialize(requirementValue: RequirementRsValue.AsInteger): Long = requirementValue.value
     }
 
