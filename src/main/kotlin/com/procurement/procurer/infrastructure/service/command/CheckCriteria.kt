@@ -409,26 +409,6 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
         }
     }
 
-    fun RequirementValue.validateNonNegativeValue() {
-
-        when (this) {
-            is ExpectedValue.AsBoolean,
-            is ExpectedValue.AsString,
-            is ExpectedValue.AsNumber,
-            is ExpectedValue.AsInteger -> Unit
-
-            is RangeValue.AsInteger    -> if (this.minValue <= 0 || this.maxValue <= 0) negativeValueException(this)
-            is RangeValue.AsNumber     -> if (this.minValue <= BigDecimal.ZERO || this.maxValue <= BigDecimal.ZERO)
-                negativeValueException(this)
-
-            is MinValue.AsInteger      -> if (this.value <= 0) negativeValueException(this)
-            is MinValue.AsNumber       -> if (this.value <= BigDecimal.ZERO) negativeValueException(this)
-
-            is MaxValue.AsInteger      -> if (this.value <= 0) negativeValueException(this)
-            is MaxValue.AsNumber       -> if (this.value <= BigDecimal.ZERO) negativeValueException(this)
-
-        }
-    }
 
     val criteria = this.tender.criteria ?: return this
     val conversions = this.tender.conversions ?: return this
@@ -446,7 +426,6 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
             val requirement = requirements.get(requirementId)
             requirement?.value?.validateDataType(coefficient)
             requirement?.value?.validateValueCompatibility(coefficient)
-            requirement?.value?.validateNonNegativeValue()
         }
     }
 
