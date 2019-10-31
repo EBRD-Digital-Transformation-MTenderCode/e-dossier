@@ -76,7 +76,7 @@ fun CheckCriteriaData.checkDatatypeCompliance(): CheckCriteriaData {
         throw ErrorException(
             ErrorType.INVALID_CRITERIA,
             message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue. " +
-                " \n${rv} != ${rDatatype}"
+                "${rv} != ${rDatatype}"
         )
 
     fun Requirement.hasRequirementValue(): Boolean = this.value != null
@@ -369,7 +369,7 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
         }
     }
 
-    fun RequirementValue.validateValueCompatibility(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient) {
+    fun RequirementValue.validateValueCompatibility(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient, dataType: RequirementDataType) {
         when (coefficient.value) {
 
             is CoefficientValue.AsBoolean -> if (this is ExpectedValue.AsBoolean && (coefficient.value.value != this.value))
@@ -378,33 +378,34 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
             is CoefficientValue.AsString  -> Unit
 
             is CoefficientValue.AsNumber  ->
-                if ((this is ExpectedValue.AsNumber && (coefficient.value.value != this.value))
-                    || (this is ExpectedValue.AsInteger && (coefficient.value.value != this.value.toBigDecimal()))
+                if (dataType == RequirementDataType.INTEGER
+                    ||(this is ExpectedValue.AsNumber && (coefficient.value.value.compareTo(this.value) != 0))
+                    || (this is ExpectedValue.AsInteger && (coefficient.value.value.compareTo(this.value.toBigDecimal()) != 0))
 
-                    || (this is RangeValue.AsNumber && (coefficient.value.value < this.minValue || coefficient.value.value > this.maxValue))
+                    || (this is RangeValue.AsNumber && (coefficient.value.value.compareTo(this.minValue) == -1  || coefficient.value.value.compareTo(this.maxValue) == 1 ))
                     || (this is RangeValue.AsInteger
-                        && (coefficient.value.value < this.minValue.toBigDecimal() || coefficient.value.value > this.maxValue.toBigDecimal()))
+                        && (coefficient.value.value < this.minValue.toBigDecimal() || coefficient.value.value.compareTo(this.maxValue.toBigDecimal()) == 1 ))
 
-                    || (this is MinValue.AsNumber && (coefficient.value.value < this.value))
-                    || (this is MinValue.AsInteger && (coefficient.value.value < this.value.toBigDecimal()))
+                    || (this is MinValue.AsNumber && (coefficient.value.value.compareTo(this.value) == -1 ))
+                    || (this is MinValue.AsInteger && (coefficient.value.value.compareTo(this.value.toBigDecimal()) == -1 ))
 
-                    || (this is MaxValue.AsNumber && (coefficient.value.value > this.value))
-                    || (this is MaxValue.AsInteger && (coefficient.value.value > this.value.toBigDecimal()))
+                    || (this is MaxValue.AsNumber && (coefficient.value.value.compareTo(this.value) == 1 ))
+                    || (this is MaxValue.AsInteger && (coefficient.value.value.compareTo(this.value.toBigDecimal()) == 1 ))
                 ) mismatchValueException(coefficient.value, this)
 
             is CoefficientValue.AsInteger ->
                 if ((this is ExpectedValue.AsInteger && (coefficient.value.value != this.value))
-                    || (this is ExpectedValue.AsNumber && (coefficient.value.value.toBigDecimal() != this.value))
+                    || (this is ExpectedValue.AsNumber && (coefficient.value.value.toBigDecimal().compareTo(this.value) != 0 ))
 
                     || ((this is RangeValue.AsInteger) && (coefficient.value.value < this.minValue || coefficient.value.value > this.maxValue))
                     || ((this is RangeValue.AsNumber)
-                        && (coefficient.value.value.toBigDecimal() < this.minValue || coefficient.value.value.toBigDecimal() > this.maxValue))
+                        && (coefficient.value.value.toBigDecimal().compareTo(this.minValue) == -1  || coefficient.value.value.toBigDecimal().compareTo(this.maxValue) == 1 ))
 
                     || (this is MinValue.AsInteger && (coefficient.value.value < this.value))
-                    || (this is MinValue.AsNumber && (coefficient.value.value.toBigDecimal() < this.value))
+                    || (this is MinValue.AsNumber && (coefficient.value.value.toBigDecimal().compareTo(this.value) == -1 ))
 
                     || (this is MaxValue.AsInteger && (coefficient.value.value > this.value))
-                    || (this is MaxValue.AsNumber && (coefficient.value.value.toBigDecimal() > this.value))
+                    || (this is MaxValue.AsNumber && (coefficient.value.value.toBigDecimal().compareTo(this.value) == 1 ))
                 ) mismatchValueException(coefficient.value, this)
         }
     }
@@ -425,7 +426,7 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
         it.coefficients.forEach { coefficient ->
             val requirement = requirements.get(requirementId)
             requirement?.value?.validateDataType(coefficient)
-            requirement?.value?.validateValueCompatibility(coefficient)
+            requirement?.value?.validateValueCompatibility(coefficient, requirement.dataType)
         }
     }
 

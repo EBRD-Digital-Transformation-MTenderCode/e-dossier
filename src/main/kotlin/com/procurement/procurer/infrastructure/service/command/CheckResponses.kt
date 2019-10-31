@@ -128,10 +128,10 @@ fun CheckResponsesData.checkDataTypeValue(createdCriteria: CreatedCriteria): Che
         requirementResponse: CheckResponsesData.Bid.RequirementResponse
     ): Nothing = throw ErrorException(
         error = ErrorType.INVALID_REQUIREMENT_VALUE,
-        message = "RequirementResponse dataType= ${requirementResponseDatatype.javaClass}, \n" +
-            "Requirement dataType (DB) = ${requirementDbDataType.value()}. \n" +
-            "ReqirementResponse.id=${requirementResponse.id}.\n" +
-            "ReqirementResponse.requirement.id=${requirementResponse.requirement.id}\n"
+        message = "RequirementResponse dataType= ${requirementResponseDatatype.javaClass}, " +
+            "Requirement dataType (DB) = ${requirementDbDataType.value()}. " +
+            "ReqirementResponse.id=${requirementResponse.id}." +
+            "ReqirementResponse.requirement.id=${requirementResponse.requirement.id}. "
     )
 
     if (this.bid.requirementResponses.isEmpty()) return this
