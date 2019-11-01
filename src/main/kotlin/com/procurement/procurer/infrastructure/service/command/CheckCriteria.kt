@@ -333,14 +333,6 @@ fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
     return this
 }
 
-
-fun main() {
-    val list = listOf(BigDecimal("2.2"),BigDecimal("2.20"))
-    val set = list.toSet()
-    println(list)
-    println(set)
-}
-
 fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
     fun mismatchDataTypeException(cv: CoefficientValue, rv: RequirementValue): Nothing =
         throw ErrorException(

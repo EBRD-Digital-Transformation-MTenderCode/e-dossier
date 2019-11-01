@@ -9,7 +9,7 @@
       {
         "id": "bid.requirementResponses[0].id",
         "title": "bid.requirementResponses[0].title",
-        "value": 23.00,
+        "value": 23.010,
         "requirement": {
           "id": "bid.requirementResponses[0].requirement.id"
         }

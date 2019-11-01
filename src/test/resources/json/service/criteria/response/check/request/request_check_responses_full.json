@@ -10,7 +10,7 @@
         "id": "bid.requirementResponses[0].id",
         "title": "bid.requirementResponses[0].title",
         "description": "bid.requirementResponses[0].description",
-        "value": 23.01,
+        "value": 23.010,
         "requirement": {
           "id": "bid.requirementResponses[0].requirement.id"
         },
