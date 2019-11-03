@@ -187,7 +187,7 @@ fun CheckResponsesData.checkDataTypeValue(createdCriteria: CreatedCriteria): Che
 fun CheckResponsesData.checkPeriod(): CheckResponsesData {
     fun invalidPeriodExpection(endDate: LocalDateTime, currentTime: LocalDateTime): Nothing = throw ErrorException(
         error = ErrorType.INVALID_PERIOD_VALUE,
-        message = "Period.endDate specified in RequirementResponse cannot be greater than current time. " +
+        message = "Period.endDate specified in RequirementResponse cannot be greater or equals to current time. " +
             "EndDate = ${JsonDateTimeSerializer.serialize(endDate)}, Current time = ${JsonDateTimeSerializer.serialize(
                 currentTime
             )}"
@@ -195,7 +195,7 @@ fun CheckResponsesData.checkPeriod(): CheckResponsesData {
 
     fun invalidPeriodExpection(period: CheckResponsesData.Bid.RequirementResponse.Period): Nothing = throw ErrorException(
         error = ErrorType.INVALID_PERIOD_VALUE,
-        message = "Period.startDate specified in RequirementResponse cannot be greater than period.endDate. " +
+        message = "Period.startDate specified in RequirementResponse cannot be greater or equals to period.endDate. " +
             "StratDate = ${JsonDateTimeSerializer.serialize(period.startDate)}, " +
             "EndDate = ${JsonDateTimeSerializer.serialize(period.endDate)}"
     )
@@ -208,7 +208,7 @@ fun CheckResponsesData.checkPeriod(): CheckResponsesData {
         .forEach {
             val currentTime = LocalDateTime.now(Clock.systemUTC())
             if (it.endDate >= currentTime) invalidPeriodExpection(endDate = it.endDate, currentTime = currentTime)
-            if (it.startDate > it.endDate) invalidPeriodExpection(period = it)
+            if (it.startDate >= it.endDate) invalidPeriodExpection(period = it)
         }
 
     return this
