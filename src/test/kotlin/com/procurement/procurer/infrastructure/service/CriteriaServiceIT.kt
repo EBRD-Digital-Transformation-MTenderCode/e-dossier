@@ -121,8 +121,6 @@ class CriteriaServiceIT {
         println(responseData)
         assertEquals(responseData.awardCriteriaDetails, AwardCriteriaDetails.MANUAL)
 
-
-
         val post_document = parseContext.parse(json)
         val post_requestNode = post_document.jsonString().toNode()
 
@@ -136,15 +134,13 @@ class CriteriaServiceIT {
             data = post_requestNode
         )
 
-        val post_response = criteriaService.createCriteria(post_cm)
+        val post_response = criteriaService.createCriteria(post_cm).data as CreateCriteriaResponse
 
         verify(criteriaRepository, times(2))
             .save(any())
 
-        verify(criteriaRepository, times(1))
-            .findBy(any())
-
-        assertEquals(toJson(pre_response), toJson(post_response))
+        assertEquals(AwardCriteriaDetails.MANUAL, responseData.awardCriteriaDetails)
+        assertEquals(AwardCriteriaDetails.AUTOMATED, post_response.awardCriteriaDetails)
 
     }
 

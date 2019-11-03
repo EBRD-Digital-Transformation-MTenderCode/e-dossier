@@ -39,7 +39,6 @@ import com.procurement.procurer.infrastructure.service.command.extractCreatedCri
 import com.procurement.procurer.infrastructure.service.command.generateCreateCriteriaResponse
 import com.procurement.procurer.infrastructure.service.command.processCriteria
 import com.procurement.procurer.infrastructure.service.command.toEntity
-import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.infrastructure.utils.toObject
 
 class CriteriaService(
@@ -63,10 +62,9 @@ class CriteriaService(
         val createdCriteriaEntity = createdCriteria.toEntity()
         val cn = createCnEntity(createdCriteriaEntity, context)
 
-        val wasApplied = criteriaRepository.save(cn)
-        val cnEntity = if (!wasApplied) criteriaRepository.findBy(context.cpid) else cn
+        criteriaRepository.save(cn)
 
-        val cnResponse = toObject(CreatedCriteriaEntity::class.java, cnEntity!!.jsonData)
+        val cnResponse = toObject(CreatedCriteriaEntity::class.java, cn.jsonData)
         val responseData = generateCreateCriteriaResponse(cnResponse)
 
         return ResponseDto(id = cm.id, data = responseData)
@@ -107,7 +105,7 @@ class CriteriaService(
             error = ErrorType.ENTITY_NOT_FOUND,
             message = "Cannot found record with cpid=${context.cpid}."
         )
-        val createdCriteria =  cnEntity
+        val createdCriteria = cnEntity
             .extractCreatedCriteria()
             .toData()
 
@@ -119,7 +117,6 @@ class CriteriaService(
             .checkDataTypeValue(createdCriteria)                // FReq-1.2.1.4
             .checkPeriod()                                      // FReq-1.2.1.5 & FReq-1.2.1.7
             .checkIdsUniqueness()                               // FReq-1.2.1.6
-
 
         return ResponseDto(data = "ok")
     }
