@@ -31,7 +31,6 @@ fun CheckCriteriaData.checkConversionWithoutCriteria(): CheckCriteriaData {
 }
 
 fun CheckCriteriaData.checkActualItemRelation(): CheckCriteriaData {
-    fun CheckCriteriaData.Tender.Criteria.hasRelation(): Boolean = this.relatesTo != null && this.relatedItem != null
 
     fun Map<String, CheckCriteriaData.Tender.Item>.containsElement(itemId: String) {
         if (!this.containsKey(itemId)) throw ErrorException(
@@ -58,15 +57,39 @@ fun CheckCriteriaData.checkActualItemRelation(): CheckCriteriaData {
         }
     }
 
+    fun CheckCriteriaData.Tender.Criteria.validateRelation(){
+        if (this.relatesTo == null && this.relatedItem != null) throw ErrorException(
+            error = ErrorType.INVALID_CRITERIA,
+            message = "Criteria has reletedItem attribute but missing relatedTo"
+        )
+
+        if (this.relatesTo != null) {
+            when (this.relatesTo) {
+                CriteriaRelatesTo.TENDERER -> if (this.relatedItem != null ) throw ErrorException(
+                    error = ErrorType.INVALID_CRITERIA,
+                    message = "For parameter relatedTo = 'tenderer', parameter relatedItem cannot be passed"
+                )
+                CriteriaRelatesTo.ITEM,
+                CriteriaRelatesTo.LOT -> if (this.relatedItem == null ) throw ErrorException(
+                    error = ErrorType.INVALID_CRITERIA,
+                    message = "For parameter relatedTo = 'lot' or 'item', parameter relatedItem must be specified"
+                )
+            }
+        }
+
+
+    }
+
     val criteria = this.tender.criteria ?: return this
     val items = this.items
 
     val itemsById = items.associateBy { it.id }
     val itemsByRelatedLot = items.groupBy { it.relatedLot }
 
-    criteria
-        .filter { _criteria -> _criteria.hasRelation() }
-        .forEach { _criteria -> _criteria.validate(itemsById, itemsByRelatedLot) }
+    criteria.forEach { _criteria ->
+        _criteria.validateRelation()
+        _criteria.validate(itemsById, itemsByRelatedLot)
+    }
 
     return this
 }
