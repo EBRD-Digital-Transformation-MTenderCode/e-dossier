@@ -78,9 +78,9 @@ fun CheckResponsesData.checkAnswerCompleteness(createdCriteria: CreatedCriteria)
 
     val totalRequirements = lotRequirements + itemsRequirements
     val answered = (totalRequirements).intersect(requirementRequest)
-    if (answered.size < totalRequirements.size) throw ErrorException(
+    if (answered.size != totalRequirements.size) throw ErrorException(
         error = ErrorType.INVALID_REQUIREMENT_VALUE,
-        message = "For lots and items founded ${totalRequirements.size} requirement in DB but answered only for ${answered.size}. " +
+        message = "For lots and items founded ${totalRequirements.size} requirement in DB but answered for ${answered.size}. " +
             "Ignored requirements: ${totalRequirements.minus(answered)} "
     )
 
@@ -92,9 +92,9 @@ fun CheckResponsesData.checkAnswerCompleteness(createdCriteria: CreatedCriteria)
         .toList()
 
     val answeredTender = (tenderRequirements).intersect(requirementRequest)
-    if (answeredTender.size < tenderRequirements.size) throw ErrorException(
+    if (answeredTender.size != tenderRequirements.size) throw ErrorException(
         error = ErrorType.INVALID_REQUIREMENT_VALUE,
-        message = "For tenderer and tender founded ${tenderRequirements.size} requirement in DB but answered only for ${answeredTender.size}. " +
+        message = "For tenderer and tender founded ${tenderRequirements.size} requirement in DB but answered for ${answeredTender.size}. " +
             "Ignored requirements: ${tenderRequirements.minus(answeredTender)} "
     )
 
