@@ -2,6 +2,7 @@ package com.procurement.procurer.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
@@ -1289,7 +1290,14 @@ class CriteriaServiceTest {
             whenever(criteriaRepository.findBy(any()))
                 .thenReturn(cnEntity)
 
-            val requestNode = json.toNode()
+            val requestNode = (json.toNode() as ObjectNode)
+            val bidNode = requestNode.get("bid") as ObjectNode
+
+            val requirementResponse = (bidNode.get("requirementResponses") as ArrayNode).get(1)
+
+            bidNode.putArray("requirementResponses")
+                .add(requirementResponse)
+
             val cm = commandMessage(command = CommandType.CHECK_RESPONSES, data = requestNode)
 
             assertDoesNotThrow { criteriaService.checkResponses(cm) }
@@ -1372,54 +1380,6 @@ class CriteriaServiceTest {
 
         @Nested
         inner class FReq_1_2_1_2 {
-
-            @Test
-            fun `Answered all question`() {
-                val FIRST_ID = "first-requirement-response-id"
-                val SECOND_ID = "second-requirement-response-id"
-                val THIRD_ID = "third-requirement-response-id"
-
-                val entityNode = entity.toNode()
-                val requestNode = json.toNode()
-
-                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
-                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
-
-                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
-                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
-
-                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
-
-                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
-                lotRequirementResponse.putAttribute("value", 23.56)
-                    .putAttribute("id", THIRD_ID)
-                    .getObject("requirement")
-                    .putAttribute("id", lotRequirementId)
-
-                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
-                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
-                    .putAttribute("id", SECOND_ID)
-                    .getObject("requirement")
-                    .putAttribute("id", itemRequirementId)
-
-                val tenderRequirementResponse = requestNode.getObject("bid")
-                    .getArray("requirementResponses").get(1).toObjectNode()
-                    .putAttribute("id", FIRST_ID)
-
-                requestNode.getObject("bid")
-                    .putArray("requirementResponses")
-                    .putObject(tenderRequirementResponse)
-                    .putObject(lotRequirementResponse)
-                    .putObject(itemRequirementResponse)
-
-                val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
-                whenever(criteriaRepository.findBy(any()))
-                    .thenReturn(cnEntity)
-
-                val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
-
-                assertDoesNotThrow { criteriaService.checkResponses(cm) }
-            }
 
             @Test
             fun `Not answer on item requirement`() {
@@ -1622,45 +1582,20 @@ class CriteriaServiceTest {
             @Test
             fun `Period endDate greater than current time`() {
                 val FIRST_ID = "first-requirement-response-id"
-                val SECOND_ID = "second-requirement-response-id"
-                val THIRD_ID = "third-requirement-response-id"
 
-                val entityNode = entity.toNode()
                 val requestNode = json.toNode()
-
-                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
-                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
-
-                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
-                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
-
-                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
-
-                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
-                lotRequirementResponse.putAttribute("value", 23.56)
-                    .putAttribute("id", THIRD_ID)
-                    .getObject("requirement")
-                    .putAttribute("id", lotRequirementId)
-
-                val time = JsonDateTimeSerializer.serialize(LocalDateTime.now().plusMonths(3))
-                lotRequirementResponse.getObject("period")
-                    .putAttribute("endDate", time)
-
-                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
-                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
-                    .putAttribute("id", SECOND_ID)
-                    .getObject("requirement")
-                    .putAttribute("id", itemRequirementId)
 
                 val tenderRequirementResponse = requestNode.getObject("bid")
                     .getArray("requirementResponses").get(1).toObjectNode()
                     .putAttribute("id", FIRST_ID)
 
+                val time = JsonDateTimeSerializer.serialize(LocalDateTime.now().plusMonths(3))
+                tenderRequirementResponse.getObject("period")
+                    .putAttribute("endDate", time)
+
                 requestNode.getObject("bid")
                     .putArray("requirementResponses")
                     .putObject(tenderRequirementResponse)
-                    .putObject(lotRequirementResponse)
-                    .putObject(itemRequirementResponse)
 
                 val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
                 whenever(criteriaRepository.findBy(any()))
@@ -1679,47 +1614,22 @@ class CriteriaServiceTest {
             @Test
             fun `Period startDate greater than endDate`() {
                 val FIRST_ID = "first-requirement-response-id"
-                val SECOND_ID = "second-requirement-response-id"
-                val THIRD_ID = "third-requirement-response-id"
 
-                val entityNode = entity.toNode()
                 val requestNode = json.toNode()
-
-                val lotCriteria = generateLotCriteria(requestNode = requestNode, entityNode = entityNode)
-                val lotRequirementId = getLotCriteriaRequirementId(lotCriteria)
-
-                val itemCriteria = generateItemCriteria(requestNode = requestNode, entityNode = entityNode)
-                val itemRequirementId = getItemCriteriaRequirementId(itemCriteria)
-
-                val sampleRequirementResponse = getSampleRequirementResponse(requestNode = requestNode)
-
-                val lotRequirementResponse = sampleRequirementResponse.deepCopy()
-                lotRequirementResponse.putAttribute("value", 23.56)
-                    .putAttribute("id", THIRD_ID)
-                    .getObject("requirement")
-                    .putAttribute("id", lotRequirementId)
-
-                val startDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().plusMonths(3))
-                val endDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().minusMonths(3))
-                lotRequirementResponse.getObject("period")
-                    .putAttribute("startDate", startDate)
-                    .putAttribute("endDate", endDate)
-
-                val itemRequirementResponse = sampleRequirementResponse.deepCopy()
-                itemRequirementResponse.putAttribute("value", "SAMPLE_ANSWER")
-                    .putAttribute("id", SECOND_ID)
-                    .getObject("requirement")
-                    .putAttribute("id", itemRequirementId)
 
                 val tenderRequirementResponse = requestNode.getObject("bid")
                     .getArray("requirementResponses").get(1).toObjectNode()
                     .putAttribute("id", FIRST_ID)
 
+                val startDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().plusMonths(3))
+                val endDate = JsonDateTimeSerializer.serialize(LocalDateTime.now().minusMonths(3))
+                tenderRequirementResponse.getObject("period")
+                    .putAttribute("startDate", startDate)
+                    .putAttribute("endDate", endDate)
+
                 requestNode.getObject("bid")
                     .putArray("requirementResponses")
                     .putObject(tenderRequirementResponse)
-                    .putObject(lotRequirementResponse)
-                    .putObject(itemRequirementResponse)
 
                 val cnEntity = CnEntity(cpid = CPID, owner = "SOME_OWNER", jsonData = entity)
                 whenever(criteriaRepository.findBy(any()))
