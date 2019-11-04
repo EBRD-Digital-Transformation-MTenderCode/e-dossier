@@ -166,7 +166,7 @@ fun CheckResponsesData.checkDataTypeValue(createdCriteria: CreatedCriteria): Che
                     requirementDbDataType = requirement.dataType,
                     requirementResponse = requirementResponse
                 )
-            is RequirementRsValue.AsInteger -> if (requirement.dataType != RequirementDataType.INTEGER)
+            is RequirementRsValue.AsInteger -> if (requirement.dataType != RequirementDataType.INTEGER && requirement.dataType != RequirementDataType.NUMBER)
                 dataTypeMismatchException(
                     requirementResponseDatatype = requirementResponse.value,
                     requirementDbDataType = requirement.dataType,
