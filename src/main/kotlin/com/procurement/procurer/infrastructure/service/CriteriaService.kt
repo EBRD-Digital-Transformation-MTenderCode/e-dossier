@@ -26,6 +26,7 @@ import com.procurement.procurer.infrastructure.service.command.checkConversionRe
 import com.procurement.procurer.infrastructure.service.command.checkConversionRelation
 import com.procurement.procurer.infrastructure.service.command.checkConversionWithoutCriteria
 import com.procurement.procurer.infrastructure.service.command.checkCriteriaAndConversionAreRequired
+import com.procurement.procurer.infrastructure.service.command.checkCriteriaWithAwardCriteria
 import com.procurement.procurer.infrastructure.service.command.checkDataTypeValue
 import com.procurement.procurer.infrastructure.service.command.checkDatatypeCompliance
 import com.procurement.procurer.infrastructure.service.command.checkDateTime
@@ -79,6 +80,7 @@ class CriteriaService(
             .checkAwardCriteriaDetailsAreRequired()  // FReq-1.1.1.22
             .checkCriteriaAndConversionAreRequired() // FReq-1.1.1.23
             .checkCoefficientValueUniqueness()       // FReq-1.1.1.24
+            .checkCriteriaWithAwardCriteria()        // FReq-1.1.1.27
 
             .checkActualItemRelation()   // FReq-1.1.1.3
             .checkDatatypeCompliance()   // FReq-1.1.1.4

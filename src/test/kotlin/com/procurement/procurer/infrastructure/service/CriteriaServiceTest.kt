@@ -143,9 +143,17 @@ class CriteriaServiceTest {
             ) {
 
                 val requestNode = json.toNode()
-                requestNode.getObject("tender")
-                    .put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
+                val tenderNode = requestNode.getObject("tender")
+                val criteria = tenderNode.get("criteria").get(0) as ObjectNode
+                val tenderCriteria = criteria.deepCopy()
+                tenderCriteria.putAttribute("relatesTo", "tenderer")
+
+                tenderNode.put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
                     .remove("awardCriteriaDetails")
+
+                tenderNode.remove("conversions")
+                tenderNode.putArray("criteria")
+                    .add(tenderCriteria)
 
                 val cm = commandMessage(
                     CommandType.CHECK_CRITERIA,
@@ -166,9 +174,17 @@ class CriteriaServiceTest {
 
                 val requestNode = json.toNode()
 
-                requestNode.getObject("tender")
-                    .put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
+                val tenderNode = requestNode.getObject("tender")
+                val criteria = tenderNode.get("criteria").get(0) as ObjectNode
+                val tenderCriteria = criteria.deepCopy()
+                tenderCriteria.putAttribute("relatesTo", "tenderer")
+
+                tenderNode.put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
                     .put("awardCriteriaDetails", AwardCriteriaDetails.fromString(awardCriteriaDetails).value)
+                    .remove("conversions")
+                tenderNode.putArray("criteria")
+                    .add(tenderCriteria)
+
 
                 val cm = commandMessage(
                     CommandType.CHECK_CRITERIA,

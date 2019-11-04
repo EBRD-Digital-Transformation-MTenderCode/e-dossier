@@ -356,6 +356,31 @@ fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
     return this
 }
 
+fun CheckCriteriaData.checkCriteriaWithAwardCriteria(): CheckCriteriaData {
+    if (this.tender.criteria == null) return this
+
+    when (this.tender.awardCriteria) {
+        AwardCriteria.PRICE_ONLY -> {
+            if (this.tender.conversions != null) throw ErrorException(
+                error = ErrorType.INVALID_CONVERSION,
+                message = "For awardCriteria='priceOnly' conversion cannot be passed"
+            )
+
+            val nonTendererCriteria = this.tender.criteria.filter { it.relatesTo != CriteriaRelatesTo.TENDERER }
+            if (nonTendererCriteria.isNotEmpty()) throw ErrorException(
+                error = ErrorType.INVALID_CRITERIA,
+                message = "For awardCriteria='priceOnly' can be passed only criteria that relates to tenderer. " +
+                    "Non tenderer criteria ids: ${nonTendererCriteria.map { it.id }}"
+            )
+        }
+        AwardCriteria.COST_ONLY,
+        AwardCriteria.QUALITY_ONLY,
+        AwardCriteria.RATED_CRITERIA -> Unit
+    }
+
+    return this
+}
+
 fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
     fun mismatchDataTypeException(cv: CoefficientValue, rv: RequirementValue): Nothing =
         throw ErrorException(
