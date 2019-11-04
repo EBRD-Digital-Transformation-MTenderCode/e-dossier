@@ -37,7 +37,7 @@ fun CheckResponsesData.checkRequirementRelationRelevance(createdCriteria: Create
         .forEach { requirementRequest ->
             requirementsDb.find { it.id == requirementRequest.id } ?: throw ErrorException(
                 error = ErrorType.INVALID_REQUIREMENT_VALUE,
-                message = "No requirement founded  by passed id=${requirementRequest.id}. Ids from DB: ${requirementsDb.map { it.id }}"
+                message = "No requirement founded  by passed id=${requirementRequest.id}. "
             )
         }
 
