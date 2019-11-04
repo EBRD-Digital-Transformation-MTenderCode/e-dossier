@@ -109,6 +109,11 @@ class CriteriaService(
             .extractCreatedCriteria()
             .toData()
 
+        if (createdCriteria.criteria != null && request.bid.requirementResponses == null) throw ErrorException(
+            error = ErrorType.INVALID_REQUIREMENT_RESPONSE,
+            message = "No requirement responses found for requirement from criteria"
+        )
+
         request
             .toData()
             .checkRequirementRelationRelevance(createdCriteria) // FReq-1.2.1.1

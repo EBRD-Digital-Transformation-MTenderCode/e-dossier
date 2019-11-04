@@ -1308,7 +1308,8 @@ class CriteriaServiceTest {
 
             val cm = commandMessage(command = CommandType.CHECK_RESPONSES, data = requestNode)
 
-            assertDoesNotThrow { criteriaService.checkResponses(cm) }
+            val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+            assertEquals(ErrorType.INVALID_REQUIREMENT_RESPONSE, exception.error)
         }
 
         @Nested

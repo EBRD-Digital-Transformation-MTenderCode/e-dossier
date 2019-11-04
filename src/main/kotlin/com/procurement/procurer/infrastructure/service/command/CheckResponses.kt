@@ -19,8 +19,8 @@ fun CnEntity.extractCreatedCriteria(): CreatedCriteriaEntity {
 }
 
 fun CheckResponsesData.checkRequirementRelationRelevance(createdCriteria: CreatedCriteria): CheckResponsesData {
+    if (this.bid.requirementResponses.isEmpty() && createdCriteria.criteria == null) return this
 
-    if (this.bid.requirementResponses.isEmpty()) return this
     val requirementResponses = this.bid.requirementResponses
 
     val criteriaDb = createdCriteria.criteria ?: throw ErrorException(
@@ -46,7 +46,7 @@ fun CheckResponsesData.checkRequirementRelationRelevance(createdCriteria: Create
 
 fun CheckResponsesData.checkAnswerCompleteness(createdCriteria: CreatedCriteria): CheckResponsesData {
 
-    if (this.bid.requirementResponses.isEmpty()) return this
+    if (this.bid.requirementResponses.isEmpty() && createdCriteria.criteria == null) return this
     val requirementResponses = this.bid.requirementResponses
 
     val criteriaDb = createdCriteria.criteria ?: throw ErrorException(
@@ -134,7 +134,7 @@ fun CheckResponsesData.checkDataTypeValue(createdCriteria: CreatedCriteria): Che
             "ReqirementResponse.requirement.id=${requirementResponse.requirement.id}. "
     )
 
-    if (this.bid.requirementResponses.isEmpty()) return this
+    if (this.bid.requirementResponses.isEmpty() && createdCriteria.criteria == null) return this
     val requirementResponses = this.bid.requirementResponses
 
     val criteriaDb = createdCriteria.criteria ?: throw ErrorException(
