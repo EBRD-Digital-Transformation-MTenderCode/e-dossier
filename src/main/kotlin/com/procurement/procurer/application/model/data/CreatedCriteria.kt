@@ -1,5 +1,6 @@
 package com.procurement.procurer.application.model.data
 
+import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
@@ -9,6 +10,7 @@ import java.math.BigDecimal
 data class CreatedCriteria(
     val criteria: List<Criteria>?,
     val conversions: List<Conversion>?,
+    val awardCriteria: AwardCriteria,
     val awardCriteriaDetails: AwardCriteriaDetails?
 ) {
     data class Criteria(

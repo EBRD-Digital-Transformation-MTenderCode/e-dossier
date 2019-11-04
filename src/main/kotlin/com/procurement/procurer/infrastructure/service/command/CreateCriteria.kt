@@ -36,7 +36,7 @@ fun processCriteria(
 
     val requirementTempToPermanentIdRelation = mutableMapOf<String, String>()
 
-    val permanentCriteria = CreatedCriteria(
+    return CreatedCriteria(
         criteria = data.tender.criteria?.map { criteria ->
             CreatedCriteria.Criteria(
                 id = generationService.generatePermanentCriteriaId(),
@@ -82,11 +82,9 @@ fun processCriteria(
 
             )
         },
+        awardCriteria = data.tender.awardCriteria,
         awardCriteriaDetails = setAwardCriteriaDetails(data.tender.awardCriteria) ?: data.tender.awardCriteriaDetails
     )
-
-
-    return permanentCriteria
 }
 
 fun CreatedCriteria.toEntity(): CreatedCriteriaEntity {
@@ -124,6 +122,7 @@ fun CreatedCriteria.toEntity(): CreatedCriteriaEntity {
                 }
             )
         },
+        awardCriteria = this.awardCriteria,
         awardCriteriaDetails = this.awardCriteriaDetails
     )
 }

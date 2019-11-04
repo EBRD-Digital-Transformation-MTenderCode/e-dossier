@@ -11,6 +11,7 @@ import com.procurement.procurer.infrastructure.bind.criteria.RequirementDeserial
 import com.procurement.procurer.infrastructure.bind.criteria.RequirementSerializer
 import com.procurement.procurer.application.model.data.CoefficientValue
 import com.procurement.procurer.application.model.data.Requirement
+import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
@@ -25,6 +26,8 @@ data class CreatedCriteriaEntity(
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @field:JsonProperty("conversions") @param:JsonProperty("conversions") val conversions: List<Conversion>?,
+
+    @field:JsonProperty("awardCriteria") @param:JsonProperty("awardCriteria") val awardCriteria: AwardCriteria,
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @field:JsonProperty("awardCriteriaDetails") @param:JsonProperty("awardCriteriaDetails") val awardCriteriaDetails: AwardCriteriaDetails?

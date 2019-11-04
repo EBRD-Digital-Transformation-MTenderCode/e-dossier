@@ -165,6 +165,7 @@ fun CreatedCriteriaEntity.toData(): CreatedCriteria {
                 }
             )
         },
+        awardCriteria = this.awardCriteria,
         awardCriteriaDetails = this.awardCriteriaDetails
     )
 }
