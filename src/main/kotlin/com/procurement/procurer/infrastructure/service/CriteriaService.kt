@@ -71,7 +71,7 @@ class CriteriaService(
     }
 
     fun checkCriteria(cm: CommandMessage): ResponseDto {
-        val request = medeiaValidationService.validateViaJsonSchema(cm)
+        val request = medeiaValidationService.validateCriteria(cm)
 
         request
             .toData()
@@ -99,7 +99,7 @@ class CriteriaService(
     }
 
     fun checkResponses(cm: CommandMessage): ResponseDto {
-        val request: CheckResponsesRequest = toObject(CheckResponsesRequest::class.java, cm.data)
+        val request = medeiaValidationService.validateResponses(cm)
         val context = context(cm)
         val cnEntity = criteriaRepository.findBy(context.cpid) ?: throw ErrorException(
             error = ErrorType.ENTITY_NOT_FOUND,
