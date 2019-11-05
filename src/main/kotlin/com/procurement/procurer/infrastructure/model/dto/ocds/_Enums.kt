@@ -78,9 +78,7 @@ enum class CriteriaRelatesTo(@JsonValue val value: String) {
 }
 
 enum class ConversionsRelatesTo(@JsonValue val value: String) {
-    REQUIREMENT("requirement"),
-    OBSERVATION("observation"),
-    OPTION("option");
+    REQUIREMENT("requirement");
 
     override fun toString(): String {
         return this.value

@@ -564,9 +564,7 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
 fun CheckCriteriaData.checkConversionRelatesToEnum(): CheckCriteriaData {
     fun CheckCriteriaData.Tender.Conversion.validate() {
         when (this.relatesTo) {
-            ConversionsRelatesTo.REQUIREMENT,
-            ConversionsRelatesTo.OBSERVATION,
-            ConversionsRelatesTo.OPTION -> Unit
+            ConversionsRelatesTo.REQUIREMENT -> Unit
         }
     }
 
