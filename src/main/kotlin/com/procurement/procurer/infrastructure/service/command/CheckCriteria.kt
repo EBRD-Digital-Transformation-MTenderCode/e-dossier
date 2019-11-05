@@ -335,12 +335,11 @@ fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
     fun List<CheckCriteriaData.Tender.Conversion.Coefficient>.validateCoefficientValues() {
         when (this[0].value) {
             is CoefficientValue.AsBoolean,
-            is CoefficientValue.AsInteger -> {
-                val values = this.map { it.value }
-                if (values.toSet().size != values.size) uniquenessException(this)
-            }
+            is CoefficientValue.AsInteger,
             is CoefficientValue.AsNumber -> {
-                val values = this.map { it.value as CoefficientValue.AsNumber }.map { it.value }.map { it.stripTrailingZeros() }
+                val values = this.map {
+                    if (it.value is CoefficientValue.AsNumber) it.value.value.stripTrailingZeros() else it.value
+                }
                 if (values.toSet().size != values.size) uniquenessException(this)
             }
             is CoefficientValue.AsString -> Unit
