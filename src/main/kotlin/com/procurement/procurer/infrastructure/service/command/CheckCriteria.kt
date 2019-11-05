@@ -671,7 +671,7 @@ fun CheckCriteriaData.checkCriteriaAndConversionAreRequired(): CheckCriteriaData
             "${AwardCriteria.COST_ONLY}, " +
             "${AwardCriteria.QUALITY_ONLY}, " +
             "${AwardCriteria.RATED_CRITERIA}" +
-            "] && 'awardCriteriaDetails' in [${AwardCriteriaDetails.AUTOMATED} Criteria and Conversion are required] ' "
+            "] && 'awardCriteriaDetails' in [${AwardCriteriaDetails.AUTOMATED}] Criteria and Conversion are required. "
     )
 
     return this
