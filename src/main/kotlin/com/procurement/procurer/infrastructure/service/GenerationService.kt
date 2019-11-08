@@ -5,23 +5,23 @@ import java.util.*
 
 class GenerationService : Generable {
 
-    override fun generatePermanentCriteriaId(): String {
-        return UUID.randomUUID().toString()
+    override fun generatePermanentCriteriaId(): UUID {
+        return UUID.randomUUID()
     }
 
-    override fun generatePermanentRequirementGroupId(): String {
-        return UUID.randomUUID().toString()
+    override fun generatePermanentRequirementGroupId(): UUID {
+        return UUID.randomUUID()
     }
 
-    override fun generatePermanentRequirementId(): String {
-        return UUID.randomUUID().toString()
+    override fun generatePermanentRequirementId(): UUID {
+        return UUID.randomUUID()
     }
 
-    override fun generatePermanentConversionId(): String {
-        return UUID.randomUUID().toString()
+    override fun generatePermanentConversionId(): UUID {
+        return UUID.randomUUID()
     }
 
-    override fun generatePermanentCoefficientId(): String {
-        return UUID.randomUUID().toString()
+    override fun generatePermanentCoefficientId(): UUID {
+        return UUID.randomUUID()
     }
 }

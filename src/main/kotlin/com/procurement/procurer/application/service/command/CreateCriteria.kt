@@ -39,7 +39,7 @@ fun processCriteria(
     return CreatedCriteria(
         criteria = data.tender.criteria?.map { criteria ->
             CreatedCriteria.Criteria(
-                id = generationService.generatePermanentCriteriaId(),
+                id = generationService.generatePermanentCriteriaId().toString(),
                 title = criteria.title,
                 description = criteria.description,
                 relatesTo = criteria.relatesTo,
@@ -47,10 +47,10 @@ fun processCriteria(
                 source = defineSource(criteria),
                 requirementGroups = criteria.requirementGroups.map { rg ->
                     CreatedCriteria.Criteria.RequirementGroup(
-                        id = generationService.generatePermanentRequirementGroupId(),
+                        id = generationService.generatePermanentRequirementGroupId().toString(),
                         description = rg.description,
                         requirements = rg.requirements.map { requirement ->
-                            val permanentId = generationService.generatePermanentRequirementId()
+                            val permanentId = generationService.generatePermanentRequirementId().toString()
                             requirementTempToPermanentIdRelation.put(requirement.id, permanentId)
                             Requirement(
                                 id = permanentId,
@@ -67,14 +67,14 @@ fun processCriteria(
         },
         conversions = data.tender.conversions?.map { conversion ->
             CreatedCriteria.Conversion(
-                id = generationService.generatePermanentConversionId(),
+                id = generationService.generatePermanentConversionId().toString(),
                 description = conversion.description,
                 relatesTo = conversion.relatesTo,
                 relatedItem = replaceConversionRelation(conversion, requirementTempToPermanentIdRelation),
                 rationale = conversion.rationale,
                 coefficients = conversion.coefficients.map { coefficient ->
                     CreatedCriteria.Conversion.Coefficient(
-                        id = generationService.generatePermanentCoefficientId(),
+                        id = generationService.generatePermanentCoefficientId().toString(),
                         value = coefficient.value,
                         coefficient = coefficient.coefficient
                     )

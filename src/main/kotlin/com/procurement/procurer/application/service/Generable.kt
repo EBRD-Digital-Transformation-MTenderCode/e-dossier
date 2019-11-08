@@ -1,14 +1,16 @@
 package com.procurement.procurer.application.service
 
+import java.util.*
+
 interface Generable {
 
-    fun generatePermanentCriteriaId(): String
+    fun generatePermanentCriteriaId(): UUID
 
-    fun generatePermanentRequirementGroupId(): String
+    fun generatePermanentRequirementGroupId(): UUID
 
-    fun generatePermanentRequirementId(): String
+    fun generatePermanentRequirementId(): UUID
 
-    fun generatePermanentConversionId(): String
+    fun generatePermanentConversionId(): UUID
 
-    fun generatePermanentCoefficientId(): String
+    fun generatePermanentCoefficientId(): UUID
 }
