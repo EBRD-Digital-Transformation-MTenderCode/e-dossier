@@ -2,6 +2,7 @@ package com.procurement.procurer.application.service
 
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
+import com.procurement.procurer.application.model.data.ExpectedValue
 import com.procurement.procurer.application.repository.CriteriaRepository
 import com.procurement.procurer.application.service.context.GetCriteriaContext
 import com.procurement.procurer.infrastructure.converter.createResponseData
@@ -10,6 +11,9 @@ import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
 import com.procurement.procurer.application.model.data.GetCriteriaData
+import com.procurement.procurer.application.model.data.RequestsForEvPanelsData
+import com.procurement.procurer.application.model.data.Requirement
+import com.procurement.procurer.application.model.data.RequirementValue
 import com.procurement.procurer.application.service.command.checkActualItemRelation
 import com.procurement.procurer.application.service.command.checkAnswerCompleteness
 import com.procurement.procurer.application.service.command.checkAnsweredOnce
@@ -39,6 +43,9 @@ import com.procurement.procurer.application.service.command.extractCreatedCriter
 import com.procurement.procurer.application.service.command.generateCreateCriteriaResponse
 import com.procurement.procurer.application.service.command.processCriteria
 import com.procurement.procurer.application.service.command.toEntity
+import com.procurement.procurer.application.service.context.EvPanelsContext
+import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
+import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
 import com.procurement.procurer.infrastructure.utils.toObject
 
@@ -136,6 +143,33 @@ class CriteriaService(
                 .toData()
                 .let { createResponseData(it) }
         }
+    }
+
+    fun createRequestsForEvPanels(context: EvPanelsContext): RequestsForEvPanelsData {
+        return RequestsForEvPanelsData(
+            criteria = RequestsForEvPanelsData.Criteria(
+                id = generationService.generatePermanentCriteriaId(),
+                title = "",
+                description = "",
+                source = CriteriaSource.PROCURING_ENTITY,
+                requirementGroups = listOf(
+                    RequestsForEvPanelsData.Criteria.RequirementGroup(
+                        id = generationService.generatePermanentRequirementGroupId(),
+                        requirements = listOf(
+                            Requirement(
+                                id = generationService.generatePermanentRequirementId().toString(),
+                                title = "",
+                                dataType = RequirementDataType.BOOLEAN,
+                                value = ExpectedValue.of(false),
+                                period = null,
+                                description = null
+                            )
+                        )
+                    )
+                )
+
+            )
+        )
     }
 
     private fun context(cm: CommandMessage): ContextRequest {
