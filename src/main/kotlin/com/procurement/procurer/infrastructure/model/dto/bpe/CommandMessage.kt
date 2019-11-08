@@ -69,6 +69,20 @@ val CommandMessage.operationType: String
             message = "Missing the 'operationType' attribute in context."
         )
 
+val CommandMessage.country: String
+    get() = this.context.country
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'country' attribute in context."
+        )
+
+val CommandMessage.language: String
+    get() = this.context.language
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'language' attribute in context."
+        )
+
 data class Context @JsonCreator constructor(
     val operationId: String?,
     val requestId: String?,
@@ -94,7 +108,8 @@ enum class CommandType(private val value: String) {
     CHECK_CRITERIA("checkCriteria"),
     CREATE_CRITERIA("createCriteria"),
     CHECK_RESPONSES("checkResponses"),
-    GET_CRITERIA("getCriteria");
+    GET_CRITERIA("getCriteria"),
+    CREATE_REQUESTS_FOR_EV_PANELS("createRequestsForEvPanels");
 
     @JsonValue
     fun value(): String {
