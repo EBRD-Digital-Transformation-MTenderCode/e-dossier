@@ -49,7 +49,8 @@ enum class AwardCriteriaDetails(@JsonValue val value: String) {
 
 enum class CriteriaSource(@JsonValue val value: String) {
     TENDERER("tenderer"),
-    BUYER("buyer");
+    BUYER("buyer"),
+    PROCURING_ENTITY("procuringEntity");
 
     override fun toString(): String {
         return this.value
