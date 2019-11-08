@@ -63,6 +63,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
 import java.time.LocalDateTime
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = [ObjectMapperConfiguration::class])
@@ -1181,19 +1182,46 @@ class CriteriaServiceTest {
         @Test
         fun `full flow`() {
 
-            val expectedCriteriaIds = listOf("c-1-001", "c-2-002", "c-3-003")
-            val expectedRgIds = listOf("rg-1-001", "rg-2-002", "rg-3-003")
-            val expectedRequirementIds = listOf("r-1-001", "r-2-002", "r-3-003", "r-4-004", "r-5-005")
-            val expectedConversionIds = listOf("cnv-1-001", "cnv-2-002")
-            val expectedCoefficientIds = listOf("cfc-1-001", "cfc-2-002", "cfc-3-003", "cfc-4-004")
+            val expectedCriteriaIds = listOf(
+                UUID.fromString("112315a4-dc87-426f-8e8a-142b7eec1001"),
+                UUID.fromString("112315a4-dc87-426f-8e8a-142b7eec2002"),
+                UUID.fromString("112315a4-dc87-426f-8e8a-142b7eec3003")
+            )
 
-            whenever(generationService.generatePermanentCriteriaId().toString())
+            val expectedRgIds = listOf(
+                UUID.fromString("d6ed4efe-4aa4-42c4-9324-eed808d22dd1"),
+                UUID.fromString("d6ed4efe-4aa4-42c4-9324-eed808d22dd2"),
+                UUID.fromString("d6ed4efe-4aa4-42c4-9324-eed808d22dd3")
+            )
+
+            val expectedRequirementIds = listOf(
+                UUID.fromString("1a251e1d-1d6a-4944-a3ad-c2436eb2de51"),
+                UUID.fromString("1a251e1d-1d6a-4944-a3ad-c2436eb2de52"),
+                UUID.fromString("1a251e1d-1d6a-4944-a3ad-c2436eb2de53"),
+                UUID.fromString("1a251e1d-1d6a-4944-a3ad-c2436eb2de54"),
+                UUID.fromString("1a251e1d-1d6a-4944-a3ad-c2436eb2de55")
+            )
+
+            val expectedConversionIds = listOf(
+                UUID.fromString("8f6c268a-b1e4-4c12-a218-144dd1ba3881"),
+                UUID.fromString("8f6c268a-b1e4-4c12-a218-144dd1ba3882")
+            )
+
+
+            val expectedCoefficientIds = listOf(
+                UUID.fromString("099bc62e-2192-4c45-b5ed-8a840f9955b1"),
+                UUID.fromString("099bc62e-2192-4c45-b5ed-8a840f9955b2"),
+                UUID.fromString("099bc62e-2192-4c45-b5ed-8a840f9955b3"),
+                UUID.fromString("099bc62e-2192-4c45-b5ed-8a840f9955b4")
+            )
+
+            whenever(generationService.generatePermanentCriteriaId())
                 .thenReturn(expectedCriteriaIds[0], expectedCriteriaIds[1], expectedCriteriaIds[2])
 
-            whenever(generationService.generatePermanentRequirementGroupId().toString())
+            whenever(generationService.generatePermanentRequirementGroupId())
                 .thenReturn(expectedRgIds[0], expectedRgIds[1], expectedRgIds[2])
 
-            whenever(generationService.generatePermanentRequirementId().toString())
+            whenever(generationService.generatePermanentRequirementId())
                 .thenReturn(
                     expectedRequirementIds[0],
                     expectedRequirementIds[1],
@@ -1202,10 +1230,10 @@ class CriteriaServiceTest {
                     expectedRequirementIds[4]
                 )
 
-            whenever(generationService.generatePermanentConversionId().toString())
+            whenever(generationService.generatePermanentConversionId())
                 .thenReturn(expectedConversionIds[0], expectedConversionIds[1])
 
-            whenever(generationService.generatePermanentCoefficientId().toString())
+            whenever(generationService.generatePermanentCoefficientId())
                 .thenReturn(
                     expectedCoefficientIds[0],
                     expectedCoefficientIds[1],
@@ -1239,25 +1267,25 @@ class CriteriaServiceTest {
 
             val responseDto = response.data as CreateCriteriaResponse
 
-            val criteriaId = responseDto.criteria!!.map { it.id }
+            val criteriaId = responseDto.criteria!!.map { UUID.fromString(it.id) }
             assertEquals(expectedCriteriaIds, criteriaId)
 
             val requirementGroupsId = responseDto.criteria!!.flatMap { it.requirementGroups }
-                .map { it.id }
+                .map { UUID.fromString(it.id) }
             assertEquals(expectedRgIds, requirementGroupsId)
 
             val requirementsId = responseDto.criteria!!
                 .flatMap { it.requirementGroups }
                 .flatMap { it.requirements }
-                .map { it.id }
+                .map { UUID.fromString(it.id) }
 
             assertEquals(expectedRequirementIds, requirementsId)
 
-            val conversionsId = responseDto.conversions!!.map { it.id }
+            val conversionsId = responseDto.conversions!!.map { UUID.fromString(it.id) }
             assertEquals(expectedConversionIds, conversionsId)
 
             val coefficientId = responseDto.conversions!!.flatMap { it.coefficients }
-                .map { it.id }
+                .map { UUID.fromString(it.id) }
             assertEquals(expectedCoefficientIds, coefficientId)
 
             val criteriaSource = responseDto.criteria!![0].source
@@ -1273,7 +1301,7 @@ class CriteriaServiceTest {
                 .map { it.relatedItem }
 
             conversionRelations.forEach {
-                assertTrue(expectedRequirementIds.contains(it))
+                assertTrue(expectedRequirementIds.contains(UUID.fromString(it)))
             }
         }
     }
