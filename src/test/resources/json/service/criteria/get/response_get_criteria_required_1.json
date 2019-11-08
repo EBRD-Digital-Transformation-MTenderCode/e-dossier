@@ -1,0 +1,42 @@
+{
+  "awardCriteria": "priceOnly",
+  "awardCriteriaDetails": "manual",
+  "conversions": [
+    {
+      "id": "conversion-1557946336820",
+      "relatesTo": "requirement",
+      "relatedItem": "002-1-2",
+      "rationale": "Number of years for product guarantee",
+      "coefficients": [
+        {
+          "id": "coefficient-1557947503428",
+          "value": 1,
+          "coefficient": 1
+        },
+        {
+          "id": "coefficient-1557947503428",
+          "value": 2,
+          "coefficient": 0.85
+        },
+        {
+          "id": "coefficient-1557947503428",
+          "value": 3,
+          "coefficient": 0.7
+        }
+      ]
+    },
+    {
+      "id": "conversion-1557946336820",
+      "relatesTo": "requirement",
+      "relatedItem": "003-1-2",
+      "rationale": "Number of Google certified staff",
+      "coefficients": [
+        {
+          "id": "coefficient-1557947503428",
+          "value": 1,
+          "coefficient": 1
+        }
+      ]
+    }
+  ]
+}
