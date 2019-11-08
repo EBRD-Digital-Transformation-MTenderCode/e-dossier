@@ -1187,13 +1187,13 @@ class CriteriaServiceTest {
             val expectedConversionIds = listOf("cnv-1-001", "cnv-2-002")
             val expectedCoefficientIds = listOf("cfc-1-001", "cfc-2-002", "cfc-3-003", "cfc-4-004")
 
-            whenever(generationService.generatePermanentCriteriaId())
+            whenever(generationService.generatePermanentCriteriaId().toString())
                 .thenReturn(expectedCriteriaIds[0], expectedCriteriaIds[1], expectedCriteriaIds[2])
 
-            whenever(generationService.generatePermanentRequirementGroupId())
+            whenever(generationService.generatePermanentRequirementGroupId().toString())
                 .thenReturn(expectedRgIds[0], expectedRgIds[1], expectedRgIds[2])
 
-            whenever(generationService.generatePermanentRequirementId())
+            whenever(generationService.generatePermanentRequirementId().toString())
                 .thenReturn(
                     expectedRequirementIds[0],
                     expectedRequirementIds[1],
@@ -1202,10 +1202,10 @@ class CriteriaServiceTest {
                     expectedRequirementIds[4]
                 )
 
-            whenever(generationService.generatePermanentConversionId())
+            whenever(generationService.generatePermanentConversionId().toString())
                 .thenReturn(expectedConversionIds[0], expectedConversionIds[1])
 
-            whenever(generationService.generatePermanentCoefficientId())
+            whenever(generationService.generatePermanentCoefficientId().toString())
                 .thenReturn(
                     expectedCoefficientIds[0],
                     expectedCoefficientIds[1],
