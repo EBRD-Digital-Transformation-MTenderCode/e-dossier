@@ -1,12 +1,13 @@
-package com.procurement.procurer.infrastructure.service.command
+package com.procurement.procurer.application.service.command
 
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.model.entity.CnEntity
-import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.model.data.CreateCriteriaData
 import com.procurement.procurer.application.model.data.CreatedCriteria
 import com.procurement.procurer.application.model.data.Requirement
+import com.procurement.procurer.application.service.CriteriaService
+import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
@@ -14,7 +15,6 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelates
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
-import com.procurement.procurer.infrastructure.service.CriteriaService
 import com.procurement.procurer.infrastructure.utils.toJson
 
 fun processCriteria(

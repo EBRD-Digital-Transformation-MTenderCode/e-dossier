@@ -2,7 +2,7 @@ package com.procurement.procurer.infrastructure.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.procurer.application.repository.CriteriaRepository
-import com.procurement.procurer.infrastructure.service.CriteriaService
+import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.infrastructure.service.GenerationService
 import com.procurement.procurer.infrastructure.service.MedeiaValidationService
 import org.springframework.beans.factory.annotation.Autowired

@@ -93,7 +93,8 @@ enum class CommandType(private val value: String) {
 
     CHECK_CRITERIA("checkCriteria"),
     CREATE_CRITERIA("createCriteria"),
-    CHECK_RESPONSES("checkResponses");
+    CHECK_RESPONSES("checkResponses"),
+    GET_CRITERIA("getCriteria");
 
     @JsonValue
     fun value(): String {

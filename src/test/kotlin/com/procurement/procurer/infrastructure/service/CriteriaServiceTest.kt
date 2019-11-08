@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.JsonPath
 import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.clearInvocations
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
@@ -20,9 +19,9 @@ import com.procurement.procurer.application.model.data.CheckCriteriaData.Tender.
 import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.application.model.entity.CnEntity
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.JsonValidationService
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
@@ -63,7 +62,6 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
-import java.time.Clock
 import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

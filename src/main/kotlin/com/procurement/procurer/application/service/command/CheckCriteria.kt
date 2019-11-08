@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.service.command
+package com.procurement.procurer.application.service.command
 
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType

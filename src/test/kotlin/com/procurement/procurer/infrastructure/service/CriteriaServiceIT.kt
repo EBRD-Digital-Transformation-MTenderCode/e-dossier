@@ -13,6 +13,7 @@ import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
@@ -22,7 +23,6 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.repository.CassandraCriteriaRepository
 import com.procurement.procurer.infrastructure.repository.CassandraTestContainer
-import com.procurement.procurer.infrastructure.utils.toJson
 import com.procurement.procurer.json.getObject
 import com.procurement.procurer.json.loadJson
 import com.procurement.procurer.json.toNode

@@ -1,45 +1,45 @@
-package com.procurement.procurer.infrastructure.service
+package com.procurement.procurer.application.service
 
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.repository.CriteriaRepository
-import com.procurement.procurer.application.service.Generable
-import com.procurement.procurer.application.service.JsonValidationService
+import com.procurement.procurer.application.service.context.GetCriteriaContext
+import com.procurement.procurer.infrastructure.converter.createResponseData
+import com.procurement.procurer.infrastructure.converter.toData
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesRequest
 import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
-import com.procurement.procurer.infrastructure.model.dto.cn.toData
+import com.procurement.procurer.application.model.data.GetCriteriaData
+import com.procurement.procurer.application.service.command.checkActualItemRelation
+import com.procurement.procurer.application.service.command.checkAnswerCompleteness
+import com.procurement.procurer.application.service.command.checkAnsweredOnce
+import com.procurement.procurer.application.service.command.checkArrays
+import com.procurement.procurer.application.service.command.checkAwardCriteriaDetailsAreRequired
+import com.procurement.procurer.application.service.command.checkAwardCriteriaDetailsEnum
+import com.procurement.procurer.application.service.command.checkAwardCriteriaEnum
+import com.procurement.procurer.application.service.command.checkCastCoefficient
+import com.procurement.procurer.application.service.command.checkCoefficient
+import com.procurement.procurer.application.service.command.checkCoefficientDataType
+import com.procurement.procurer.application.service.command.checkCoefficientValueUniqueness
+import com.procurement.procurer.application.service.command.checkConversionRelatesToEnum
+import com.procurement.procurer.application.service.command.checkConversionRelation
+import com.procurement.procurer.application.service.command.checkConversionWithoutCriteria
+import com.procurement.procurer.application.service.command.checkCriteriaAndConversionAreRequired
+import com.procurement.procurer.application.service.command.checkCriteriaWithAwardCriteria
+import com.procurement.procurer.application.service.command.checkDataTypeValue
+import com.procurement.procurer.application.service.command.checkDatatypeCompliance
+import com.procurement.procurer.application.service.command.checkDateTime
+import com.procurement.procurer.application.service.command.checkIdsUniqueness
+import com.procurement.procurer.application.service.command.checkMinMaxValue
+import com.procurement.procurer.application.service.command.checkPeriod
+import com.procurement.procurer.application.service.command.checkRequirementRelationRelevance
+import com.procurement.procurer.application.service.command.checkRequirements
+import com.procurement.procurer.application.service.command.createCnEntity
+import com.procurement.procurer.application.service.command.extractCreatedCriteria
+import com.procurement.procurer.application.service.command.generateCreateCriteriaResponse
+import com.procurement.procurer.application.service.command.processCriteria
+import com.procurement.procurer.application.service.command.toEntity
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
-import com.procurement.procurer.infrastructure.service.command.checkActualItemRelation
-import com.procurement.procurer.infrastructure.service.command.checkAnswerCompleteness
-import com.procurement.procurer.infrastructure.service.command.checkAnsweredOnce
-import com.procurement.procurer.infrastructure.service.command.checkArrays
-import com.procurement.procurer.infrastructure.service.command.checkAwardCriteriaDetailsAreRequired
-import com.procurement.procurer.infrastructure.service.command.checkAwardCriteriaDetailsEnum
-import com.procurement.procurer.infrastructure.service.command.checkAwardCriteriaEnum
-import com.procurement.procurer.infrastructure.service.command.checkCastCoefficient
-import com.procurement.procurer.infrastructure.service.command.checkCoefficient
-import com.procurement.procurer.infrastructure.service.command.checkCoefficientDataType
-import com.procurement.procurer.infrastructure.service.command.checkCoefficientValueUniqueness
-import com.procurement.procurer.infrastructure.service.command.checkConversionRelatesToEnum
-import com.procurement.procurer.infrastructure.service.command.checkConversionRelation
-import com.procurement.procurer.infrastructure.service.command.checkConversionWithoutCriteria
-import com.procurement.procurer.infrastructure.service.command.checkCriteriaAndConversionAreRequired
-import com.procurement.procurer.infrastructure.service.command.checkCriteriaWithAwardCriteria
-import com.procurement.procurer.infrastructure.service.command.checkDataTypeValue
-import com.procurement.procurer.infrastructure.service.command.checkDatatypeCompliance
-import com.procurement.procurer.infrastructure.service.command.checkDateTime
-import com.procurement.procurer.infrastructure.service.command.checkIdsUniqueness
-import com.procurement.procurer.infrastructure.service.command.checkMinMaxValue
-import com.procurement.procurer.infrastructure.service.command.checkPeriod
-import com.procurement.procurer.infrastructure.service.command.checkRequirementRelationRelevance
-import com.procurement.procurer.infrastructure.service.command.checkRequirements
-import com.procurement.procurer.infrastructure.service.command.createCnEntity
-import com.procurement.procurer.infrastructure.service.command.extractCreatedCriteria
-import com.procurement.procurer.infrastructure.service.command.generateCreateCriteriaResponse
-import com.procurement.procurer.infrastructure.service.command.processCriteria
-import com.procurement.procurer.infrastructure.service.command.toEntity
 import com.procurement.procurer.infrastructure.utils.toObject
 
 class CriteriaService(
@@ -66,7 +66,9 @@ class CriteriaService(
         criteriaRepository.save(cn)
 
         val cnResponse = toObject(CreatedCriteriaEntity::class.java, cn.jsonData)
-        val responseData = generateCreateCriteriaResponse(cnResponse)
+        val responseData = generateCreateCriteriaResponse(
+            cnResponse
+        )
 
         return ResponseDto(id = cm.id, data = responseData)
     }
@@ -126,6 +128,14 @@ class CriteriaService(
             .checkIdsUniqueness()                               // FReq-1.2.1.6
 
         return ResponseDto(data = "ok")
+    }
+
+    fun getCriteriaDetails(context: GetCriteriaContext): GetCriteriaData? {
+        return criteriaRepository.findBy(context.cpid)?.let { cnEntity ->
+            cnEntity.extractCreatedCriteria()
+                .toData()
+                .let { createResponseData(it) }
+        }
     }
 
     private fun context(cm: CommandMessage): ContextRequest {

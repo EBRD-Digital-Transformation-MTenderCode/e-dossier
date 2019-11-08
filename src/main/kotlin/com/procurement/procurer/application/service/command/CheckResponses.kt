@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.service.command
+package com.procurement.procurer.application.service.command
 
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
@@ -6,7 +6,7 @@ import com.procurement.procurer.application.model.data.CreatedCriteria
 import com.procurement.procurer.application.model.data.RequirementRsValue
 import com.procurement.procurer.application.model.entity.CnEntity
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesData
+import com.procurement.procurer.application.model.data.CheckResponsesData
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity

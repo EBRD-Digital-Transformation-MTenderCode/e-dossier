@@ -11,7 +11,7 @@ import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
 import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
-import com.procurement.procurer.infrastructure.service.CriteriaService
+import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.infrastructure.service.MedeiaValidationService
 import com.procurement.procurer.json.exception.JsonBindingException
 import com.procurement.procurer.json.loadJson

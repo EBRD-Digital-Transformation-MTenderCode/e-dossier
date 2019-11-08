@@ -1,6 +1,5 @@
-package com.procurement.procurer.infrastructure.model.dto.cn
+package com.procurement.procurer.application.model.data
 
-import com.procurement.procurer.application.model.data.RequirementRsValue
 import java.time.LocalDateTime
 
 data class CheckResponsesData(
