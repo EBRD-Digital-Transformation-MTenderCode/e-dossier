@@ -5,7 +5,6 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetai
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
-import java.math.BigDecimal
 
 data class CreatedCriteria(
     val criteria: List<Criteria>?,
@@ -40,7 +39,7 @@ data class CreatedCriteria(
         data class Coefficient(
             val id: String,
             val value: CoefficientValue,
-            val coefficient: BigDecimal
+            val coefficient: CoefficientRate
         )
     }
 }

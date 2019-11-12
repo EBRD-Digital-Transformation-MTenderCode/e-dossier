@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.procurer.application.model.data.CoefficientValue
 import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.infrastructure.bind.coefficient.CoefficientValueDeserializer
-import com.procurement.procurer.infrastructure.bind.coefficient.CoefficientValueSerializer
+import com.procurement.procurer.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
+import com.procurement.procurer.infrastructure.bind.coefficient.value.CoefficientValueSerializer
 import com.procurement.procurer.infrastructure.bind.criteria.RequirementDeserializer
 import com.procurement.procurer.infrastructure.bind.criteria.RequirementSerializer
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
