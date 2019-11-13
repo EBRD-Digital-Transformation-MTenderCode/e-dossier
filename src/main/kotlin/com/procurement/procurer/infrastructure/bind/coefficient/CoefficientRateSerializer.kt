@@ -10,8 +10,7 @@ import java.math.BigDecimal
 
 class CoefficientRateSerializer : JsonSerializer<CoefficientRate>() {
     companion object {
-        fun serialize(CoefficientRate: CoefficientRate.AsNumber): BigDecimal = CoefficientRate.value
-        fun serialize(CoefficientRate: CoefficientRate.AsInteger): Long = CoefficientRate.value
+        fun serialize(CoefficientRate: CoefficientRate): BigDecimal = CoefficientRate.rate
     }
 
     @Throws(IOException::class, JsonProcessingException::class)
@@ -19,9 +18,12 @@ class CoefficientRateSerializer : JsonSerializer<CoefficientRate>() {
         CoefficientRate: CoefficientRate,
         jsonGenerator: JsonGenerator,
         provider: SerializerProvider
-    ) =
-        when (CoefficientRate) {
-            is CoefficientRate.AsNumber -> jsonGenerator.writeNumber(serialize(CoefficientRate))
-            is CoefficientRate.AsInteger -> jsonGenerator.writeNumber(serialize(CoefficientRate))
+    ) {
+        val coefficient = serialize(CoefficientRate)
+        if (coefficient.stripTrailingZeros().scale() == 0) {
+            jsonGenerator.writeNumber(coefficient.longValueExact())
+        } else {
+            jsonGenerator.writeNumber(coefficient)
         }
+    }
 }

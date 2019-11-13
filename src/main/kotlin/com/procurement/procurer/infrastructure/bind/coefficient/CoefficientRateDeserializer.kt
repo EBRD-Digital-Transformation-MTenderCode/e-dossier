@@ -12,14 +12,13 @@ import java.math.BigDecimal
 
 class CoefficientRateDeserializer : JsonDeserializer<CoefficientRate>() {
     companion object {
-        fun deserialize(value: BigDecimal): CoefficientRate = CoefficientRate.AsNumber(value)
-        fun deserialize(value: Long): CoefficientRate = CoefficientRate.AsInteger(value)
+        fun deserialize(value: BigDecimal): CoefficientRate = CoefficientRate(rate = value)
     }
 
     @Throws(IOException::class, JsonProcessingException::class)
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): CoefficientRate {
         return when (jsonParser.currentToken) {
-            JsonToken.VALUE_NUMBER_INT   -> deserialize(jsonParser.longValue)
+            JsonToken.VALUE_NUMBER_INT,
             JsonToken.VALUE_NUMBER_FLOAT -> deserialize(BigDecimal(jsonParser.text))
             else                         -> throw CoefficientException(
                 coefficient = jsonParser.text,

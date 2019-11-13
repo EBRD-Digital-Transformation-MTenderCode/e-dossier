@@ -304,7 +304,7 @@ fun CheckCriteriaData.checkCoefficient(): CheckCriteriaData {
     val COEFFICIENT_MAX = 1.toBigDecimal()
 
     fun CheckCriteriaData.Tender.Conversion.Coefficient.validateCoefficientRate() {
-        if (this.coefficient < COEFFICIENT_MIN || this.coefficient > COEFFICIENT_MAX)
+        if (this.coefficient.rate < COEFFICIENT_MIN || this.coefficient.rate > COEFFICIENT_MAX)
             throw ErrorException(
                 ErrorType.INVALID_CONVERSION,
                 message = "Conversion coefficient rate (${this.coefficient}) does not satisfy the conditions: " +
@@ -537,7 +537,7 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
         }
 
         val castCoefficient = (tenderConversions + lotConversions + itemConversions)
-            .map { conversion -> BigDecimal(1) - conversion.coefficients.minBy { it.coefficient }!!.coefficient }
+            .map { conversion -> BigDecimal(1) - conversion.coefficients.minBy { it.coefficient.rate }!!.coefficient.rate }
             .fold(BigDecimal.ZERO, BigDecimal::add)
 
         val mainProcurementCategory = this.mainProcurementCategory
