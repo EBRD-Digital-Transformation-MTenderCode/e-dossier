@@ -103,10 +103,13 @@ class CriteriaService(
     fun checkResponses(cm: CommandMessage): ResponseDto {
         val request = medeiaValidationService.validateResponses(cm)
         val context = context(cm)
-        val cnEntity = criteriaRepository.findBy(context.cpid) ?: throw ErrorException(
-            error = ErrorType.ENTITY_NOT_FOUND,
-            message = "Cannot found record with cpid=${context.cpid}."
-        )
+        val cnEntity = criteriaRepository.findBy(context.cpid) ?: let {
+            if (request.bid.requirementResponses != null) throw ErrorException(
+                error = ErrorType.ENTITY_NOT_FOUND,
+                message = "RequirementResponses were sent but record with cpid=${context.cpid} not found."
+            ) else return ResponseDto(data = "ok")
+        }
+
         val createdCriteria = cnEntity
             .extractCreatedCriteria()
             .toData()
