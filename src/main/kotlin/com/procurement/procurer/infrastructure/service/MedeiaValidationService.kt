@@ -12,7 +12,6 @@ import com.procurement.procurer.infrastructure.utils.toJson
 import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
-import java.lang.Exception
 
 class MedeiaValidationService(
     private val objectMapper: ObjectMapper
@@ -28,7 +27,11 @@ class MedeiaValidationService(
     override fun validateCriteria(cm: CommandMessage): CheckCriteriaRequest =
         try {
             val unvalidatedParser = objectMapper.factory.createParser(toJson(cm.data))
-            val validatedParser = api.decorateJsonParser(criteriaValidator, unvalidatedParser)
+            val decoratedParser = api.decorateJsonParser(criteriaValidator, unvalidatedParser)
+
+            /* ¯╰( ´・ω・)つ──☆ ✿✿✿ */ api.parseAll(decoratedParser) /* ✿✿✿  */
+
+            val validatedParser = objectMapper.factory.createParser(toJson(cm.data))
             objectMapper.readValue(validatedParser, CheckCriteriaRequest::class.java)
         } catch (exception: Exception) {
             errorHandling(exception)
@@ -37,7 +40,11 @@ class MedeiaValidationService(
     override fun validateResponses(cm: CommandMessage): CheckResponsesRequest =
         try {
             val unvalidatedParser = objectMapper.factory.createParser(toJson(cm.data))
-            val validatedParser = api.decorateJsonParser(responsesValidator, unvalidatedParser)
+            val decoratedParser = api.decorateJsonParser(responsesValidator, unvalidatedParser)
+
+            api.parseAll(decoratedParser)
+
+            val validatedParser = objectMapper.factory.createParser(toJson(cm.data))
             objectMapper.readValue(validatedParser, CheckResponsesRequest::class.java)
         } catch (exception: Exception) {
             errorHandling(exception)

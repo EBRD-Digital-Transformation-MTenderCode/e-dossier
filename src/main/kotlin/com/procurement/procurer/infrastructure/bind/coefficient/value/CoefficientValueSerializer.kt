@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.bind.coefficient
+package com.procurement.procurer.infrastructure.bind.coefficient.value
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -22,9 +22,25 @@ class CoefficientValueSerializer : JsonSerializer<CoefficientValue>() {
         provider: SerializerProvider
     ) =
         when (coefficientValue) {
-            is CoefficientValue.AsString  -> jsonGenerator.writeString(serialize(coefficientValue))
-            is CoefficientValue.AsNumber  -> jsonGenerator.writeNumber(serialize(coefficientValue))
-            is CoefficientValue.AsBoolean -> jsonGenerator.writeBoolean(serialize(coefficientValue))
-            is CoefficientValue.AsInteger -> jsonGenerator.writeNumber(serialize(coefficientValue))
+            is CoefficientValue.AsString  -> jsonGenerator.writeString(
+                serialize(
+                    coefficientValue
+                )
+            )
+            is CoefficientValue.AsNumber  -> jsonGenerator.writeNumber(
+                serialize(
+                    coefficientValue
+                )
+            )
+            is CoefficientValue.AsBoolean -> jsonGenerator.writeBoolean(
+                serialize(
+                    coefficientValue
+                )
+            )
+            is CoefficientValue.AsInteger -> jsonGenerator.writeNumber(
+                serialize(
+                    coefficientValue
+                )
+            )
         }
 }

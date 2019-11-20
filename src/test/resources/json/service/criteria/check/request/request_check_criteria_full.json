@@ -160,73 +160,73 @@
         "description": "tender.conversions[0].description",
         "coefficients": [
           {
-            "id": "coefficient-1557947503428",
+            "id": "coefficient-1557947503421",
             "value": 1.010,
             "coefficient": 1
           },
           {
-            "id": "coefficient-1557947503428",
+            "id": "coefficient-1557947503422",
             "value": 2.010,
             "coefficient": 0.85
           },
           {
-            "id": "coefficient-1557947503428",
+            "id": "coefficient-1557947503423",
             "value": 3.010,
             "coefficient": 0.7
           }
         ]
       },
       {
-        "id": "conversion-1557946336820",
+        "id": "conversion-1557946336821",
         "relatesTo": "requirement",
         "relatedItem": "003-1-2",
         "rationale": "Number of Google certified staff",
         "description": "tender.conversions[1].description",
         "coefficients": [
           {
-            "id": "coefficient-1557947503428",
+            "id": "coefficient-1557947503421",
             "value": "Ukraine",
             "coefficient": 1
           }
         ]
       },
       {
-        "id": "conversion-1557946336820",
+        "id": "conversion-1557946336822",
         "relatesTo": "requirement",
         "relatedItem": "974c8196-9d1c-419c-9ca9-45bb9f5fd59a",
         "rationale": "Number of Google certified staff",
         "description": "tender.conversions[1].description",
         "coefficients": [
           {
-            "id": "coefficient-1557947503428",
+            "id": "coefficient-1557947503421",
             "value": false,
             "coefficient": 0.8
           }
         ]
       },
       {
-        "id": "conversion-1557946336820",
+        "id": "conversion-1557946336823",
         "relatesTo": "requirement",
         "relatedItem": "004-1-1",
         "rationale": "Number of Google certified staff",
         "description": "tender.conversions[1].description",
         "coefficients": [
           {
-            "id": "coefficient-1557947503428",
+            "id": "coefficient-1557947503421",
             "value": 25,
             "coefficient": 0.9
           }
         ]
       },
       {
-        "id": "conversion-1557946336820",
+        "id": "conversion-1557946336824",
         "relatesTo": "requirement",
         "relatedItem": "005-1-1",
         "rationale": "Number of Google certified staff",
         "description": "tender.conversions[1].description",
         "coefficients": [
           {
-            "id": "coefficient-1557947503428",
+            "id": "coefficient-1557947503421",
             "value": 25,
             "coefficient": 0.75
           }

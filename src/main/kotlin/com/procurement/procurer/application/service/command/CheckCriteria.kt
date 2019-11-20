@@ -1,5 +1,6 @@
 package com.procurement.procurer.application.service.command
 
+import com.procurement.access.lib.toSetBy
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.model.data.CheckCriteriaData
@@ -304,7 +305,7 @@ fun CheckCriteriaData.checkCoefficient(): CheckCriteriaData {
     val COEFFICIENT_MAX = 1.toBigDecimal()
 
     fun CheckCriteriaData.Tender.Conversion.Coefficient.validateCoefficientRate() {
-        if (this.coefficient < COEFFICIENT_MIN || this.coefficient > COEFFICIENT_MAX)
+        if (this.coefficient.rate < COEFFICIENT_MIN || this.coefficient.rate > COEFFICIENT_MAX)
             throw ErrorException(
                 ErrorType.INVALID_CONVERSION,
                 message = "Conversion coefficient rate (${this.coefficient}) does not satisfy the conditions: " +
@@ -537,7 +538,7 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
         }
 
         val castCoefficient = (tenderConversions + lotConversions + itemConversions)
-            .map { conversion -> BigDecimal(1) - conversion.coefficients.minBy { it.coefficient }!!.coefficient }
+            .map { conversion -> BigDecimal(1) - conversion.coefficients.minBy { it.coefficient.rate }!!.coefficient.rate }
             .fold(BigDecimal.ZERO, BigDecimal::add)
 
         val mainProcurementCategory = this.mainProcurementCategory
@@ -598,24 +599,63 @@ fun CheckCriteriaData.checkAwardCriteriaDetailsEnum(): CheckCriteriaData {
     return this
 }
 
+
+inline fun <reified T,R> List<T>.validateUniqueness(uniques: Set<R>) {
+    if (this.size != uniques.size) throw ErrorException(
+        error = ErrorType.NOT_UNIQUE_IDS,
+        message = "All elements in ${T::class.java.simpleName} arrays in json must be unique by id"
+    )
+}
+
+inline fun <reified T> List<T>.validateNotEmpty() {
+    if (this.isEmpty()) throw ErrorException(
+        error = ErrorType.EMPTY_LIST,
+        message = "All arrays of '${T::class.java.simpleName}' in json must have at least one object have to be added "
+    )
+}
+
 fun CheckCriteriaData.checkArrays(): CheckCriteriaData {
-    fun List<Any>.validate() {
-        if (this.size < 1) throw ErrorException(
-            ErrorType.INVALID_CONVERSION,
-            message = "All arrays in json must have at least one object have to be added "
-        )
-    }
 
     val tender = this.tender
 
-    this.items.validate()
+    this.items.apply {
+        validateNotEmpty()
+        validateUniqueness(uniques = items.toSetBy { it.id })
+    }
 
-    tender.criteria?.validate()
-    tender.criteria?.forEach { it.requirementGroups.validate() }
-    tender.criteria?.forEach { it.requirementGroups.forEach { it.requirements.validate() } }
+    tender.criteria?.let { criterias ->
+        criterias.apply {
+            validateNotEmpty()
+            validateUniqueness(uniques = criterias.toSetBy { it.id })
+        }
+        criterias.forEach { criteria ->
+            criteria.requirementGroups.apply {
+                validateNotEmpty()
+                validateUniqueness(uniques = criteria.requirementGroups.toSetBy { it.id })
+            }
 
-    tender.conversions?.validate()
-    tender.conversions?.forEach { it.coefficients.validate() }
+            criteria.requirementGroups.forEach { requirementGroup ->
+                requirementGroup.requirements.apply {
+                    validateNotEmpty()
+                    validateUniqueness(uniques = requirementGroup.requirements.toSetBy { it.id })
+                }
+            }
+        }
+    }
+
+    tender.conversions?.let { conversions ->
+        conversions.apply {
+            validateNotEmpty()
+            validateUniqueness(uniques = conversions.toSetBy { it.id })
+        }
+
+        conversions.forEach {conversion ->
+            conversion.coefficients.apply {
+                validateNotEmpty()
+                validateUniqueness(uniques = conversion.coefficients.toSetBy { it.id })
+            }
+        }
+    }
 
     return this
 }

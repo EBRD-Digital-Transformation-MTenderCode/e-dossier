@@ -5,7 +5,6 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetai
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.MainProcurementCategory
-import java.math.BigDecimal
 
 data class CheckCriteriaData(
     val tender: Tender,
@@ -50,7 +49,7 @@ data class CheckCriteriaData(
             data class Coefficient(
                 val id: String,
                 val value: CoefficientValue,
-                val coefficient: BigDecimal
+                val coefficient: CoefficientRate
             )
         }
     }

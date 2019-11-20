@@ -41,7 +41,7 @@ data class CreateCriteriaData(
             data class Coefficient(
                 val id: String,
                 val value: CoefficientValue,
-                val coefficient: BigDecimal
+                val coefficient: CoefficientRate
             )
         }
     }

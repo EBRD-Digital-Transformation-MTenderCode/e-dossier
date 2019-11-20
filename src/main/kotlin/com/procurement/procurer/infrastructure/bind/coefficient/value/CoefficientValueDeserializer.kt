@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.bind.coefficient
+package com.procurement.procurer.infrastructure.bind.coefficient.value
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -21,11 +21,21 @@ class CoefficientValueDeserializer : JsonDeserializer<CoefficientValue>() {
     @Throws(IOException::class, JsonProcessingException::class)
     override fun deserialize(jsonParser: JsonParser, deserializationContext: DeserializationContext): CoefficientValue {
         return when (jsonParser.currentToken) {
-            JsonToken.VALUE_STRING       -> deserialize(jsonParser.text)
-            JsonToken.VALUE_FALSE        -> deserialize(false)
-            JsonToken.VALUE_TRUE         -> deserialize(true)
-            JsonToken.VALUE_NUMBER_INT   -> deserialize(jsonParser.longValue)
-            JsonToken.VALUE_NUMBER_FLOAT -> deserialize(BigDecimal(jsonParser.text))
+            JsonToken.VALUE_STRING       -> deserialize(
+                jsonParser.text
+            )
+            JsonToken.VALUE_FALSE        -> deserialize(
+                false
+            )
+            JsonToken.VALUE_TRUE         -> deserialize(
+                true
+            )
+            JsonToken.VALUE_NUMBER_INT   -> deserialize(
+                jsonParser.longValue
+            )
+            JsonToken.VALUE_NUMBER_FLOAT -> deserialize(
+                BigDecimal(jsonParser.text)
+            )
             else                         -> throw CoefficientValueException(
                 coefficientValue = jsonParser.text,
                 description = "Invalid type"
