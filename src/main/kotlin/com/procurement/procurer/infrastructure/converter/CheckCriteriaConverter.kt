@@ -1,7 +1,7 @@
 package com.procurement.procurer.infrastructure.converter
 
 import com.procurement.procurer.application.model.data.CheckCriteriaData
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CheckCriteriaRequest
 
 fun CheckCriteriaRequest.toData(): CheckCriteriaData {
     return CheckCriteriaData(

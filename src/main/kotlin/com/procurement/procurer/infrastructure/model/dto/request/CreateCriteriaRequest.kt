@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.model.dto.cn
+package com.procurement.procurer.infrastructure.model.dto.request
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude

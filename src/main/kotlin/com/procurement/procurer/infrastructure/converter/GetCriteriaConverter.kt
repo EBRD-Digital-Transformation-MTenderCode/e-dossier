@@ -2,7 +2,7 @@ package com.procurement.procurer.infrastructure.converter
 
 import com.procurement.procurer.application.model.data.CreatedCriteria
 import com.procurement.procurer.application.model.data.GetCriteriaData
-import com.procurement.procurer.infrastructure.model.dto.cn.GetCriteriaResponse
+import com.procurement.procurer.infrastructure.model.dto.response.GetCriteriaResponse
 
 fun createResponseData(createdCriteria: CreatedCriteria): GetCriteriaData {
     return GetCriteriaData(

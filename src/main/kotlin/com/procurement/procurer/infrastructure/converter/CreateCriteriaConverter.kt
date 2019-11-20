@@ -2,7 +2,7 @@ package com.procurement.procurer.infrastructure.converter
 
 import com.procurement.procurer.application.model.data.CreateCriteriaData
 import com.procurement.procurer.application.model.data.CreatedCriteria
-import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
 
 fun CreateCriteriaRequest.toData(): CreateCriteriaData {

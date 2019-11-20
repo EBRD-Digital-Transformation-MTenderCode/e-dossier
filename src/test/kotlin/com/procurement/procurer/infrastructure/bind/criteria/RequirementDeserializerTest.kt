@@ -10,7 +10,7 @@ import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CheckCriteriaRequest
 import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.infrastructure.service.MedeiaValidationService
 import com.procurement.procurer.json.exception.JsonBindingException
@@ -27,7 +27,8 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = [ObjectMapperConfiguration::class])
-class RequirementDeserializerTest: AbstractDTOTestBase<CheckCriteriaRequest>(CheckCriteriaRequest::class.java) {
+class RequirementDeserializerTest: AbstractDTOTestBase<CheckCriteriaRequest>(
+    CheckCriteriaRequest::class.java) {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper

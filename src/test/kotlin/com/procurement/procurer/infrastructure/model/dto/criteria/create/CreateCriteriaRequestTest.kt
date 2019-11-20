@@ -1,10 +1,11 @@
 package com.procurement.procurer.infrastructure.model.dto.criteria.create
 
 import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
 import org.junit.jupiter.api.Test
 
-class CreateCriteriaRequestTest : AbstractDTOTestBase<CreateCriteriaRequest>(CreateCriteriaRequest::class.java) {
+class CreateCriteriaRequestTest : AbstractDTOTestBase<CreateCriteriaRequest>(
+    CreateCriteriaRequest::class.java) {
 
     @Test
     fun fully() {

@@ -9,11 +9,10 @@ import com.procurement.procurer.infrastructure.converter.createResponseData
 import com.procurement.procurer.infrastructure.converter.toData
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
-import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
 import com.procurement.procurer.application.model.data.GetCriteriaData
 import com.procurement.procurer.application.model.data.RequestsForEvPanelsData
 import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.application.model.data.RequirementValue
 import com.procurement.procurer.application.service.command.checkActualItemRelation
 import com.procurement.procurer.application.service.command.checkAnswerCompleteness
 import com.procurement.procurer.application.service.command.checkAnsweredOnce
@@ -43,6 +42,8 @@ import com.procurement.procurer.application.service.command.extractCreatedCriter
 import com.procurement.procurer.application.service.command.generateCreateCriteriaResponse
 import com.procurement.procurer.application.service.command.processCriteria
 import com.procurement.procurer.application.service.command.toEntity
+import com.procurement.procurer.application.service.context.CheckResponsesContext
+import com.procurement.procurer.application.service.context.CreateCriteriaContext
 import com.procurement.procurer.application.service.context.EvPanelsContext
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
@@ -55,13 +56,12 @@ class CriteriaService(
     private val medeiaValidationService: JsonValidationService
 ) {
 
-    fun createCriteria(cm: CommandMessage): ResponseDto {
+    fun createCriteria(cm: CommandMessage, context: CreateCriteriaContext): ResponseDto {
         val request: CreateCriteriaRequest = toObject(
             CreateCriteriaRequest::class.java,
             cm.data
         )
         val requestData = request.toData()
-        val context = context(cm)
 
         val createdCriteria = processCriteria(
             requestData,
@@ -109,9 +109,8 @@ class CriteriaService(
         return ResponseDto(data = "ok")
     }
 
-    fun checkResponses(cm: CommandMessage): ResponseDto {
+    fun checkResponses(cm: CommandMessage, context: CheckResponsesContext): ResponseDto {
         val request = medeiaValidationService.validateResponses(cm)
-        val context = context(cm)
         val cnEntity = criteriaRepository.findBy(context.cpid) ?: throw ErrorException(
             error = ErrorType.ENTITY_NOT_FOUND,
             message = "Cannot found record with cpid=${context.cpid}."
@@ -172,25 +171,5 @@ class CriteriaService(
         )
     }
 
-    private fun context(cm: CommandMessage): ContextRequest {
-        fun missingArgumentException(argument: String): Nothing =
-            throw ErrorException(
-                error = ErrorType.CONTEXT,
-                message = "Missing the '${argument}' attribute in context."
-            )
-
-        val cpid = cm.context.cpid ?: missingArgumentException("cpid")
-        val owner = cm.context.owner ?: missingArgumentException("owner")
-
-        return ContextRequest(
-            cpid = cpid,
-            owner = owner
-        )
-    }
-
-    data class ContextRequest(
-        val cpid: String,
-        val owner: String
-    )
 }
 

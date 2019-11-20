@@ -1,10 +1,11 @@
 package com.procurement.procurer.infrastructure.model.dto.criteria.responses
 
 import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CheckResponsesRequest
 import org.junit.jupiter.api.Test
 
-class CheckResponsesRequestTest : AbstractDTOTestBase<CheckResponsesRequest>(CheckResponsesRequest::class.java) {
+class CheckResponsesRequestTest : AbstractDTOTestBase<CheckResponsesRequest>(
+    CheckResponsesRequest::class.java) {
 
     @Test
     fun fully() {

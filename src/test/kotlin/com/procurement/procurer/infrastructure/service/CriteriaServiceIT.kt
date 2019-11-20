@@ -15,10 +15,11 @@ import com.nhaarman.mockito_kotlin.verify
 import com.procurement.procurer.application.repository.CriteriaRepository
 import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.application.service.JsonValidationService
+import com.procurement.procurer.application.service.context.CreateCriteriaContext
 import com.procurement.procurer.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
-import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
+import com.procurement.procurer.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.repository.CassandraCriteriaRepository
@@ -115,7 +116,9 @@ class CriteriaServiceIT {
             data = pre_requestNode
         )
 
-        val pre_response = criteriaService.createCriteria(pre_cm)
+        val context = CreateCriteriaContext(cpid = "cpid", owner = "owner")
+
+        val pre_response = criteriaService.createCriteria(pre_cm, context = context)
 
         val responseData = pre_response.data as CreateCriteriaResponse
         println(responseData)
@@ -134,7 +137,7 @@ class CriteriaServiceIT {
             data = post_requestNode
         )
 
-        val post_response = criteriaService.createCriteria(post_cm).data as CreateCriteriaResponse
+        val post_response = criteriaService.createCriteria(post_cm, context = context).data as CreateCriteriaResponse
 
         verify(criteriaRepository, times(2))
             .save(any())

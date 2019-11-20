@@ -8,7 +8,8 @@ import com.procurement.procurer.application.model.data.CreatedCriteria
 import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.application.service.Generable
-import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
+import com.procurement.procurer.application.service.context.CreateCriteriaContext
+import com.procurement.procurer.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
@@ -135,7 +136,7 @@ private fun setAwardCriteriaDetails(awardCriteria: AwardCriteria): AwardCriteria
 
 fun createCnEntity(
     createdCriteriaEntity: CreatedCriteriaEntity,
-    context: CriteriaService.ContextRequest
+    context: CreateCriteriaContext
 ): CnEntity {
     return CnEntity(
         cpid = context.cpid,

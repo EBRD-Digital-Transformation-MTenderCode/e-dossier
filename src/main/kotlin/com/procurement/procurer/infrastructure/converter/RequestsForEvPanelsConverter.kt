@@ -2,7 +2,7 @@ package com.procurement.procurer.infrastructure.converter
 
 import com.procurement.procurer.application.model.data.RequestsForEvPanelsData
 import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.infrastructure.model.dto.cn.RequestsForEvPanelsResponse
+import com.procurement.procurer.infrastructure.model.dto.response.RequestsForEvPanelsResponse
 
 fun RequestsForEvPanelsData.toResponseDto(): RequestsForEvPanelsResponse {
     return RequestsForEvPanelsResponse(

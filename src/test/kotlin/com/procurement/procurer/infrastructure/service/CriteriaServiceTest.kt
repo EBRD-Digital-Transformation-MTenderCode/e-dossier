@@ -22,16 +22,18 @@ import com.procurement.procurer.application.repository.CriteriaRepository
 import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.JsonValidationService
+import com.procurement.procurer.application.service.context.CheckResponsesContext
+import com.procurement.procurer.application.service.context.CreateCriteriaContext
 import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.procurer.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.procurer.infrastructure.generator.CommandMessageGenerator
 import com.procurement.procurer.infrastructure.generator.ContextGenerator
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesRequest
-import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaRequest
-import com.procurement.procurer.infrastructure.model.dto.cn.CreateCriteriaResponse
+import com.procurement.procurer.infrastructure.model.dto.request.CheckCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CheckResponsesRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
@@ -1260,7 +1262,8 @@ class CriteriaServiceTest {
 
             println(cm.toJson())
 
-            val response = criteriaService.createCriteria(cm)
+            val context = CreateCriteriaContext(cpid = "cpid", owner = "owner")
+            val response = criteriaService.createCriteria(cm, context = context)
 
             verify(criteriaRepository, times(1))
                 .save(any())
@@ -1340,9 +1343,10 @@ class CriteriaServiceTest {
             bidNode.putArray("requirementResponses")
                 .add(requirementResponse)
 
+            val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
             val cm = commandMessage(command = CommandType.CHECK_RESPONSES, data = requestNode)
 
-            assertDoesNotThrow { criteriaService.checkResponses(cm) }
+            assertDoesNotThrow { criteriaService.checkResponses(cm, context = context) }
         }
 
         @Test
@@ -1356,9 +1360,10 @@ class CriteriaServiceTest {
             requestNode.getObject("bid")
                 .remove("requirementResponses")
 
+            val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
             val cm = commandMessage(command = CommandType.CHECK_RESPONSES, data = requestNode)
 
-            val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+            val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
             assertEquals(ErrorType.INVALID_REQUIREMENT_RESPONSE, exception.error)
         }
 
@@ -1383,7 +1388,8 @@ class CriteriaServiceTest {
 
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
             }
         }
@@ -1457,9 +1463,10 @@ class CriteriaServiceTest {
                 whenever(criteriaRepository.findBy(any()))
                     .thenReturn(cnEntity)
 
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
             }
 
@@ -1500,9 +1507,10 @@ class CriteriaServiceTest {
                 whenever(criteriaRepository.findBy(any()))
                     .thenReturn(cnEntity)
 
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
             }
         }
@@ -1557,9 +1565,10 @@ class CriteriaServiceTest {
                 whenever(criteriaRepository.findBy(any()))
                     .thenReturn(cnEntity)
 
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
             }
         }
@@ -1611,9 +1620,10 @@ class CriteriaServiceTest {
                 whenever(criteriaRepository.findBy(any()))
                     .thenReturn(cnEntity)
 
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
             }
         }
@@ -1643,9 +1653,10 @@ class CriteriaServiceTest {
                 whenever(criteriaRepository.findBy(any()))
                     .thenReturn(cnEntity)
 
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_PERIOD_VALUE, exception.error)
             }
         }
@@ -1677,9 +1688,10 @@ class CriteriaServiceTest {
                 whenever(criteriaRepository.findBy(any()))
                     .thenReturn(cnEntity)
 
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_PERIOD_VALUE, exception.error)
             }
         }
@@ -1740,9 +1752,10 @@ class CriteriaServiceTest {
                 whenever(criteriaRepository.findBy(any()))
                     .thenReturn(cnEntity)
 
+                val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
-                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm) }
+                val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
                 assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
             }
         }

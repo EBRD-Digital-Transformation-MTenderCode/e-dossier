@@ -22,7 +22,7 @@ data class GetCriteriaData(
         data class Coefficient(
             val id: String,
             val value: CoefficientValue,
-            val coefficient: BigDecimal
+            val coefficient: CoefficientRate
         )
     }
 }

@@ -6,8 +6,8 @@ import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.service.JsonValidationService
 import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckCriteriaRequest
-import com.procurement.procurer.infrastructure.model.dto.cn.CheckResponsesRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CheckCriteriaRequest
+import com.procurement.procurer.infrastructure.model.dto.request.CheckResponsesRequest
 import com.procurement.procurer.infrastructure.utils.toJson
 import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
