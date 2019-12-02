@@ -120,9 +120,8 @@ class CriteriaServiceIT {
 
         val pre_response = criteriaService.createCriteria(pre_cm, context = context)
 
-        val responseData = pre_response.data as CreateCriteriaResponse
-        println(responseData)
-        assertEquals(responseData.awardCriteriaDetails, AwardCriteriaDetails.MANUAL)
+        println(pre_response)
+        assertEquals(pre_response.awardCriteriaDetails, AwardCriteriaDetails.MANUAL)
 
         val post_document = parseContext.parse(json)
         val post_requestNode = post_document.jsonString().toNode()
@@ -137,12 +136,12 @@ class CriteriaServiceIT {
             data = post_requestNode
         )
 
-        val post_response = criteriaService.createCriteria(post_cm, context = context).data as CreateCriteriaResponse
+        val post_response = criteriaService.createCriteria(post_cm, context = context)
 
         verify(criteriaRepository, times(2))
             .save(any())
 
-        assertEquals(AwardCriteriaDetails.MANUAL, responseData.awardCriteriaDetails)
+        assertEquals(AwardCriteriaDetails.MANUAL, pre_response.awardCriteriaDetails)
         assertEquals(AwardCriteriaDetails.AUTOMATED, post_response.awardCriteriaDetails)
 
     }

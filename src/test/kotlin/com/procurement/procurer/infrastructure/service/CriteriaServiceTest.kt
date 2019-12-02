@@ -1268,7 +1268,7 @@ class CriteriaServiceTest {
             verify(criteriaRepository, times(1))
                 .save(any())
 
-            val responseDto = response.data as CreateCriteriaResponse
+            val responseDto = response
 
             val criteriaId = responseDto.criteria!!.map { UUID.fromString(it.id) }
             assertEquals(expectedCriteriaIds, criteriaId)
