@@ -6,7 +6,6 @@ import com.procurement.procurer.application.model.entity.CnEntity
 import com.procurement.procurer.application.model.data.CreateCriteriaData
 import com.procurement.procurer.application.model.data.CreatedCriteria
 import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.application.service.CriteriaService
 import com.procurement.procurer.application.service.Generable
 import com.procurement.procurer.application.service.context.CreateCriteriaContext
 import com.procurement.procurer.infrastructure.model.dto.response.CreateCriteriaResponse
@@ -18,7 +17,7 @@ import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
 import com.procurement.procurer.infrastructure.utils.toJson
 
-fun processCriteria(
+fun buildCriteria(
     data: CreateCriteriaData,
     generationService: Generable
 ): CreatedCriteria {
@@ -145,9 +144,9 @@ fun createCnEntity(
     )
 }
 
-fun generateCreateCriteriaResponse(createdCriteriaEntity: CreatedCriteriaEntity) =
+fun generateCreateCriteriaResponse(createdCriteria: CreatedCriteria) =
     CreateCriteriaResponse(
-        criteria = createdCriteriaEntity.criteria?.map { criteria ->
+        criteria = createdCriteria.criteria?.map { criteria ->
             CreateCriteriaResponse.Criteria(
                 id = criteria.id,
                 title = criteria.title,
@@ -173,7 +172,7 @@ fun generateCreateCriteriaResponse(createdCriteriaEntity: CreatedCriteriaEntity)
                 }
             )
         },
-        conversions = createdCriteriaEntity.conversions?.map { conversion ->
+        conversions = createdCriteria.conversions?.map { conversion ->
             CreateCriteriaResponse.Conversion(
                 id = conversion.id,
                 relatesTo = conversion.relatesTo,
@@ -189,5 +188,5 @@ fun generateCreateCriteriaResponse(createdCriteriaEntity: CreatedCriteriaEntity)
                 }
             )
         },
-        awardCriteriaDetails = createdCriteriaEntity.awardCriteriaDetails
+        awardCriteriaDetails = createdCriteria.awardCriteriaDetails
     )

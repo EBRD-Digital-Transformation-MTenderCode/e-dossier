@@ -2,6 +2,7 @@ package com.procurement.procurer.application.service
 
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
+import com.procurement.procurer.application.model.data.CreatedCriteria
 import com.procurement.procurer.application.model.data.ExpectedValue
 import com.procurement.procurer.application.repository.CriteriaRepository
 import com.procurement.procurer.application.service.context.GetCriteriaContext
@@ -40,7 +41,7 @@ import com.procurement.procurer.application.service.command.checkRequirements
 import com.procurement.procurer.application.service.command.createCnEntity
 import com.procurement.procurer.application.service.command.extractCreatedCriteria
 import com.procurement.procurer.application.service.command.generateCreateCriteriaResponse
-import com.procurement.procurer.application.service.command.processCriteria
+import com.procurement.procurer.application.service.command.buildCriteria
 import com.procurement.procurer.application.service.command.toEntity
 import com.procurement.procurer.application.service.context.CheckResponsesContext
 import com.procurement.procurer.application.service.context.CreateCriteriaContext
@@ -56,28 +57,17 @@ class CriteriaService(
     private val medeiaValidationService: JsonValidationService
 ) {
 
-    fun createCriteria(cm: CommandMessage, context: CreateCriteriaContext): ResponseDto {
+    fun createCriteria(cm: CommandMessage, context: CreateCriteriaContext): CreatedCriteria {
         val request: CreateCriteriaRequest = toObject(
             CreateCriteriaRequest::class.java,
             cm.data
         )
         val requestData = request.toData()
-
-        val createdCriteria = processCriteria(
-            requestData,
-            generationService
-        )
+        val createdCriteria = buildCriteria(requestData, generationService)
         val createdCriteriaEntity = createdCriteria.toEntity()
         val cn = createCnEntity(createdCriteriaEntity, context)
-
         criteriaRepository.save(cn)
-
-        val cnResponse = toObject(CreatedCriteriaEntity::class.java, cn.jsonData)
-        val responseData = generateCreateCriteriaResponse(
-            cnResponse
-        )
-
-        return ResponseDto(id = cm.id, data = responseData)
+        return createdCriteria
     }
 
     fun checkCriteria(cm: CommandMessage): ResponseDto {

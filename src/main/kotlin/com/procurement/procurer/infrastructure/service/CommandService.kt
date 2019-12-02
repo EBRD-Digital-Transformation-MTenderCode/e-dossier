@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.service.CriteriaService
+import com.procurement.procurer.application.service.command.generateCreateCriteriaResponse
 import com.procurement.procurer.application.service.context.CheckResponsesContext
 import com.procurement.procurer.application.service.context.CreateCriteriaContext
 import com.procurement.procurer.application.service.context.EvPanelsContext
@@ -61,7 +62,8 @@ class CommandService(
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
                         val context = CreateCriteriaContext(cpid = cm.cpid, owner = cm.owner)
                         val serviceResponse = criteriaService.createCriteria(cm, context = context)
-                        ResponseDto(data = serviceResponse)
+                        val response = generateCreateCriteriaResponse(serviceResponse)
+                        ResponseDto(data = response)
                     }
 
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
