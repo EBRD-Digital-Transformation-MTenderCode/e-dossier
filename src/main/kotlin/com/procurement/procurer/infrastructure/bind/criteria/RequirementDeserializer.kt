@@ -8,14 +8,15 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.procurer.application.model.data.ExpectedValue
 import com.procurement.procurer.application.model.data.MaxValue
 import com.procurement.procurer.application.model.data.MinValue
+import com.procurement.procurer.application.model.data.NoneValue
 import com.procurement.procurer.application.model.data.Period
 import com.procurement.procurer.application.model.data.RangeValue
 import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.application.model.data.RequirementValue
+import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
 import java.io.IOException
 import java.math.BigDecimal
@@ -51,101 +52,108 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
             }
         }
 
-        private fun requirementValue(requirementNode: JsonNode): RequirementValue? {
+        private fun requirementValue(requirementNode: JsonNode): RequirementValue {
             fun datatypeMismatchException(): Nothing = throw ErrorException(
                 ErrorType.INVALID_REQUIREMENT_VALUE,
                 message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue."
             )
 
             val dataType = RequirementDataType.fromString(requirementNode.get("dataType").asText())
-            return if (isExpectedValue(requirementNode)) {
-                when (dataType) {
-                    RequirementDataType.BOOLEAN ->
-                        if (requirementNode.get("expectedValue").isBoolean())
-                            ExpectedValue.of(requirementNode.get("expectedValue").booleanValue())
-                        else datatypeMismatchException()
+            return when {
+                isExpectedValue(requirementNode) -> {
+                    when (dataType) {
+                        RequirementDataType.BOOLEAN ->
+                            if (requirementNode.get("expectedValue").isBoolean())
+                                ExpectedValue.of(requirementNode.get("expectedValue").booleanValue())
+                            else datatypeMismatchException()
 
-                    RequirementDataType.STRING  ->
-                        if (requirementNode.get("expectedValue").isTextual())
-                            ExpectedValue.of(requirementNode.get("expectedValue").textValue())
-                        else datatypeMismatchException()
+                        RequirementDataType.STRING ->
+                            if (requirementNode.get("expectedValue").isTextual())
+                                ExpectedValue.of(requirementNode.get("expectedValue").textValue())
+                            else datatypeMismatchException()
 
-                    RequirementDataType.NUMBER  ->
-                        if (requirementNode.get("expectedValue").isBigDecimal() || requirementNode.get("expectedValue").isBigInteger())
-                            ExpectedValue.of(BigDecimal(requirementNode.get("expectedValue").asText()))
-                        else datatypeMismatchException()
+                        RequirementDataType.NUMBER ->
+                            if (requirementNode.get("expectedValue").isBigDecimal() || requirementNode.get("expectedValue").isBigInteger())
+                                ExpectedValue.of(BigDecimal(requirementNode.get("expectedValue").asText()))
+                            else datatypeMismatchException()
 
-                    RequirementDataType.INTEGER ->
-                        if (requirementNode.get("expectedValue").isBigInteger())
-                            ExpectedValue.of(requirementNode.get("expectedValue").longValue())
-                        else datatypeMismatchException()
+                        RequirementDataType.INTEGER ->
+                            if (requirementNode.get("expectedValue").isBigInteger())
+                                ExpectedValue.of(requirementNode.get("expectedValue").longValue())
+                            else datatypeMismatchException()
+                    }
                 }
-            } else if (isRange(requirementNode)) {
-                when (dataType) {
-                    RequirementDataType.NUMBER                              ->
-                        if ((requirementNode.get("minValue").isBigDecimal() || requirementNode.get("minValue").isBigInteger())
-                            && (requirementNode.get("maxValue").isBigDecimal() || requirementNode.get("maxValue").isBigInteger()))
-                            RangeValue.of(
-                                BigDecimal(requirementNode.get("minValue").asText()),
-                                BigDecimal(requirementNode.get("maxValue").asText())
+                isRange(requirementNode) -> {
+                    when (dataType) {
+                        RequirementDataType.NUMBER ->
+                            if ((requirementNode.get("minValue").isBigDecimal() || requirementNode.get("minValue").isBigInteger())
+                                && (requirementNode.get("maxValue").isBigDecimal() || requirementNode.get("maxValue").isBigInteger()))
+                                RangeValue.of(
+                                    BigDecimal(requirementNode.get("minValue").asText()),
+                                    BigDecimal(requirementNode.get("maxValue").asText())
+                                )
+                            else datatypeMismatchException()
+
+                        RequirementDataType.INTEGER ->
+                            if (requirementNode.get("minValue").isBigInteger() && requirementNode.get("maxValue").isBigInteger())
+                                RangeValue.of(
+                                    requirementNode.get("minValue").asLong(),
+                                    requirementNode.get("maxValue").asLong()
+                                )
+                            else datatypeMismatchException()
+
+                        RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
+                            throw ErrorException(
+                                ErrorType.INVALID_REQUIREMENT_VALUE,
+                                message = "Boolean or String datatype cannot have a range"
                             )
-                        else datatypeMismatchException()
-
-                    RequirementDataType.INTEGER                             ->
-                        if (requirementNode.get("minValue").isBigInteger() && requirementNode.get("maxValue").isBigInteger())
-                            RangeValue.of(
-                                requirementNode.get("minValue").asLong(),
-                                requirementNode.get("maxValue").asLong()
+                    }
+                }
+                isOnlyMax(requirementNode) -> {
+                    when (dataType) {
+                        RequirementDataType.NUMBER ->
+                            if (requirementNode.get("maxValue").isBigDecimal() || requirementNode.get("maxValue").isBigInteger())
+                                MaxValue.of(BigDecimal(requirementNode.get("maxValue").asText()))
+                            else datatypeMismatchException()
+                        RequirementDataType.INTEGER ->
+                            if (requirementNode.get("maxValue").isBigInteger())
+                                MaxValue.of(requirementNode.get("maxValue").longValue())
+                            else datatypeMismatchException()
+                        RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
+                            throw ErrorException(
+                                ErrorType.INVALID_REQUIREMENT_VALUE,
+                                message = "Boolean or String datatype cannot have a max value"
                             )
-                        else datatypeMismatchException()
-
-                    RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
-                        throw ErrorException(
-                            ErrorType.INVALID_REQUIREMENT_VALUE,
-                            message = "Boolean or String datatype cannot have a range"
-                        )
+                    }
                 }
-            } else if (isOnlyMax(requirementNode)) {
-                when (dataType) {
-                    RequirementDataType.NUMBER                              ->
-                        if (requirementNode.get("maxValue").isBigDecimal() || requirementNode.get("maxValue").isBigInteger())
-                            MaxValue.of(BigDecimal(requirementNode.get("maxValue").asText()))
-                        else datatypeMismatchException()
-                    RequirementDataType.INTEGER                             ->
-                        if (requirementNode.get("maxValue").isBigInteger())
-                            MaxValue.of(requirementNode.get("maxValue").longValue())
-                        else datatypeMismatchException()
-                    RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
-                        throw ErrorException(
-                            ErrorType.INVALID_REQUIREMENT_VALUE,
-                            message = "Boolean or String datatype cannot have a max value"
-                        )
-                }
-            } else if (isOnlyMin(requirementNode)) {
-                when (dataType) {
-                    RequirementDataType.NUMBER                              ->
-                        if (requirementNode.get("minValue").isBigDecimal() || requirementNode.get("minValue").isBigInteger())
-                            MinValue.of(BigDecimal(requirementNode.get("minValue").asText()))
-                        else datatypeMismatchException()
+                isOnlyMin(requirementNode) -> {
+                    when (dataType) {
+                        RequirementDataType.NUMBER ->
+                            if (requirementNode.get("minValue").isBigDecimal() || requirementNode.get("minValue").isBigInteger())
+                                MinValue.of(BigDecimal(requirementNode.get("minValue").asText()))
+                            else datatypeMismatchException()
 
-                    RequirementDataType.INTEGER                             ->
-                        if (requirementNode.get("minValue").isBigInteger())
-                            MinValue.of(requirementNode.get("minValue").longValue())
-                        else datatypeMismatchException()
+                        RequirementDataType.INTEGER ->
+                            if (requirementNode.get("minValue").isBigInteger())
+                                MinValue.of(requirementNode.get("minValue").longValue())
+                            else datatypeMismatchException()
 
-                    RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
-                        throw ErrorException(
-                            ErrorType.INVALID_REQUIREMENT_VALUE,
-                            message = "Boolean or String datatype cannot have a min value"
-                        )
+                        RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
+                            throw ErrorException(
+                                ErrorType.INVALID_REQUIREMENT_VALUE,
+                                message = "Boolean or String datatype cannot have a min value"
+                            )
+                    }
                 }
-            } else if (isNotBounded(requirementNode)) {
-                null
-            } else {
-                throw ErrorException(
-                    ErrorType.INVALID_REQUIREMENT_VALUE,
-                    message = "Expected value cannot exists with Min/MaxValue"
-                )
+                isNotBounded(requirementNode) -> {
+                    NoneValue
+                }
+                else -> {
+                    throw ErrorException(
+                        ErrorType.INVALID_REQUIREMENT_VALUE,
+                        message = "Expected value cannot exists with Min/MaxValue"
+                    )
+                }
             }
         }
 

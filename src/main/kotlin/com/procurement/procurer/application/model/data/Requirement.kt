@@ -10,7 +10,7 @@ class Requirement(
     val description: String?,
     val period: Period?,
     val dataType: RequirementDataType,
-    val value: RequirementValue?
+    val value: RequirementValue
 )
 
 data class Period(
@@ -75,3 +75,5 @@ sealed class RangeValue : RequirementValue() {
     data class AsNumber(val minValue: BigDecimal, val maxValue: BigDecimal) : RangeValue()
     data class AsInteger(val minValue: Long, val maxValue: Long) : RangeValue()
 }
+
+object NoneValue : RequirementValue()

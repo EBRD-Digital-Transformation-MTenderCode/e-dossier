@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.procurer.application.model.data.ExpectedValue
 import com.procurement.procurer.application.model.data.MaxValue
 import com.procurement.procurer.application.model.data.MinValue
+import com.procurement.procurer.application.model.data.NoneValue
 import com.procurement.procurer.application.model.data.RangeValue
 import com.procurement.procurer.application.model.data.Requirement
+import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
 import java.io.IOException
 import java.math.BigDecimal
 
@@ -39,38 +40,39 @@ class RequirementSerializer : JsonSerializer<List<Requirement>>() {
 
 
                 when (requirement.value) {
-                    is ExpectedValue.AsString  -> {
+                    is ExpectedValue.AsString -> {
                         requirementNode.put("expectedValue", requirement.value.value)
                     }
                     is ExpectedValue.AsBoolean -> {
                         requirementNode.put("expectedValue", requirement.value.value)
                     }
-                    is ExpectedValue.AsNumber  -> {
+                    is ExpectedValue.AsNumber -> {
                         requirementNode.put("expectedValue", requirement.value.value.jsonFormat())
                     }
                     is ExpectedValue.AsInteger -> {
                         requirementNode.put("expectedValue", requirement.value.value)
                     }
-                    is RangeValue.AsNumber     -> {
+                    is RangeValue.AsNumber -> {
                         requirementNode.put("minValue", requirement.value.minValue.jsonFormat())
                         requirementNode.put("maxValue", requirement.value.maxValue.jsonFormat())
                     }
-                    is RangeValue.AsInteger    -> {
+                    is RangeValue.AsInteger -> {
                         requirementNode.put("minValue", requirement.value.minValue)
                         requirementNode.put("maxValue", requirement.value.maxValue)
                     }
-                    is MinValue.AsNumber       -> {
+                    is MinValue.AsNumber -> {
                         requirementNode.put("minValue", requirement.value.value.jsonFormat())
                     }
-                    is MinValue.AsInteger      -> {
+                    is MinValue.AsInteger -> {
                         requirementNode.put("minValue", requirement.value.value)
                     }
-                    is MaxValue.AsNumber       -> {
+                    is MaxValue.AsNumber -> {
                         requirementNode.put("maxValue", requirement.value.value.jsonFormat())
                     }
-                    is MaxValue.AsInteger      -> {
+                    is MaxValue.AsInteger -> {
                         requirementNode.put("maxValue", requirement.value.value)
                     }
+                    is NoneValue -> Unit
                 }
 
                 requirementNode
