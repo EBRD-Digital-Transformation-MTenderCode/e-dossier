@@ -8,6 +8,7 @@ import com.procurement.procurer.application.model.data.CoefficientValue
 import com.procurement.procurer.application.model.data.ExpectedValue
 import com.procurement.procurer.application.model.data.MaxValue
 import com.procurement.procurer.application.model.data.MinValue
+import com.procurement.procurer.application.model.data.NoneValue
 import com.procurement.procurer.application.model.data.Period
 import com.procurement.procurer.application.model.data.RangeValue
 import com.procurement.procurer.application.model.data.Requirement
@@ -52,13 +53,13 @@ fun CheckCriteriaData.checkActualItemRelation(): CheckCriteriaData {
         itemsByRelatedLot: Map<String, List<CheckCriteriaData.Tender.Item>>
     ) {
         when (this.relatesTo) {
-            CriteriaRelatesTo.ITEM     -> itemsById.containsElement(this.relatedItem!!)
-            CriteriaRelatesTo.LOT      -> itemsByRelatedLot.relatesWithLot(this.relatedItem!!)
+            CriteriaRelatesTo.ITEM -> itemsById.containsElement(this.relatedItem!!)
+            CriteriaRelatesTo.LOT -> itemsByRelatedLot.relatesWithLot(this.relatedItem!!)
             CriteriaRelatesTo.TENDERER -> Unit
         }
     }
 
-    fun CheckCriteriaData.Tender.Criteria.validateRelation(){
+    fun CheckCriteriaData.Tender.Criteria.validateRelation() {
         if (this.relatesTo == null && this.relatedItem != null) throw ErrorException(
             error = ErrorType.INVALID_CRITERIA,
             message = "Criteria has reletedItem attribute but missing relatedTo"
@@ -66,19 +67,17 @@ fun CheckCriteriaData.checkActualItemRelation(): CheckCriteriaData {
 
         if (this.relatesTo != null) {
             when (this.relatesTo) {
-                CriteriaRelatesTo.TENDERER -> if (this.relatedItem != null ) throw ErrorException(
+                CriteriaRelatesTo.TENDERER -> if (this.relatedItem != null) throw ErrorException(
                     error = ErrorType.INVALID_CRITERIA,
                     message = "For parameter relatedTo = 'tenderer', parameter relatedItem cannot be passed"
                 )
                 CriteriaRelatesTo.ITEM,
-                CriteriaRelatesTo.LOT -> if (this.relatedItem == null ) throw ErrorException(
+                CriteriaRelatesTo.LOT -> if (this.relatedItem == null) throw ErrorException(
                     error = ErrorType.INVALID_CRITERIA,
                     message = "For parameter relatedTo = 'lot' or 'item', parameter relatedItem must be specified"
                 )
             }
         }
-
-
     }
 
     val criteria = this.tender.criteria ?: return this
@@ -103,7 +102,7 @@ fun CheckCriteriaData.checkDatatypeCompliance(): CheckCriteriaData {
                 "${rv} != ${rDatatype}"
         )
 
-    fun Requirement.hasRequirementValue(): Boolean = this.value != null
+    fun Requirement.hasRequirementValue(): Boolean = this.value != NoneValue
     fun Requirement.validate() {
         if (!this.hasRequirementValue()) return
 
@@ -111,19 +110,19 @@ fun CheckCriteriaData.checkDatatypeCompliance(): CheckCriteriaData {
             is ExpectedValue.AsBoolean -> if (this.dataType != RequirementDataType.BOOLEAN)
                 mismatchDatatypeException(this.value, this.dataType)
 
-            is ExpectedValue.AsString  -> if (this.dataType != RequirementDataType.STRING)
+            is ExpectedValue.AsString -> if (this.dataType != RequirementDataType.STRING)
                 mismatchDatatypeException(this.value, this.dataType)
 
             is ExpectedValue.AsInteger,
             is MinValue.AsInteger,
             is MaxValue.AsInteger,
-            is RangeValue.AsInteger    -> if (this.dataType != RequirementDataType.INTEGER)
+            is RangeValue.AsInteger -> if (this.dataType != RequirementDataType.INTEGER)
                 mismatchDatatypeException(this.value, this.dataType)
 
             is ExpectedValue.AsNumber,
             is MinValue.AsNumber,
             is MaxValue.AsNumber,
-            is RangeValue.AsNumber     -> if (this.dataType != RequirementDataType.NUMBER)
+            is RangeValue.AsNumber -> if (this.dataType != RequirementDataType.NUMBER)
                 mismatchDatatypeException(this.value, this.dataType)
         }
     }
@@ -146,14 +145,14 @@ fun CheckCriteriaData.checkMinMaxValue(): CheckCriteriaData {
 
     fun <T : Number> validateRange(minValue: T, maxValue: T) {
         when (minValue) {
-            is Long       -> if (minValue >= maxValue.toLong()) rangeException()
+            is Long -> if (minValue >= maxValue.toLong()) rangeException()
             is BigDecimal -> if (minValue >= BigDecimal(maxValue.toString())) rangeException()
         }
     }
 
     fun RangeValue.validate() {
         when (this) {
-            is RangeValue.AsNumber  -> validateRange(minValue = this.minValue, maxValue = this.maxValue)
+            is RangeValue.AsNumber -> validateRange(minValue = this.minValue, maxValue = this.maxValue)
             is RangeValue.AsInteger -> validateRange(minValue = this.minValue, maxValue = this.maxValue)
         }
     }
@@ -322,13 +321,12 @@ fun CheckCriteriaData.checkCoefficient(): CheckCriteriaData {
     return this
 }
 
-
 fun CheckCriteriaData.checkCoefficientValueUniqueness(): CheckCriteriaData {
     fun uniquenessException(coefficients: List<CheckCriteriaData.Tender.Conversion.Coefficient>): Nothing = throw ErrorException(
         ErrorType.INVALID_CONVERSION,
         message = "Conversion coefficients value contains not unique element: " +
             "${coefficients.map { it.value }
-                .map { if (it is CoefficientValue.AsNumber) it.value.stripTrailingZeros() else it}
+                .map { if (it is CoefficientValue.AsNumber) it.value.stripTrailingZeros() else it }
                 .groupBy { it }
                 .filter { it.value.size > 1 }.keys}"
     )
@@ -382,89 +380,85 @@ fun CheckCriteriaData.checkCriteriaWithAwardCriteria(): CheckCriteriaData {
 }
 
 fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
-    fun mismatchDataTypeException(cv: CoefficientValue, rv: RequirementValue): Nothing =
+    fun mismatchDataTypeException(cv: CoefficientValue, rv: RequirementDataType): Nothing =
         throw ErrorException(
             ErrorType.INVALID_CONVERSION,
-            message = "DataType in Conversion mismatch with Requirement dataType. " +
-                "${cv} != ${rv}"
+            message = "DataType in Conversion mismatch with Requirement dataType. $cv != $rv"
         )
 
     fun mismatchValueException(cv: CoefficientValue, rv: RequirementValue): Nothing =
         throw ErrorException(
             ErrorType.INVALID_CONVERSION,
-            message = "Value in Conversion mismatch with Requirement value. " +
-                "Coefficient value ${cv} don't satisfies the requirements  ${rv.javaClass.name.split(".").last()} -> ${rv}"
+            message = "Value in Conversion mismatch with Requirement value. Coefficient value $cv don't satisfies the requirements  ${rv.javaClass.name.split(
+                "."
+            ).last()} -> ${rv}"
         )
 
-    fun negativeValueException(rv: RequirementValue): Nothing =
-        throw ErrorException(
-            ErrorType.INVALID_CONVERSION,
-            message = "Value in Requirement must be greater than 0. ${rv}"
-        )
-
-    fun RequirementValue.validateDataType(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient) {
+    fun RequirementDataType.validateDataType(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient) {
         when (coefficient.value) {
-            is CoefficientValue.AsBoolean -> if (this !is ExpectedValue.AsBoolean)
+            is CoefficientValue.AsBoolean -> if (this != RequirementDataType.BOOLEAN)
                 mismatchDataTypeException(coefficient.value, this)
 
-            is CoefficientValue.AsString  -> if (this !is ExpectedValue.AsString)
+            is CoefficientValue.AsString -> if (this != RequirementDataType.STRING)
                 mismatchDataTypeException(coefficient.value, this)
 
-            is CoefficientValue.AsNumber  -> if ((this !is ExpectedValue.AsNumber && this !is ExpectedValue.AsInteger)
-                && (this !is RangeValue.AsNumber && this !is RangeValue.AsInteger)
-                && (this !is MinValue.AsNumber && this !is MinValue.AsInteger)
-                && (this !is MaxValue.AsNumber && this !is MaxValue.AsInteger)
-            ) mismatchDataTypeException(coefficient.value, this)
+            is CoefficientValue.AsNumber -> if (this != RequirementDataType.NUMBER)
+                mismatchDataTypeException(coefficient.value, this)
 
-            is CoefficientValue.AsInteger -> if ((this !is ExpectedValue.AsInteger && this !is ExpectedValue.AsNumber)
-                && (this !is RangeValue.AsInteger && this !is RangeValue.AsNumber)
-                && (this !is MinValue.AsInteger && this !is MinValue.AsNumber)
-                && (this !is MaxValue.AsInteger && this !is MaxValue.AsNumber)
-            ) mismatchDataTypeException(coefficient.value, this)
+            is CoefficientValue.AsInteger -> if (this != RequirementDataType.INTEGER)
+                mismatchDataTypeException(coefficient.value, this)
         }
     }
 
-    fun RequirementValue.validateValueCompatibility(coefficient: CheckCriteriaData.Tender.Conversion.Coefficient, dataType: RequirementDataType) {
+    fun RequirementValue.validateValueCompatibility(
+        coefficient: CheckCriteriaData.Tender.Conversion.Coefficient,
+        dataType: RequirementDataType
+    ) {
         when (coefficient.value) {
 
             is CoefficientValue.AsBoolean -> if (this is ExpectedValue.AsBoolean && (coefficient.value.value != this.value))
                 mismatchValueException(coefficient.value, this)
 
-            is CoefficientValue.AsString  -> Unit
+            is CoefficientValue.AsString -> Unit
 
-            is CoefficientValue.AsNumber  ->
+            is CoefficientValue.AsNumber ->
                 if (dataType == RequirementDataType.INTEGER
-                    ||(this is ExpectedValue.AsNumber && (coefficient.value.value.compareTo(this.value) != 0))
-                    || (this is ExpectedValue.AsInteger && (coefficient.value.value.compareTo(this.value.toBigDecimal()) != 0))
+                    || (this is ExpectedValue.AsNumber && (coefficient.value.value.compareTo(this.value) != 0))
+                    || (this is ExpectedValue.AsInteger && (coefficient.value.value.compareTo(BigDecimal(this.value)) != 0))
 
-                    || (this is RangeValue.AsNumber && (coefficient.value.value.compareTo(this.minValue) == -1  || coefficient.value.value.compareTo(this.maxValue) == 1 ))
+                    || (this is RangeValue.AsNumber && (coefficient.value.value.compareTo(this.minValue) == -1 || coefficient.value.value.compareTo(
+                        this.maxValue
+                    ) == 1))
                     || (this is RangeValue.AsInteger
-                        && (coefficient.value.value < this.minValue.toBigDecimal() || coefficient.value.value.compareTo(this.maxValue.toBigDecimal()) == 1 ))
+                        && (coefficient.value.value < BigDecimal(this.minValue) || coefficient.value.value.compareTo(
+                        BigDecimal(this.maxValue)
+                    ) == 1))
 
-                    || (this is MinValue.AsNumber && (coefficient.value.value.compareTo(this.value) == -1 ))
-                    || (this is MinValue.AsInteger && (coefficient.value.value.compareTo(this.value.toBigDecimal()) == -1 ))
+                    || (this is MinValue.AsNumber && (coefficient.value.value.compareTo(this.value) == -1))
+                    || (this is MinValue.AsInteger && (coefficient.value.value.compareTo(BigDecimal(this.value)) == -1))
 
-                    || (this is MaxValue.AsNumber && (coefficient.value.value.compareTo(this.value) == 1 ))
-                    || (this is MaxValue.AsInteger && (coefficient.value.value.compareTo(this.value.toBigDecimal()) == 1 ))
+                    || (this is MaxValue.AsNumber && (coefficient.value.value.compareTo(this.value) == 1))
+                    || (this is MaxValue.AsInteger && (coefficient.value.value.compareTo(BigDecimal(this.value)) == 1))
                 ) mismatchValueException(coefficient.value, this)
 
             is CoefficientValue.AsInteger ->
                 if ((this is ExpectedValue.AsInteger && (coefficient.value.value != this.value))
-                    || (this is ExpectedValue.AsNumber && (coefficient.value.value.toBigDecimal().compareTo(this.value) != 0 ))
+                    || (this is ExpectedValue.AsNumber && (BigDecimal(coefficient.value.value).compareTo(this.value) != 0))
 
                     || ((this is RangeValue.AsInteger) && (coefficient.value.value < this.minValue || coefficient.value.value > this.maxValue))
                     || ((this is RangeValue.AsNumber)
-                        && (coefficient.value.value.toBigDecimal().compareTo(this.minValue) == -1  || coefficient.value.value.toBigDecimal().compareTo(this.maxValue) == 1 ))
+                        && (BigDecimal(coefficient.value.value).compareTo(this.minValue) == -1 || BigDecimal(coefficient.value.value).compareTo(
+                        this.maxValue
+                    ) == 1))
 
                     || (this is MinValue.AsInteger && (coefficient.value.value < this.value))
-                    || (this is MinValue.AsNumber && (coefficient.value.value.toBigDecimal().compareTo(this.value) == -1 ))
+                    || (this is MinValue.AsNumber && (BigDecimal(coefficient.value.value).compareTo(this.value) == -1))
 
                     || (this is MaxValue.AsInteger && (coefficient.value.value > this.value))
-                    || (this is MaxValue.AsNumber && (coefficient.value.value.toBigDecimal().compareTo(this.value) == 1 ))
+                    || (this is MaxValue.AsNumber && (BigDecimal(coefficient.value.value).compareTo(this.value) == 1))
                 ) mismatchValueException(coefficient.value, this)
         }
     }
-
 
     val criteria = this.tender.criteria ?: return this
     val conversions = this.tender.conversions ?: return this
@@ -479,9 +473,10 @@ fun CheckCriteriaData.checkCoefficientDataType(): CheckCriteriaData {
     conversionsRelatesToRequirement.forEach {
         val requirementId = it.relatedItem
         it.coefficients.forEach { coefficient ->
-            val requirement = requirements.get(requirementId)
-            requirement?.value?.validateDataType(coefficient)
-            requirement?.value?.validateValueCompatibility(coefficient, requirement.dataType)
+            requirements.get(requirementId)
+                ?.also { requirement ->
+                    requirement.dataType.validateDataType(coefficient)
+                }
         }
     }
 
@@ -548,10 +543,10 @@ fun CheckCriteriaData.checkCastCoefficient(): CheckCriteriaData {
         val MAX_LIMIT_FOR_SERVICES = 0.4.toBigDecimal()
 
         when (mainProcurementCategory) {
-            MainProcurementCategory.GOODS    -> if (castCoefficient > MAX_LIMIT_FOR_GOODS)
+            MainProcurementCategory.GOODS -> if (castCoefficient > MAX_LIMIT_FOR_GOODS)
                 castCoefficientException(MAX_LIMIT_FOR_GOODS)
 
-            MainProcurementCategory.WORKS    -> if (castCoefficient > MAX_LIMIT_FOR_WORKS)
+            MainProcurementCategory.WORKS -> if (castCoefficient > MAX_LIMIT_FOR_WORKS)
                 castCoefficientException(MAX_LIMIT_FOR_WORKS)
 
             MainProcurementCategory.SERVICES -> if (castCoefficient > MAX_LIMIT_FOR_SERVICES)
@@ -599,8 +594,7 @@ fun CheckCriteriaData.checkAwardCriteriaDetailsEnum(): CheckCriteriaData {
     return this
 }
 
-
-inline fun <reified T,R> List<T>.validateUniqueness(uniques: Set<R>) {
+inline fun <reified T, R> List<T>.validateUniqueness(uniques: Set<R>) {
     if (this.size != uniques.size) throw ErrorException(
         error = ErrorType.NOT_UNIQUE_IDS,
         message = "All elements in ${T::class.java.simpleName} arrays in json must be unique by id"
@@ -649,7 +643,7 @@ fun CheckCriteriaData.checkArrays(): CheckCriteriaData {
             validateUniqueness(uniques = conversions.toSetBy { it.id })
         }
 
-        conversions.forEach {conversion ->
+        conversions.forEach { conversion ->
             conversion.coefficients.apply {
                 validateNotEmpty()
                 validateUniqueness(uniques = conversion.coefficients.toSetBy { it.id })
@@ -676,7 +670,7 @@ fun CheckCriteriaData.checkAwardCriteriaDetailsAreRequired(): CheckCriteriaData 
                     "${AwardCriteria.RATED_CRITERIA}" +
                     "] field 'awardCriteriaDetails' are required "
             )
-        AwardCriteria.PRICE_ONLY     -> Unit
+        AwardCriteria.PRICE_ONLY -> Unit
     }
 
     return this
@@ -690,13 +684,13 @@ fun CheckCriteriaData.checkCriteriaAndConversionAreRequired(): CheckCriteriaData
         AwardCriteria.COST_ONLY,
         AwardCriteria.QUALITY_ONLY,
         AwardCriteria.RATED_CRITERIA -> true
-        AwardCriteria.PRICE_ONLY     -> false
+        AwardCriteria.PRICE_ONLY -> false
     }
 
     fun isAutomatedCriteria() = when (tender.awardCriteriaDetails) {
         AwardCriteriaDetails.AUTOMATED -> true
-        AwardCriteriaDetails.MANUAL    -> false
-        null                           -> false
+        AwardCriteriaDetails.MANUAL -> false
+        null -> false
     }
 
     if (isNonPriceCriteria()
