@@ -12,7 +12,6 @@ import com.procurement.procurer.application.model.data.ExpectedValue
 import com.procurement.procurer.application.model.data.MaxValue
 import com.procurement.procurer.application.model.data.MinValue
 import com.procurement.procurer.application.model.data.NoneValue
-import com.procurement.procurer.application.model.data.Period
 import com.procurement.procurer.application.model.data.RangeValue
 import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.application.model.data.RequirementValue
@@ -30,12 +29,12 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
                 val title: String = requirement.get("title").asText()
                 val description: String? = requirement.takeIf { it.has("description") }?.get("description")?.asText()
                 val dataType: RequirementDataType = RequirementDataType.fromString(requirement.get("dataType").asText())
-                val period: Period? = requirement.takeIf { it.has("period") }
+                val period: Requirement.Period? = requirement.takeIf { it.has("period") }
                     ?.let {
                         val period = it.get("period")
                         val startDate = JsonDateTimeDeserializer.deserialize(period.get("startDate").asText())
                         val endDate = JsonDateTimeDeserializer.deserialize(period.get("endDate").asText())
-                        Period(
+                        Requirement.Period(
                             startDate = startDate,
                             endDate = endDate
                         )
