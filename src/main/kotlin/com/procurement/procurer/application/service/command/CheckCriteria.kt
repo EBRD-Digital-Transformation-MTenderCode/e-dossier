@@ -9,7 +9,6 @@ import com.procurement.procurer.application.model.data.ExpectedValue
 import com.procurement.procurer.application.model.data.MaxValue
 import com.procurement.procurer.application.model.data.MinValue
 import com.procurement.procurer.application.model.data.NoneValue
-import com.procurement.procurer.application.model.data.Period
 import com.procurement.procurer.application.model.data.RangeValue
 import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.application.model.data.RequirementValue
@@ -169,7 +168,7 @@ fun CheckCriteriaData.checkMinMaxValue(): CheckCriteriaData {
 
 fun CheckCriteriaData.checkDateTime(): CheckCriteriaData {
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-    fun Period.validate() {
+    fun Requirement.Period.validate() {
         if (this.startDate.year > currentYear || this.endDate.year > currentYear)
             throw ErrorException(
                 ErrorType.INVALID_PERIOD_VALUE,

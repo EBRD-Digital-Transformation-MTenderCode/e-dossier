@@ -11,12 +11,12 @@ class Requirement(
     val period: Period?,
     val dataType: RequirementDataType,
     val value: RequirementValue
-)
-
-data class Period(
-    val startDate: LocalDateTime,
-    val endDate: LocalDateTime
-)
+) {
+    data class Period(
+        val startDate: LocalDateTime,
+        val endDate: LocalDateTime
+    )
+}
 
 sealed class RequirementValue
 
