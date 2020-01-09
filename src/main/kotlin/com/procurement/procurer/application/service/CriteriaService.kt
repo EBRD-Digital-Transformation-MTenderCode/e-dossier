@@ -3,17 +3,12 @@ package com.procurement.procurer.application.service
 import com.procurement.procurer.application.exception.ErrorException
 import com.procurement.procurer.application.exception.ErrorType
 import com.procurement.procurer.application.model.data.CreatedCriteria
-import com.procurement.procurer.application.model.data.ExpectedValue
-import com.procurement.procurer.application.repository.CriteriaRepository
-import com.procurement.procurer.application.service.context.GetCriteriaContext
-import com.procurement.procurer.infrastructure.converter.createResponseData
-import com.procurement.procurer.infrastructure.converter.toData
-import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
-import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
 import com.procurement.procurer.application.model.data.GetCriteriaData
+import com.procurement.procurer.application.model.data.NoneValue
 import com.procurement.procurer.application.model.data.RequestsForEvPanelsData
 import com.procurement.procurer.application.model.data.Requirement
+import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.procurer.application.service.command.buildCriteria
 import com.procurement.procurer.application.service.command.checkActualItemRelation
 import com.procurement.procurer.application.service.command.checkAnswerCompleteness
 import com.procurement.procurer.application.service.command.checkAnsweredOnce
@@ -40,15 +35,19 @@ import com.procurement.procurer.application.service.command.checkRequirementRela
 import com.procurement.procurer.application.service.command.checkRequirements
 import com.procurement.procurer.application.service.command.createCnEntity
 import com.procurement.procurer.application.service.command.extractCreatedCriteria
-import com.procurement.procurer.application.service.command.generateCreateCriteriaResponse
-import com.procurement.procurer.application.service.command.buildCriteria
 import com.procurement.procurer.application.service.command.toEntity
 import com.procurement.procurer.application.service.context.CheckResponsesContext
 import com.procurement.procurer.application.service.context.CreateCriteriaContext
 import com.procurement.procurer.application.service.context.EvPanelsContext
+import com.procurement.procurer.application.service.context.GetCriteriaContext
+import com.procurement.procurer.infrastructure.converter.createResponseData
+import com.procurement.procurer.infrastructure.converter.toData
+import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
+import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
+import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
-import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
+import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
 import com.procurement.procurer.infrastructure.utils.toObject
 
 class CriteriaService(
@@ -141,6 +140,7 @@ class CriteriaService(
                 title = "",
                 description = "",
                 source = CriteriaSource.PROCURING_ENTITY,
+                relatesTo = CriteriaRelatesTo.AWARD,
                 requirementGroups = listOf(
                     RequestsForEvPanelsData.Criteria.RequirementGroup(
                         id = generationService.generatePermanentRequirementGroupId(),
@@ -149,7 +149,7 @@ class CriteriaService(
                                 id = generationService.generatePermanentRequirementId().toString(),
                                 title = "",
                                 dataType = RequirementDataType.BOOLEAN,
-                                value = ExpectedValue.of(false),
+                                value = NoneValue,
                                 period = null,
                                 description = null
                             )
@@ -160,6 +160,5 @@ class CriteriaService(
             )
         )
     }
-
 }
 
