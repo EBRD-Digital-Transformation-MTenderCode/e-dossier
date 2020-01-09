@@ -11,6 +11,7 @@ fun RequestsForEvPanelsData.toResponseDto(): RequestsForEvPanelsResponse {
             title = this.criteria.title,
             description = this.criteria.description,
             source = this.criteria.source,
+            relatesTo = this.criteria.relatesTo,
             requirementGroups = this.criteria.requirementGroups.map { requirementGroup ->
                 RequestsForEvPanelsResponse.Criteria.RequirementGroup(
                     id = requirementGroup.id,

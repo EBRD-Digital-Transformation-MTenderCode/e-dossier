@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.procurer.application.model.data.Requirement
 import com.procurement.procurer.infrastructure.bind.criteria.RequirementDeserializer
 import com.procurement.procurer.infrastructure.bind.criteria.RequirementSerializer
+import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import java.util.*
 
@@ -18,6 +19,7 @@ data class RequestsForEvPanelsResponse(
         @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
         @field:JsonProperty("title") @param:JsonProperty("title") val title: String,
         @field:JsonProperty("source") @param:JsonProperty("source") val source: CriteriaSource,
+        @field:JsonProperty("relatesTo") @param:JsonProperty("relatesTo") val relatesTo: CriteriaRelatesTo,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
