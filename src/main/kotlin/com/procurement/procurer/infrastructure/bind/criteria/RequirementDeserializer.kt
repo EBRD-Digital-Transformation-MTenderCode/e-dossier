@@ -62,46 +62,53 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
                 isExpectedValue(requirementNode) -> {
                     when (dataType) {
                         RequirementDataType.BOOLEAN ->
-                            if (requirementNode.get("expectedValue").isBoolean())
+                            if (requirementNode.get("expectedValue").isBoolean)
                                 ExpectedValue.of(requirementNode.get("expectedValue").booleanValue())
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
 
                         RequirementDataType.STRING ->
-                            if (requirementNode.get("expectedValue").isTextual())
+                            if (requirementNode.get("expectedValue").isTextual)
                                 ExpectedValue.of(requirementNode.get("expectedValue").textValue())
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
 
                         RequirementDataType.NUMBER ->
-                            if (requirementNode.get("expectedValue").isBigDecimal() || requirementNode.get("expectedValue").isBigInteger())
+                            if (requirementNode.get("expectedValue").isBigDecimal || requirementNode.get("expectedValue").isBigInteger)
                                 ExpectedValue.of(BigDecimal(requirementNode.get("expectedValue").asText()))
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
 
                         RequirementDataType.INTEGER ->
-                            if (requirementNode.get("expectedValue").isBigInteger())
+                            if (requirementNode.get("expectedValue").isBigInteger)
                                 ExpectedValue.of(requirementNode.get("expectedValue").longValue())
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
                     }
                 }
                 isRange(requirementNode) -> {
                     when (dataType) {
                         RequirementDataType.NUMBER ->
-                            if ((requirementNode.get("minValue").isBigDecimal() || requirementNode.get("minValue").isBigInteger())
-                                && (requirementNode.get("maxValue").isBigDecimal() || requirementNode.get("maxValue").isBigInteger()))
+                            if ((requirementNode.get("minValue").isBigDecimal || requirementNode.get("minValue").isBigInteger)
+                                && (requirementNode.get("maxValue").isBigDecimal || requirementNode.get("maxValue").isBigInteger))
                                 RangeValue.of(
                                     BigDecimal(requirementNode.get("minValue").asText()),
                                     BigDecimal(requirementNode.get("maxValue").asText())
                                 )
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
 
                         RequirementDataType.INTEGER ->
-                            if (requirementNode.get("minValue").isBigInteger() && requirementNode.get("maxValue").isBigInteger())
+                            if (requirementNode.get("minValue").isBigInteger && requirementNode.get("maxValue").isBigInteger)
                                 RangeValue.of(
                                     requirementNode.get("minValue").asLong(),
                                     requirementNode.get("maxValue").asLong()
                                 )
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
 
-                        RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
+                        RequirementDataType.BOOLEAN,
+                        RequirementDataType.STRING ->
                             throw ErrorException(
                                 ErrorType.INVALID_REQUIREMENT_VALUE,
                                 message = "Boolean or String datatype cannot have a range"
@@ -111,14 +118,17 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
                 isOnlyMax(requirementNode) -> {
                     when (dataType) {
                         RequirementDataType.NUMBER ->
-                            if (requirementNode.get("maxValue").isBigDecimal() || requirementNode.get("maxValue").isBigInteger())
+                            if (requirementNode.get("maxValue").isBigDecimal || requirementNode.get("maxValue").isBigInteger)
                                 MaxValue.of(BigDecimal(requirementNode.get("maxValue").asText()))
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
                         RequirementDataType.INTEGER ->
-                            if (requirementNode.get("maxValue").isBigInteger())
+                            if (requirementNode.get("maxValue").isBigInteger)
                                 MaxValue.of(requirementNode.get("maxValue").longValue())
-                            else datatypeMismatchException()
-                        RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
+                            else
+                                datatypeMismatchException()
+                        RequirementDataType.BOOLEAN,
+                        RequirementDataType.STRING ->
                             throw ErrorException(
                                 ErrorType.INVALID_REQUIREMENT_VALUE,
                                 message = "Boolean or String datatype cannot have a max value"
@@ -128,16 +138,19 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
                 isOnlyMin(requirementNode) -> {
                     when (dataType) {
                         RequirementDataType.NUMBER ->
-                            if (requirementNode.get("minValue").isBigDecimal() || requirementNode.get("minValue").isBigInteger())
+                            if (requirementNode.get("minValue").isBigDecimal || requirementNode.get("minValue").isBigInteger)
                                 MinValue.of(BigDecimal(requirementNode.get("minValue").asText()))
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
 
                         RequirementDataType.INTEGER ->
-                            if (requirementNode.get("minValue").isBigInteger())
+                            if (requirementNode.get("minValue").isBigInteger)
                                 MinValue.of(requirementNode.get("minValue").longValue())
-                            else datatypeMismatchException()
+                            else
+                                datatypeMismatchException()
 
-                        RequirementDataType.BOOLEAN, RequirementDataType.STRING ->
+                        RequirementDataType.BOOLEAN,
+                        RequirementDataType.STRING ->
                             throw ErrorException(
                                 ErrorType.INVALID_REQUIREMENT_VALUE,
                                 message = "Boolean or String datatype cannot have a min value"
@@ -150,7 +163,7 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
                 else -> {
                     throw ErrorException(
                         ErrorType.INVALID_REQUIREMENT_VALUE,
-                        message = "Expected value cannot exists with Min/MaxValue"
+                        message = "Unknown value in Requirement object"
                     )
                 }
             }
