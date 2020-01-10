@@ -123,13 +123,7 @@ class CommandService(
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
-                        val context = EvPanelsContext(
-                            cpid = cm.cpid,
-                            country = cm.country,
-                            language = cm.language,
-                            pmd = cm.pmd
-                        )
-                        val serviceResponse = criteriaService.createRequestsForEvPanels(context = context)
+                        val serviceResponse = criteriaService.createRequestsForEvPanels()
                         val response = serviceResponse.toResponseDto()
                         ResponseDto(data = response)
                     }

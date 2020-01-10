@@ -133,7 +133,7 @@ class CriteriaService(
         }
     }
 
-    fun createRequestsForEvPanels(context: EvPanelsContext): RequestsForEvPanelsData {
+    fun createRequestsForEvPanels(): RequestsForEvPanelsData {
         return RequestsForEvPanelsData(
             criteria = RequestsForEvPanelsData.Criteria(
                 id = generationService.generatePermanentCriteriaId(),
