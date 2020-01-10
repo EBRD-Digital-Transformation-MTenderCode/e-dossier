@@ -6,27 +6,29 @@ import com.procurement.procurer.infrastructure.model.dto.response.RequestsForEvP
 
 fun RequestsForEvPanelsData.toResponseDto(): RequestsForEvPanelsResponse {
     return RequestsForEvPanelsResponse(
-        criteria = RequestsForEvPanelsResponse.Criteria(
-            id = this.criteria.id,
-            title = this.criteria.title,
-            description = this.criteria.description,
-            source = this.criteria.source,
-            relatesTo = this.criteria.relatesTo,
-            requirementGroups = this.criteria.requirementGroups.map { requirementGroup ->
-                RequestsForEvPanelsResponse.Criteria.RequirementGroup(
-                    id = requirementGroup.id,
-                    requirements = requirementGroup.requirements.map { requirement ->
-                        Requirement(
-                            id = requirement.id,
-                            title = requirement.title,
-                            dataType = requirement.dataType,
-                            value = requirement.value,
-                            period = requirement.period,
-                            description = requirement.description
-                        )
-                    }
-                )
-            }
-        )
+        criteria = this.criteria.let { criteria ->
+            RequestsForEvPanelsResponse.Criteria(
+                id = criteria.id,
+                title = criteria.title,
+                description = criteria.description,
+                source = criteria.source,
+                relatesTo = criteria.relatesTo,
+                requirementGroups = criteria.requirementGroups.map { requirementGroup ->
+                    RequestsForEvPanelsResponse.Criteria.RequirementGroup(
+                        id = requirementGroup.id,
+                        requirements = requirementGroup.requirements.map { requirement ->
+                            Requirement(
+                                id = requirement.id,
+                                title = requirement.title,
+                                dataType = requirement.dataType,
+                                value = requirement.value,
+                                period = requirement.period,
+                                description = requirement.description
+                            )
+                        }
+                    )
+                }
+            )
+        }
     )
 }
