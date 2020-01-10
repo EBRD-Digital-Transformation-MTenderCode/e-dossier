@@ -1,6 +1,6 @@
 package com.procurement.procurer.application.model.data
 
-import com.fasterxml.jackson.annotation.JsonInclude
+import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
 import java.util.*
 
@@ -11,6 +11,7 @@ data class RequestsForEvPanelsData(
         val id: UUID,
         val title: String,
         val source: CriteriaSource,
+        val relatesTo: CriteriaRelatesTo,
         val description: String?,
         val requirementGroups: List<RequirementGroup>
     ) {

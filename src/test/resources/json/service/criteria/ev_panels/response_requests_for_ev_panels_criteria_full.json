@@ -3,6 +3,7 @@
     "id": "d3732c09-7d62-4edc-a172-241da6636e7c",
     "title": "Conflict of interest",
     "source": "procuringEntity",
+    "relatesTo": "award",
     "description": "Is there conflict of interest with any of tenderers submitted bids",
     "requirementGroups": [
       {
