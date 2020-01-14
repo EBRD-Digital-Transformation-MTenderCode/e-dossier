@@ -43,7 +43,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 ])
 class CriteriaServiceIT {
     companion object {
-        private const val KEYSPACE = "procurer"
+        private const val KEYSPACE = "dossier"
         private const val TABLE_PROCURER = "tenders"
         private const val COLUMN_CPID = "cp_id"
         private const val COLUMN_OWNER = "owner"

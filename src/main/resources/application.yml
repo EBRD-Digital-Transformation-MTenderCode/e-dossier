@@ -7,7 +7,5 @@ spring:
 
 cassandra:
   contact-points: localhost
-  keyspace-name: procurer
+  keyspace-name: dossier
   port: 9042
-#  username: caclient
-#  password: 6AH7vbrkMWnfK

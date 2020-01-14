@@ -35,7 +35,7 @@ class CassandraACRepositoryIT {
         private const val OWNER = "owner-1"
         private const val JSON_DATA = """ {"ac": "data"} """
 
-        private const val KEYSPACE = "procurer"
+        private const val KEYSPACE = "dossier"
         private const val TABLE_PROCURER = "tenders"
         private const val COLUMN_CPID = "cp_id"
         private const val COLUMN_OWNER = "owner"
