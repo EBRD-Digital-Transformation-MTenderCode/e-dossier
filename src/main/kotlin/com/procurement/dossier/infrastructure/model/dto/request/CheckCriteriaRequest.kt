@@ -1,24 +1,24 @@
-package com.procurement.procurer.infrastructure.model.dto.request
+package com.procurement.dossier.infrastructure.model.dto.request
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.procurement.procurer.application.model.data.CoefficientRate
-import com.procurement.procurer.application.model.data.CoefficientValue
-import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.infrastructure.bind.coefficient.CoefficientRateDeserializer
-import com.procurement.procurer.infrastructure.bind.coefficient.CoefficientRateSerializer
-import com.procurement.procurer.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
-import com.procurement.procurer.infrastructure.bind.coefficient.value.CoefficientValueSerializer
-import com.procurement.procurer.infrastructure.bind.criteria.RequirementDeserializer
-import com.procurement.procurer.infrastructure.bind.criteria.RequirementSerializer
-import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
-import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
-import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
-import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
-import com.procurement.procurer.infrastructure.model.dto.ocds.MainProcurementCategory
+import com.procurement.dossier.application.model.data.CoefficientRate
+import com.procurement.dossier.application.model.data.CoefficientValue
+import com.procurement.dossier.application.model.data.Requirement
+import com.procurement.dossier.infrastructure.bind.coefficient.CoefficientRateDeserializer
+import com.procurement.dossier.infrastructure.bind.coefficient.CoefficientRateSerializer
+import com.procurement.dossier.infrastructure.bind.coefficient.value.CoefficientValueDeserializer
+import com.procurement.dossier.infrastructure.bind.coefficient.value.CoefficientValueSerializer
+import com.procurement.dossier.infrastructure.bind.criteria.RequirementDeserializer
+import com.procurement.dossier.infrastructure.bind.criteria.RequirementSerializer
+import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteria
+import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteriaDetails
+import com.procurement.dossier.infrastructure.model.dto.ocds.ConversionsRelatesTo
+import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
+import com.procurement.dossier.infrastructure.model.dto.ocds.MainProcurementCategory
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CheckCriteriaRequest(

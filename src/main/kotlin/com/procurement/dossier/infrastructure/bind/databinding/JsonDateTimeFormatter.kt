@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.bind.databinding
+package com.procurement.dossier.infrastructure.bind.databinding
 
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder

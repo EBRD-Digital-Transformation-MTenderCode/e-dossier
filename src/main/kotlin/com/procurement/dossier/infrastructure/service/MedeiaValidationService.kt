@@ -1,14 +1,14 @@
-package com.procurement.procurer.infrastructure.service
+package com.procurement.dossier.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.procurement.procurer.application.exception.ErrorException
-import com.procurement.procurer.application.exception.ErrorType
-import com.procurement.procurer.application.service.JsonValidationService
-import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.procurer.infrastructure.model.dto.request.CheckCriteriaRequest
-import com.procurement.procurer.infrastructure.model.dto.request.CheckResponsesRequest
-import com.procurement.procurer.infrastructure.utils.toJson
+import com.procurement.dossier.application.exception.ErrorException
+import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.application.service.JsonValidationService
+import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
+import com.procurement.dossier.infrastructure.model.dto.request.CheckCriteriaRequest
+import com.procurement.dossier.infrastructure.model.dto.request.CheckResponsesRequest
+import com.procurement.dossier.infrastructure.utils.toJson
 import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.ValidationFailedException
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi

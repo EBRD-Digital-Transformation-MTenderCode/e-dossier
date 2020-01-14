@@ -1,8 +1,8 @@
-package com.procurement.procurer.infrastructure.converter
+package com.procurement.dossier.infrastructure.converter
 
-import com.procurement.procurer.application.model.data.RequestsForEvPanelsData
-import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.infrastructure.model.dto.response.RequestsForEvPanelsResponse
+import com.procurement.dossier.application.model.data.RequestsForEvPanelsData
+import com.procurement.dossier.application.model.data.Requirement
+import com.procurement.dossier.infrastructure.model.dto.response.RequestsForEvPanelsResponse
 
 fun RequestsForEvPanelsData.toResponseDto(): RequestsForEvPanelsResponse {
     return RequestsForEvPanelsResponse(

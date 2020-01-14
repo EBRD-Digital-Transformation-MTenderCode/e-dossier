@@ -1,12 +1,12 @@
-package com.procurement.procurer.infrastructure.repository
+package com.procurement.dossier.infrastructure.repository
 
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
-import com.procurement.procurer.application.exception.DatabaseInteractionException
-import com.procurement.procurer.application.model.entity.CnEntity
-import com.procurement.procurer.application.repository.CriteriaRepository
+import com.procurement.dossier.application.exception.DatabaseInteractionException
+import com.procurement.dossier.application.model.entity.CnEntity
+import com.procurement.dossier.application.repository.CriteriaRepository
 import org.springframework.stereotype.Repository
 
 @Repository

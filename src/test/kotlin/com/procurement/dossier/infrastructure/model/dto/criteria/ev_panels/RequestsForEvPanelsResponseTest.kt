@@ -1,7 +1,7 @@
-package com.procurement.procurer.infrastructure.model.dto.criteria.ev_panels
+package com.procurement.dossier.infrastructure.model.dto.criteria.ev_panels
 
-import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.response.RequestsForEvPanelsResponse
+import com.procurement.dossier.infrastructure.model.dto.AbstractDTOTestBase
+import com.procurement.dossier.infrastructure.model.dto.response.RequestsForEvPanelsResponse
 import org.junit.jupiter.api.Test
 
 class RequestsForEvPanelsResponseTest : AbstractDTOTestBase<RequestsForEvPanelsResponse>(

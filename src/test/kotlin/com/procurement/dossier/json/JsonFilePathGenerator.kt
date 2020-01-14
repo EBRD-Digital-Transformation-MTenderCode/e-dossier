@@ -1,6 +1,6 @@
-package com.procurement.procurer.json
+package com.procurement.dossier.json
 
-import com.procurement.procurer.infrastructure.model.dto.ocds.ProcurementMethod
+import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 
 object JsonFilePathGenerator {
 

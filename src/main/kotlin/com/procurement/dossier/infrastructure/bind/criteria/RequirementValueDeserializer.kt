@@ -1,12 +1,12 @@
-package com.procurement.procurer.infrastructure.bind.criteria
+package com.procurement.dossier.infrastructure.bind.criteria
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.procurement.procurer.application.model.data.RequirementRsValue
-import com.procurement.procurer.infrastructure.exception.RequirementValueException
+import com.procurement.dossier.application.model.data.RequirementRsValue
+import com.procurement.dossier.infrastructure.exception.RequirementValueException
 import java.io.IOException
 import java.math.BigDecimal
 

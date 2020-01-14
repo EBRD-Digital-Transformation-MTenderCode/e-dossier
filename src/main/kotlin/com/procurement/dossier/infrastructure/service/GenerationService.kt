@@ -1,6 +1,6 @@
-package com.procurement.procurer.infrastructure.service
+package com.procurement.dossier.infrastructure.service
 
-import com.procurement.procurer.application.service.Generable
+import com.procurement.dossier.application.service.Generable
 import java.util.*
 
 class GenerationService : Generable {

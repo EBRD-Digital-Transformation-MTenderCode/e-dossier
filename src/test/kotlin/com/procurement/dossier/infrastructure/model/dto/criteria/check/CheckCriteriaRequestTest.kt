@@ -1,7 +1,7 @@
-package com.procurement.procurer.infrastructure.model.dto.criteria.check
+package com.procurement.dossier.infrastructure.model.dto.criteria.check
 
-import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.request.CheckCriteriaRequest
+import com.procurement.dossier.infrastructure.model.dto.AbstractDTOTestBase
+import com.procurement.dossier.infrastructure.model.dto.request.CheckCriteriaRequest
 import org.junit.jupiter.api.Test
 
 class CheckCriteriaRequestTest : AbstractDTOTestBase<CheckCriteriaRequest>(

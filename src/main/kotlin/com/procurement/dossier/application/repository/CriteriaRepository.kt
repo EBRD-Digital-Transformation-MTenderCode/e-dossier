@@ -1,6 +1,6 @@
-package com.procurement.procurer.application.repository
+package com.procurement.dossier.application.repository
 
-import com.procurement.procurer.application.model.entity.CnEntity
+import com.procurement.dossier.application.model.entity.CnEntity
 
 interface CriteriaRepository {
     fun findBy(cpid: String): CnEntity?

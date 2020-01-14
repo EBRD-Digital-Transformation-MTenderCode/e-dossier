@@ -1,6 +1,6 @@
-package com.procurement.procurer.application.model.data
+package com.procurement.dossier.application.model.data
 
-import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
+import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import java.math.BigDecimal
 import java.time.LocalDateTime
 

@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.repository
+package com.procurement.dossier.infrastructure.repository
 
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.Cluster
@@ -11,10 +11,10 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.procurer.application.exception.DatabaseInteractionException
-import com.procurement.procurer.application.model.entity.CnEntity
-import com.procurement.procurer.application.repository.CriteriaRepository
-import com.procurement.procurer.infrastructure.config.DatabaseTestConfiguration
+import com.procurement.dossier.application.exception.DatabaseInteractionException
+import com.procurement.dossier.application.model.entity.CnEntity
+import com.procurement.dossier.application.repository.CriteriaRepository
+import com.procurement.dossier.infrastructure.config.DatabaseTestConfiguration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

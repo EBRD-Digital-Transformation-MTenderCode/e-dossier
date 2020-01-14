@@ -1,4 +1,4 @@
-package com.procurement.procurer.application.exception
+package com.procurement.dossier.application.exception
 
 class ErrorException(val error: ErrorType, message: String? = null) :
     RuntimeException(

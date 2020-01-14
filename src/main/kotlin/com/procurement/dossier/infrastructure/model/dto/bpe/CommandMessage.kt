@@ -1,13 +1,13 @@
-package com.procurement.procurer.infrastructure.model.dto.bpe
+package com.procurement.dossier.infrastructure.model.dto.bpe
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.procurer.application.exception.EnumException
-import com.procurement.procurer.application.exception.ErrorException
-import com.procurement.procurer.application.exception.ErrorType
-import com.procurement.procurer.infrastructure.model.dto.ocds.ProcurementMethod
+import com.procurement.dossier.application.exception.EnumException
+import com.procurement.dossier.application.exception.ErrorException
+import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import java.util.*
 
 data class CommandMessage @JsonCreator constructor(

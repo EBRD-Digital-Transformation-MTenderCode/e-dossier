@@ -145,12 +145,12 @@
                                 <mutator>STRONGER</mutator>
                             </mutators>
                             <targetClasses>
-                                <param>com.procurement.procurer.service.*</param>
-                                <param>com.procurement.procurer.application.service.*</param>
+                                <param>com.procurement.dossier.service.*</param>
+                                <param>com.procurement.dossier.application.service.*</param>
                             </targetClasses>
                             <targetTests>
-                                <param>com.procurement.procurer.service.*</param>
-                                <param>com.procurement.procurer.application.service.*</param>
+                                <param>com.procurement.dossier.service.*</param>
+                                <param>com.procurement.dossier.application.service.*</param>
                             </targetTests>
                         </configuration>
                         <executions>

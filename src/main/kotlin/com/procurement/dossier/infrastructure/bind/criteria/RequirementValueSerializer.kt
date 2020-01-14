@@ -1,10 +1,10 @@
-package com.procurement.procurer.infrastructure.bind.criteria
+package com.procurement.dossier.infrastructure.bind.criteria
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.procurement.procurer.application.model.data.RequirementRsValue
+import com.procurement.dossier.application.model.data.RequirementRsValue
 import java.io.IOException
 
 class RequirementValueSerializer : JsonSerializer<RequirementRsValue>() {

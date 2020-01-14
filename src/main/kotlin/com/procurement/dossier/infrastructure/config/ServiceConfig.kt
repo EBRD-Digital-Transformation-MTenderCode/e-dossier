@@ -1,10 +1,10 @@
-package com.procurement.procurer.infrastructure.config
+package com.procurement.dossier.infrastructure.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.procurement.procurer.application.repository.CriteriaRepository
-import com.procurement.procurer.application.service.CriteriaService
-import com.procurement.procurer.infrastructure.service.GenerationService
-import com.procurement.procurer.infrastructure.service.MedeiaValidationService
+import com.procurement.dossier.application.repository.CriteriaRepository
+import com.procurement.dossier.application.service.CriteriaService
+import com.procurement.dossier.infrastructure.service.GenerationService
+import com.procurement.dossier.infrastructure.service.MedeiaValidationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ComponentScan(
     basePackages = [
-        "com.procurement.procurer.infrastructure.service"
+        "com.procurement.dossier.infrastructure.service"
     ]
 )
 class ServiceConfig {

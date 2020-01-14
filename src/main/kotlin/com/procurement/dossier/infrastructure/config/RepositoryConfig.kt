@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.config
+package com.procurement.dossier.infrastructure.config
 
 import com.datastax.driver.core.Cluster
 import com.datastax.driver.core.PlainTextAuthProvider
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @EnableConfigurationProperties(CassandraProperties::class)
 @ComponentScan(basePackages = [
-    "com.procurement.procurer.infrastructure.repository"
+    "com.procurement.dossier.infrastructure.repository"
 ])
 class RepositoryConfig constructor(private val cassandraProperties: CassandraProperties) {
 

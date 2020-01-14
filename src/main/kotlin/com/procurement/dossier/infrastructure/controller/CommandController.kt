@@ -1,15 +1,15 @@
-package com.procurement.procurer.infrastructure.controller
+package com.procurement.dossier.infrastructure.controller
 
-import com.procurement.procurer.application.exception.EnumException
-import com.procurement.procurer.application.exception.ErrorException
-import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.procurer.infrastructure.model.dto.bpe.ResponseDto
-import com.procurement.procurer.infrastructure.model.dto.bpe.getEnumExceptionResponseDto
-import com.procurement.procurer.infrastructure.model.dto.bpe.getErrorExceptionResponseDto
-import com.procurement.procurer.infrastructure.model.dto.bpe.getExceptionResponseDto
-import com.procurement.procurer.infrastructure.service.CommandService
-import com.procurement.procurer.infrastructure.utils.toJson
-import com.procurement.procurer.infrastructure.utils.toObject
+import com.procurement.dossier.application.exception.EnumException
+import com.procurement.dossier.application.exception.ErrorException
+import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
+import com.procurement.dossier.infrastructure.model.dto.bpe.ResponseDto
+import com.procurement.dossier.infrastructure.model.dto.bpe.getEnumExceptionResponseDto
+import com.procurement.dossier.infrastructure.model.dto.bpe.getErrorExceptionResponseDto
+import com.procurement.dossier.infrastructure.model.dto.bpe.getExceptionResponseDto
+import com.procurement.dossier.infrastructure.service.CommandService
+import com.procurement.dossier.infrastructure.utils.toJson
+import com.procurement.dossier.infrastructure.utils.toObject
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

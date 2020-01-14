@@ -59,7 +59,7 @@
         <!--</encoder>-->
     <!--</appender>-->
 
-    <logger name="com.procurement.procurer" level="DEBUG" additivity="false">
+    <logger name="com.procurement.dossier" level="DEBUG" additivity="false">
         <appender-ref ref="FILE"/>
         <!--<appender-ref ref="LOGSTASH"/>-->
         <appender-ref ref="STDOUT"/>

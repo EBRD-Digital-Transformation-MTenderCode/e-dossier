@@ -1,8 +1,8 @@
-package com.procurement.procurer.json
+package com.procurement.dossier.json
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.procurer.infrastructure.utils.toJson
-import com.procurement.procurer.json.exception.JsonCompareException
+import com.procurement.dossier.infrastructure.utils.toJson
+import com.procurement.dossier.json.exception.JsonCompareException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.fail
 

@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.repository
+package com.procurement.dossier.infrastructure.repository
 
 import org.testcontainers.containers.CassandraContainer
 

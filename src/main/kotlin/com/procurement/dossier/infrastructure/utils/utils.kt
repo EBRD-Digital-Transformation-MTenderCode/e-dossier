@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.utils
+package com.procurement.dossier.infrastructure.utils
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -9,11 +9,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.procurement.procurer.infrastructure.bind.databinding.IntDeserializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeFormatter
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
-import com.procurement.procurer.infrastructure.bind.databinding.StringsDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.IntDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeFormatter
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.dossier.infrastructure.bind.databinding.StringsDeserializer
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime

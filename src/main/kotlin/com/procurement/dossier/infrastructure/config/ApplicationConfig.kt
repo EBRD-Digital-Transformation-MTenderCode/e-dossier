@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.config
+package com.procurement.dossier.infrastructure.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import

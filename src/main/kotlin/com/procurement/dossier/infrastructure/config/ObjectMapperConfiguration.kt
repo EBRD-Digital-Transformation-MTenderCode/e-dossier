@@ -1,14 +1,14 @@
-package com.procurement.procurer.infrastructure.config
+package com.procurement.dossier.infrastructure.config
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.procurement.procurer.infrastructure.bind.databinding.IntDeserializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
-import com.procurement.procurer.infrastructure.bind.databinding.StringsDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.IntDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.dossier.infrastructure.bind.databinding.StringsDeserializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.time.LocalDateTime

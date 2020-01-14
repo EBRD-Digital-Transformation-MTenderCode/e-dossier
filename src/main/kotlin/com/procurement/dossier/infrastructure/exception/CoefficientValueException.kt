@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.exception
+package com.procurement.dossier.infrastructure.exception
 
 class CoefficientValueException(coefficientValue: String, description: String = "") :
     RuntimeException("Incorrect value of the coefficient: '$coefficientValue'. $description")

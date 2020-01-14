@@ -1,7 +1,7 @@
-package com.procurement.procurer.infrastructure.model.dto.criteria.create
+package com.procurement.dossier.infrastructure.model.dto.criteria.create
 
-import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
+import com.procurement.dossier.infrastructure.model.dto.AbstractDTOTestBase
+import com.procurement.dossier.infrastructure.model.dto.request.CreateCriteriaRequest
 import org.junit.jupiter.api.Test
 
 class CreateCriteriaRequestTest : AbstractDTOTestBase<CreateCriteriaRequest>(

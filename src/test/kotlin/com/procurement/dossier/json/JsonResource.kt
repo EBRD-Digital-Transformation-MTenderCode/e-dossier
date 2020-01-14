@@ -1,4 +1,4 @@
-package com.procurement.procurer.json
+package com.procurement.dossier.json
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -9,14 +9,14 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.procurement.procurer.json.exception.JsonBindingException
-import com.procurement.procurer.json.exception.JsonFileNotFoundException
-import com.procurement.procurer.json.exception.JsonMappingException
-import com.procurement.procurer.json.exception.JsonParsingException
-import com.procurement.procurer.infrastructure.bind.databinding.IntDeserializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
-import com.procurement.procurer.infrastructure.bind.databinding.StringsDeserializer
+import com.procurement.dossier.json.exception.JsonBindingException
+import com.procurement.dossier.json.exception.JsonFileNotFoundException
+import com.procurement.dossier.json.exception.JsonMappingException
+import com.procurement.dossier.json.exception.JsonParsingException
+import com.procurement.dossier.infrastructure.bind.databinding.IntDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.dossier.infrastructure.bind.databinding.StringsDeserializer
 import java.io.IOException
 import java.io.StringWriter
 import java.nio.charset.Charset

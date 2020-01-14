@@ -1,4 +1,4 @@
-package com.procurement.procurer.json.exception
+package com.procurement.dossier.json.exception
 
 sealed class JsonException(message: String, exception: Exception? = null) :
     RuntimeException(message, exception)

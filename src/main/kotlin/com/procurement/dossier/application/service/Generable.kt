@@ -1,4 +1,4 @@
-package com.procurement.procurer.application.service
+package com.procurement.dossier.application.service
 
 import java.util.*
 

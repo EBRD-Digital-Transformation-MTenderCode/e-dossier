@@ -1,7 +1,7 @@
-package com.procurement.procurer.infrastructure.converter
+package com.procurement.dossier.infrastructure.converter
 
-import com.procurement.procurer.application.model.data.CheckResponsesData
-import com.procurement.procurer.infrastructure.model.dto.request.CheckResponsesRequest
+import com.procurement.dossier.application.model.data.CheckResponsesData
+import com.procurement.dossier.infrastructure.model.dto.request.CheckResponsesRequest
 
 fun CheckResponsesRequest.toData(): CheckResponsesData {
     return CheckResponsesData(

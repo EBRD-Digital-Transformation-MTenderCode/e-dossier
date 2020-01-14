@@ -1,8 +1,8 @@
-package com.procurement.procurer.infrastructure.converter
+package com.procurement.dossier.infrastructure.converter
 
-import com.procurement.procurer.application.model.data.CreatedCriteria
-import com.procurement.procurer.application.model.data.GetCriteriaData
-import com.procurement.procurer.infrastructure.model.dto.response.GetCriteriaResponse
+import com.procurement.dossier.application.model.data.CreatedCriteria
+import com.procurement.dossier.application.model.data.GetCriteriaData
+import com.procurement.dossier.infrastructure.model.dto.response.GetCriteriaResponse
 
 fun createResponseData(createdCriteria: CreatedCriteria): GetCriteriaData {
     return GetCriteriaData(

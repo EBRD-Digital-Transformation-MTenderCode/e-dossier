@@ -1,15 +1,15 @@
-package com.procurement.procurer.infrastructure.model.dto.request
+package com.procurement.dossier.infrastructure.model.dto.request
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.procurement.procurer.application.model.data.RequirementRsValue
-import com.procurement.procurer.infrastructure.bind.criteria.RequirementValueDeserializer
-import com.procurement.procurer.infrastructure.bind.criteria.RequirementValueSerializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.dossier.application.model.data.RequirementRsValue
+import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueDeserializer
+import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueSerializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.bind.criteria
+package com.procurement.dossier.infrastructure.bind.criteria
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -6,17 +6,17 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import com.procurement.procurer.application.exception.ErrorException
-import com.procurement.procurer.application.exception.ErrorType
-import com.procurement.procurer.application.model.data.ExpectedValue
-import com.procurement.procurer.application.model.data.MaxValue
-import com.procurement.procurer.application.model.data.MinValue
-import com.procurement.procurer.application.model.data.NoneValue
-import com.procurement.procurer.application.model.data.RangeValue
-import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.application.model.data.RequirementValue
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeDeserializer
-import com.procurement.procurer.infrastructure.model.dto.ocds.RequirementDataType
+import com.procurement.dossier.application.exception.ErrorException
+import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.application.model.data.ExpectedValue
+import com.procurement.dossier.application.model.data.MaxValue
+import com.procurement.dossier.application.model.data.MinValue
+import com.procurement.dossier.application.model.data.NoneValue
+import com.procurement.dossier.application.model.data.RangeValue
+import com.procurement.dossier.application.model.data.Requirement
+import com.procurement.dossier.application.model.data.RequirementValue
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
+import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import java.io.IOException
 import java.math.BigDecimal
 

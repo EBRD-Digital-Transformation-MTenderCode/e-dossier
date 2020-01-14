@@ -1,12 +1,12 @@
-package com.procurement.procurer.infrastructure.bind.coefficient
+package com.procurement.dossier.infrastructure.bind.coefficient
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.JsonToken
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.procurement.procurer.application.model.data.CoefficientRate
-import com.procurement.procurer.infrastructure.exception.CoefficientException
+import com.procurement.dossier.application.model.data.CoefficientRate
+import com.procurement.dossier.infrastructure.exception.CoefficientException
 import java.io.IOException
 import java.math.BigDecimal
 

@@ -1,10 +1,10 @@
-package com.procurement.procurer.infrastructure.bind.coefficient.value
+package com.procurement.dossier.infrastructure.bind.coefficient.value
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.procurement.procurer.application.model.data.CoefficientValue
+import com.procurement.dossier.application.model.data.CoefficientValue
 import java.io.IOException
 
 class CoefficientValueSerializer : JsonSerializer<CoefficientValue>() {

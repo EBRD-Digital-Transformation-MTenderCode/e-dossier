@@ -1,4 +1,4 @@
-package com.procurement.procurer.infrastructure.bind.criteria
+package com.procurement.dossier.infrastructure.bind.criteria
 
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.procurement.procurer.application.model.data.ExpectedValue
-import com.procurement.procurer.application.model.data.MaxValue
-import com.procurement.procurer.application.model.data.MinValue
-import com.procurement.procurer.application.model.data.NoneValue
-import com.procurement.procurer.application.model.data.RangeValue
-import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.dossier.application.model.data.ExpectedValue
+import com.procurement.dossier.application.model.data.MaxValue
+import com.procurement.dossier.application.model.data.MinValue
+import com.procurement.dossier.application.model.data.NoneValue
+import com.procurement.dossier.application.model.data.RangeValue
+import com.procurement.dossier.application.model.data.Requirement
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import java.io.IOException
 import java.math.BigDecimal
 

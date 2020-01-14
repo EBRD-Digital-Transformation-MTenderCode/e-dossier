@@ -1,4 +1,4 @@
-package com.procurement.procurer.json
+package com.procurement.dossier.json
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode

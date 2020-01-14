@@ -1,4 +1,4 @@
-package com.procurement.procurer.application.model.entity
+package com.procurement.dossier.application.model.entity
 
 data class CnEntity(
     val cpid: String,

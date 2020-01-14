@@ -1,7 +1,7 @@
-package com.procurement.procurer.infrastructure.model.dto.criteria.responses
+package com.procurement.dossier.infrastructure.model.dto.criteria.responses
 
-import com.procurement.procurer.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.procurer.infrastructure.model.dto.request.CheckResponsesRequest
+import com.procurement.dossier.infrastructure.model.dto.AbstractDTOTestBase
+import com.procurement.dossier.infrastructure.model.dto.request.CheckResponsesRequest
 import org.junit.jupiter.api.Test
 
 class CheckResponsesRequestTest : AbstractDTOTestBase<CheckResponsesRequest>(

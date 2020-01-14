@@ -1,6 +1,6 @@
-package com.procurement.procurer
+package com.procurement.dossier
 
-import com.procurement.procurer.infrastructure.config.ApplicationConfig
+import com.procurement.dossier.infrastructure.config.ApplicationConfig
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 

@@ -1,15 +1,15 @@
-package com.procurement.procurer.infrastructure.model.dto.response
+package com.procurement.dossier.infrastructure.model.dto.response
 
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.procurement.procurer.application.model.data.Requirement
-import com.procurement.procurer.infrastructure.bind.criteria.RequirementDeserializer
-import com.procurement.procurer.infrastructure.bind.criteria.RequirementSerializer
-import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaRelatesTo
-import com.procurement.procurer.infrastructure.model.dto.ocds.CriteriaSource
+import com.procurement.dossier.application.model.data.Requirement
+import com.procurement.dossier.infrastructure.bind.criteria.RequirementDeserializer
+import com.procurement.dossier.infrastructure.bind.criteria.RequirementSerializer
+import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
+import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import java.util.*
 
 data class RequestsForEvPanelsResponse(

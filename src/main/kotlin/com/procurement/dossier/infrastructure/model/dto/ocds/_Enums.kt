@@ -1,8 +1,8 @@
-package com.procurement.procurer.infrastructure.model.dto.ocds
+package com.procurement.dossier.infrastructure.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import com.procurement.procurer.application.exception.EnumException
+import com.procurement.dossier.application.exception.EnumException
 import java.util.*
 
 enum class AwardCriteria(@JsonValue val value: String) {

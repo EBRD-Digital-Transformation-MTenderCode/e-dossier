@@ -1,4 +1,4 @@
-package com.procurement.procurer.application.model.data
+package com.procurement.dossier.application.model.data
 
 import java.time.LocalDateTime
 

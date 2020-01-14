@@ -1,8 +1,8 @@
-package com.procurement.procurer.application.model.data
+package com.procurement.dossier.application.model.data
 
-import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteria
-import com.procurement.procurer.infrastructure.model.dto.ocds.AwardCriteriaDetails
-import com.procurement.procurer.infrastructure.model.dto.ocds.ConversionsRelatesTo
+import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteria
+import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteriaDetails
+import com.procurement.dossier.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import java.math.BigDecimal
 
 data class GetCriteriaData(

@@ -1,9 +1,9 @@
-package com.procurement.procurer.infrastructure.converter
+package com.procurement.dossier.infrastructure.converter
 
-import com.procurement.procurer.application.model.data.CreateCriteriaData
-import com.procurement.procurer.application.model.data.CreatedCriteria
-import com.procurement.procurer.infrastructure.model.dto.request.CreateCriteriaRequest
-import com.procurement.procurer.infrastructure.model.entity.CreatedCriteriaEntity
+import com.procurement.dossier.application.model.data.CreateCriteriaData
+import com.procurement.dossier.application.model.data.CreatedCriteria
+import com.procurement.dossier.infrastructure.model.dto.request.CreateCriteriaRequest
+import com.procurement.dossier.infrastructure.model.entity.CreatedCriteriaEntity
 
 fun CreateCriteriaRequest.toData(): CreateCriteriaData {
     return CreateCriteriaData(

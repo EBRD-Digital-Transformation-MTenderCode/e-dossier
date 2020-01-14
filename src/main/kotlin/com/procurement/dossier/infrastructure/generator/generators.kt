@@ -1,10 +1,10 @@
-package com.procurement.procurer.infrastructure.generator
+package com.procurement.dossier.infrastructure.generator
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.procurer.infrastructure.model.dto.bpe.ApiVersion
-import com.procurement.procurer.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.procurer.infrastructure.model.dto.bpe.CommandType
-import com.procurement.procurer.infrastructure.model.dto.bpe.Context
+import com.procurement.dossier.infrastructure.model.dto.bpe.ApiVersion
+import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
+import com.procurement.dossier.infrastructure.model.dto.bpe.CommandType
+import com.procurement.dossier.infrastructure.model.dto.bpe.Context
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.*
