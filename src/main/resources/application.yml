@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: e-procurer
+    name: e-dossier
 
 cassandra:
   contact-points: localhost

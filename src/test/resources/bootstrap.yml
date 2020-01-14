@@ -3,9 +3,9 @@ server:
 
 spring:
   application:
-    name: e-procurer
+    name: e-dossier
   cloud:
     config:
       failFast: true
-      name: e-procurer
+      name: e-dossier
       enabled: false
