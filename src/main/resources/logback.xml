@@ -6,9 +6,9 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/e-procurer.log</file>
+        <file>logs/e-dossier.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/e-procurer%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/e-dossier%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>5MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -22,7 +22,7 @@
                     <fieldName>level</fieldName>
                 </logLevel>
                 <pattern>
-                    <pattern>{"appName": "e-procurer", "appVersion": "1.1.1"}</pattern>
+                    <pattern>{"appName": "e-dossier", "appVersion": "1.1.1"}</pattern>
                 </pattern>
                 <version/> <!-- Logstash json format version, the @version field in the output-->
                 <loggerName/>
@@ -45,7 +45,7 @@
                     <!--<fieldName>level</fieldName>-->
                 <!--</logLevel>-->
                 <!--<pattern>-->
-                    <!--<pattern>{"appName": "e-procurer", "appVersion": "1.1.1"}</pattern>-->
+                    <!--<pattern>{"appName": "e-dossier", "appVersion": "1.1.1"}</pattern>-->
                 <!--</pattern>-->
                 <!--<version/> &lt;!&ndash; Logstash json format version, the @version field in the output&ndash;&gt;-->
                 <!--<loggerName/>-->
