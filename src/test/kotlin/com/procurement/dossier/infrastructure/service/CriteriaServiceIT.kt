@@ -19,7 +19,6 @@ import com.procurement.dossier.application.service.context.CreateCriteriaContext
 import com.procurement.dossier.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.dossier.infrastructure.config.ObjectMapperConfiguration
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandType
-import com.procurement.dossier.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.dossier.infrastructure.repository.CassandraCriteriaRepository
@@ -44,7 +43,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 class CriteriaServiceIT {
     companion object {
         private const val KEYSPACE = "dossier"
-        private const val TABLE_PROCURER = "tenders"
+        private const val TABLE_NAME = "tenders"
         private const val COLUMN_CPID = "cp_id"
         private const val COLUMN_OWNER = "owner"
         private const val COLUMN_JSONDATA = "json_data"
@@ -158,7 +157,7 @@ class CriteriaServiceIT {
     private fun createTable() {
         session.execute(
             """
-                CREATE TABLE IF NOT EXISTS  $KEYSPACE.$TABLE_PROCURER (
+                CREATE TABLE IF NOT EXISTS  $KEYSPACE.$TABLE_NAME (
                     $COLUMN_CPID text,
                     $COLUMN_OWNER text,
                     $COLUMN_JSONDATA text,

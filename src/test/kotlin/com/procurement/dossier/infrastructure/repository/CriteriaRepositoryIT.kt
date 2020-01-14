@@ -36,7 +36,7 @@ class CassandraACRepositoryIT {
         private const val JSON_DATA = """ {"ac": "data"} """
 
         private const val KEYSPACE = "dossier"
-        private const val TABLE_PROCURER = "tenders"
+        private const val TABLE_NAME = "tenders"
         private const val COLUMN_CPID = "cp_id"
         private const val COLUMN_OWNER = "owner"
         private const val COLUMN_JSONDATA = "json_data"
@@ -130,7 +130,7 @@ class CassandraACRepositoryIT {
     private fun createTable() {
         session.execute(
             """
-                CREATE TABLE IF NOT EXISTS  $KEYSPACE.$TABLE_PROCURER (
+                CREATE TABLE IF NOT EXISTS  $KEYSPACE.$TABLE_NAME (
                     $COLUMN_CPID text,
                     $COLUMN_OWNER text,
                     $COLUMN_JSONDATA text,
@@ -145,7 +145,7 @@ class CassandraACRepositoryIT {
         owner: String = OWNER,
         jsonData: String = JSON_DATA
     ) {
-        val record = QueryBuilder.insertInto(KEYSPACE, TABLE_PROCURER)
+        val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
             .value(COLUMN_CPID, cpid)
             .value(COLUMN_OWNER, owner)
             .value(COLUMN_JSONDATA, jsonData)
