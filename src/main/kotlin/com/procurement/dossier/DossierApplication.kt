@@ -5,9 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication(scanBasePackageClasses = [ApplicationConfig::class])
-class ProcurerApplication
+class DossierApplication
 
 fun main(args: Array<String>) {
-    runApplication<ProcurerApplication>(*args)
+    runApplication<DossierApplication>(*args)
 }
 
