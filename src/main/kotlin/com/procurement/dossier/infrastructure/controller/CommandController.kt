@@ -3,7 +3,7 @@ package com.procurement.dossier.infrastructure.controller
 import com.procurement.dossier.infrastructure.config.properties.GlobalProperties
 import com.procurement.dossier.infrastructure.dto.ApiResponse
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.dossier.infrastructure.model.dto.bpe.errorResponseDto
+import com.procurement.dossier.infrastructure.model.dto.bpe.errorResponse
 import com.procurement.dossier.infrastructure.service.CommandService
 import com.procurement.dossier.infrastructure.utils.toJson
 import com.procurement.dossier.infrastructure.utils.toObject
@@ -34,7 +34,7 @@ class CommandController(private val commandService: CommandService) {
             toObject(CommandMessage::class.java, requestBody)
         } catch (expected: Exception) {
             log.debug("Error.", expected)
-            val response = errorResponseDto(exception = expected, id = "N/A", version = GlobalProperties.App.apiVersion)
+            val response = errorResponse(exception = expected, id = "N/A", version = GlobalProperties.App.apiVersion)
             return ResponseEntity(response, HttpStatus.OK)
         }
 
@@ -46,7 +46,7 @@ class CommandController(private val commandService: CommandService) {
                 }
         } catch (expected: Exception) {
             log.debug("Error.", expected)
-            errorResponseDto(exception = expected, id = cm.id, version = cm.version)
+            errorResponse(exception = expected, id = cm.id, version = cm.version)
         }
         return ResponseEntity(response, HttpStatus.OK)
     }

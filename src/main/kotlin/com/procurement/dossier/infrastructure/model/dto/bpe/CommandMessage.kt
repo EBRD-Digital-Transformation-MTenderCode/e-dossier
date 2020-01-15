@@ -134,24 +134,24 @@ enum class CommandType(private val value: String) {
     }
 }
 
-fun errorResponseDto(exception: Exception, id: String, version: ApiVersion): ApiErrorResponse =
+fun errorResponse(exception: Exception, id: String, version: ApiVersion): ApiErrorResponse =
     when (exception) {
-        is ErrorException -> getApiResponse(
+        is ErrorException -> getApiErrorResponse(
             id = id,
             version = version,
             code = exception.code,
             message = exception.message!!
         )
-        is EnumException -> getApiResponse(
+        is EnumException -> getApiErrorResponse(
             id = id,
             version = version,
             code = exception.code,
             message = exception.message!!
         )
-        else -> getApiResponse(id = id, version = version, code = "00.00", message = exception.message!!)
+        else -> getApiErrorResponse(id = id, version = version, code = "00.00", message = exception.message!!)
     }
 
-private fun getApiResponse(id: String, version: ApiVersion, code: String, message: String): ApiErrorResponse {
+private fun getApiErrorResponse(id: String, version: ApiVersion, code: String, message: String): ApiErrorResponse {
     return ApiErrorResponse(
         errors = listOf(
             ApiErrorResponse.Error(
