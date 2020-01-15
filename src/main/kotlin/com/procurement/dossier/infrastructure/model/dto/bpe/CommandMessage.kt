@@ -1,22 +1,31 @@
 package com.procurement.dossier.infrastructure.model.dto.bpe
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.dossier.application.exception.EnumException
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.infrastructure.bind.apiversion.ApiVersionDeserializer
+import com.procurement.dossier.infrastructure.bind.apiversion.ApiVersionSerializer
+import com.procurement.dossier.infrastructure.config.properties.GlobalProperties
+import com.procurement.dossier.infrastructure.dto.ApiErrorResponse
+import com.procurement.dossier.infrastructure.dto.ApiVersion
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import java.util.*
 
 data class CommandMessage @JsonCreator constructor(
+    @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
+    @field:JsonProperty("command") @param:JsonProperty("command") val command: CommandType,
+    @field:JsonProperty("context") @param:JsonProperty("context") val context: Context,
+    @field:JsonProperty("data") @param:JsonProperty("data") val data: JsonNode,
 
-    val id: String,
-    val command: CommandType,
-    val context: Context,
-    val data: JsonNode,
-    val version: ApiVersion
+    @JsonDeserialize(using = ApiVersionDeserializer::class)
+    @JsonSerialize(using = ApiVersionSerializer::class)
+    @field:JsonProperty("version") @param:JsonProperty("version") val version: ApiVersion
 )
 
 val CommandMessage.cpid: String
@@ -27,16 +36,18 @@ val CommandMessage.cpid: String
         )
 
 val CommandMessage.token: UUID
-    get() = this.context.token?.let { id ->
-        try {
-            UUID.fromString(id)
-        } catch (exception: Exception) {
-            throw ErrorException(error = ErrorType.INVALID_FORMAT_TOKEN)
+    get() = this.context.token
+        ?.let { id ->
+            try {
+                UUID.fromString(id)
+            } catch (ignore: Exception) {
+                throw ErrorException(error = ErrorType.INVALID_FORMAT_TOKEN)
+            }
         }
-    } ?: throw ErrorException(
-        error = ErrorType.CONTEXT,
-        message = "Missing the 'token' attribute in context."
-    )
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'token' attribute in context."
+        )
 
 val CommandMessage.owner: String
     get() = this.context.owner
@@ -53,14 +64,16 @@ val CommandMessage.stage: String
         )
 
 val CommandMessage.pmd: ProcurementMethod
-    get() = this.context.pmd?.let {
-        ProcurementMethod.valueOrException(it) {
-            ErrorException(ErrorType.INVALID_PMD)
+    get() = this.context.pmd
+        ?.let {
+            ProcurementMethod.valueOrException(it) {
+                ErrorException(ErrorType.INVALID_PMD)
+            }
         }
-    } ?: throw ErrorException(
-        error = ErrorType.CONTEXT,
-        message = "Missing the 'pmd' attribute in context."
-    )
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'pmd' attribute in context."
+        )
 
 val CommandMessage.operationType: String
     get() = this.context.operationType
@@ -121,69 +134,32 @@ enum class CommandType(private val value: String) {
     }
 }
 
-enum class ApiVersion(private val value: String) {
-    V_0_0_1("0.0.1");
-
-    @JsonValue
-    fun value(): String {
-        return this.value
-    }
-
-    override fun toString(): String {
-        return this.value
-    }
-}
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class ResponseDto(
-
-    val errors: List<ResponseErrorDto>? = null,
-
-    val data: Any? = null,
-
-    val id: String? = null
-)
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-data class ResponseErrorDto(
-
-    val code: String,
-
-    val description: String?
-)
-
-fun getExceptionResponseDto(exception: Exception): ResponseDto {
-    return ResponseDto(
-        errors = listOf(
-            ResponseErrorDto(
-                code = "400.19.00",
-                description = exception.message ?: exception.toString()
-            )
+fun errorResponse(exception: Exception, id: String, version: ApiVersion): ApiErrorResponse =
+    when (exception) {
+        is ErrorException -> getApiErrorResponse(
+            id = id,
+            version = version,
+            code = exception.code,
+            message = exception.message!!
         )
-    )
-}
+        is EnumException -> getApiErrorResponse(
+            id = id,
+            version = version,
+            code = exception.code,
+            message = exception.message!!
+        )
+        else -> getApiErrorResponse(id = id, version = version, code = "00.00", message = exception.message!!)
+    }
 
-fun getErrorExceptionResponseDto(exception: ErrorException, id: String? = null): ResponseDto {
-    return ResponseDto(
+private fun getApiErrorResponse(id: String, version: ApiVersion, code: String, message: String): ApiErrorResponse {
+    return ApiErrorResponse(
         errors = listOf(
-            ResponseErrorDto(
-                code = "400.19." + exception.error.code,
-                description = exception.message
+            ApiErrorResponse.Error(
+                code = "400.${GlobalProperties.serviceId}." + code,
+                description = message
             )
         ),
-        id = id
+        id = id,
+        version = version
     )
 }
-
-fun getEnumExceptionResponseDto(error: EnumException, id: String? = null): ResponseDto {
-    return ResponseDto(
-        errors = listOf(
-            ResponseErrorDto(
-                code = "400.19." + error.code,
-                description = error.msg
-            )
-        ),
-        id = id
-    )
-}
-

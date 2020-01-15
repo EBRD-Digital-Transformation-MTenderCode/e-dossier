@@ -1,26 +1,23 @@
 package com.procurement.dossier.infrastructure.service
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.application.model.data.CreatedCriteria
+import com.procurement.dossier.application.model.data.GetCriteriaData
 import com.procurement.dossier.application.service.CriteriaService
 import com.procurement.dossier.application.service.command.generateCreateCriteriaResponse
 import com.procurement.dossier.application.service.context.CheckResponsesContext
 import com.procurement.dossier.application.service.context.CreateCriteriaContext
-import com.procurement.dossier.application.service.context.EvPanelsContext
 import com.procurement.dossier.application.service.context.GetCriteriaContext
 import com.procurement.dossier.infrastructure.converter.toResponseDto
+import com.procurement.dossier.infrastructure.dto.ApiSuccessResponse
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandType
-import com.procurement.dossier.infrastructure.model.dto.bpe.ResponseDto
-import com.procurement.dossier.infrastructure.model.dto.bpe.country
 import com.procurement.dossier.infrastructure.model.dto.bpe.cpid
-import com.procurement.dossier.infrastructure.model.dto.bpe.language
 import com.procurement.dossier.infrastructure.model.dto.bpe.owner
 import com.procurement.dossier.infrastructure.model.dto.bpe.pmd
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.dossier.infrastructure.utils.toJson
-import com.procurement.dossier.infrastructure.utils.toObject
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -32,17 +29,17 @@ class CommandService(
         private val log = LoggerFactory.getLogger(CommandService::class.java)
     }
 
-    fun execute(cm: CommandMessage): ResponseDto {
-
-        val response = when (cm.command) {
-
-            CommandType.CHECK_CRITERIA  -> {
+    fun execute(cm: CommandMessage): ApiSuccessResponse {
+        val dataOfResponse: Any = when (cm.command) {
+            CommandType.CHECK_CRITERIA -> {
                 when (cm.pmd) {
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
-                        val serviceResponse = criteriaService.checkCriteria(cm)
-                        ResponseDto(data = serviceResponse)
+                        criteriaService.checkCriteria(cm)
+                            .also {
+                                log.debug("Checking criteria was a success.")
+                            }
                     }
 
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
@@ -52,7 +49,6 @@ class CommandService(
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> {
                         throw ErrorException(ErrorType.INVALID_PMD)
                     }
-
                 }
             }
             CommandType.CREATE_CRITERIA -> {
@@ -61,9 +57,14 @@ class CommandService(
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
                         val context = CreateCriteriaContext(cpid = cm.cpid, owner = cm.owner)
-                        val serviceResponse = criteriaService.createCriteria(cm, context = context)
-                        val response = generateCreateCriteriaResponse(serviceResponse)
-                        ResponseDto(data = response)
+                        criteriaService.createCriteria(cm, context = context)
+                            .also { result: CreatedCriteria ->
+                                if (log.isDebugEnabled)
+                                    log.debug("Criteria was created. Result: ${toJson(result)}")
+                            }
+                            .let { result: CreatedCriteria ->
+                                generateCreateCriteriaResponse(result)
+                            }
                     }
 
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
@@ -82,8 +83,10 @@ class CommandService(
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
                         val context = CheckResponsesContext(cpid = cm.cpid, owner = cm.owner)
-                        val serviceResponse = criteriaService.checkResponses(cm, context = context)
-                        ResponseDto(data = serviceResponse)
+                        criteriaService.checkResponses(cm, context = context)
+                            .also {
+                                log.debug("Checking response was a success.")
+                            }
                     }
 
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
@@ -102,9 +105,15 @@ class CommandService(
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
                         val context = GetCriteriaContext(cpid = cm.cpid)
-                        val serviceResponse = criteriaService.getCriteriaDetails(context = context)
-                        val response = serviceResponse?.let { serviceResponse.toResponseDto() } ?: JsonNodeFactory.instance.objectNode()
-                        ResponseDto(data = response)
+                        criteriaService.getCriteriaDetails(context = context)
+                            .also { result: GetCriteriaData? ->
+                                if (result != null)
+                                    log.debug("Getting criteria. Result: ${toJson(result)}")
+                                else
+                                    log.debug("No criteria.")
+                            }
+                            ?.toResponseDto()
+                            ?: Unit
                     }
 
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
@@ -116,16 +125,18 @@ class CommandService(
                     }
 
                 }
-
             }
             CommandType.CREATE_REQUESTS_FOR_EV_PANELS -> {
                 when (cm.pmd) {
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
-                        val serviceResponse = criteriaService.createRequestsForEvPanels()
-                        val response = serviceResponse.toResponseDto()
-                        ResponseDto(data = response)
+                        criteriaService.createRequestsForEvPanels()
+                            .also { result ->
+                                if (log.isDebugEnabled)
+                                    log.debug("Requests for EV panels was created. Result: ${toJson(result)}")
+                            }
+                            .toResponseDto()
                     }
 
                     ProcurementMethod.RT, ProcurementMethod.TEST_RT,
@@ -137,11 +148,12 @@ class CommandService(
                     }
 
                 }
-
             }
         }
-
-        return toObject(ResponseDto::class.java, toJson(response))
+        return ApiSuccessResponse(id = cm.id, version = cm.version, data = dataOfResponse)
+            .also {
+                if (log.isDebugEnabled)
+                    log.debug("Response: ${toJson(it)}")
+            }
     }
-
 }
