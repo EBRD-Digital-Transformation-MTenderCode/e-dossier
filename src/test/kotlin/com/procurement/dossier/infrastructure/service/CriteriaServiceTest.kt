@@ -132,7 +132,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_AWARD_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_AWARD_CRITERIA.code, exception.code)
             }
 
             @ParameterizedTest(name = "awardCriteria = {0}, without awardCriteriaDetails")
@@ -227,8 +227,8 @@ class CriteriaServiceTest {
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
 
-                if (fieldname == "criteria") assertEquals(ErrorType.INVALID_CONVERSION, exception.error)
-                if (fieldname == "conversions") assertEquals(ErrorType.INVALID_AWARD_CRITERIA, exception.error)
+                if (fieldname == "criteria") assertEquals(ErrorType.INVALID_CONVERSION.code, exception.code)
+                if (fieldname == "conversions") assertEquals(ErrorType.INVALID_AWARD_CRITERIA.code, exception.code)
             }
 
             @ParameterizedTest(name = "awardCriteria = {0},  awardCriteriaDetails = {1} ")
@@ -254,7 +254,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_AWARD_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_AWARD_CRITERIA.code, exception.code)
             }
         }
 
@@ -275,7 +275,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
 
             @Test
@@ -293,7 +293,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
         }
 
@@ -316,7 +316,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -335,7 +335,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -354,7 +354,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Nested
@@ -533,7 +533,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE.code, exception.code)
             }
 
             @Test
@@ -573,7 +573,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_PERIOD_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_PERIOD_VALUE.code, exception.code)
             }
 
             @Test
@@ -628,7 +628,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -661,7 +661,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
 
             @Test
@@ -678,7 +678,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -709,7 +709,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
 
             @Test
@@ -742,7 +742,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -772,7 +772,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
 
             @Test
@@ -789,7 +789,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
 
             @Test
@@ -806,7 +806,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
         }
 
@@ -828,7 +828,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CONVERSION, exception.error)
+                assertEquals(ErrorType.INVALID_CONVERSION.code, exception.code)
             }
         }
 
@@ -849,7 +849,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CONVERSION, exception.error)
+                assertEquals(ErrorType.INVALID_CONVERSION.code, exception.code)
             }
         }
 
@@ -872,7 +872,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CONVERSION, exception.error)
+                assertEquals(ErrorType.INVALID_CONVERSION.code, exception.code)
             }
 
             @Test
@@ -903,7 +903,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CONVERSION, exception.error)
+                assertEquals(ErrorType.INVALID_CONVERSION.code, exception.code)
             }
 
             @Test
@@ -957,7 +957,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CONVERSION, exception.error)
+                assertEquals(ErrorType.INVALID_CONVERSION.code, exception.code)
             }
 
             @Test
@@ -1054,7 +1054,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
         }
 
@@ -1074,7 +1074,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -1090,7 +1090,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
         }
 
@@ -1110,7 +1110,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -1126,7 +1126,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
 
             @Test
@@ -1143,7 +1143,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_CRITERIA, exception.error)
+                assertEquals(ErrorType.INVALID_CRITERIA.code, exception.code)
             }
         }
 
@@ -1162,7 +1162,7 @@ class CriteriaServiceTest {
                 )
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkCriteria(cm) }
-                assertEquals(ErrorType.INVALID_JSON, exception.error)
+                assertEquals(ErrorType.INVALID_JSON.code, exception.code)
             }
         }
     }
@@ -1364,7 +1364,7 @@ class CriteriaServiceTest {
             val cm = commandMessage(command = CommandType.CHECK_RESPONSES, data = requestNode)
 
             val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-            assertEquals(ErrorType.INVALID_REQUIREMENT_RESPONSE, exception.error)
+            assertEquals(ErrorType.INVALID_REQUIREMENT_RESPONSE.code, exception.code)
         }
 
         @Nested
@@ -1390,7 +1390,7 @@ class CriteriaServiceTest {
 
                 val context = CheckResponsesContext(cpid = "cpid", owner = "owner")
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE.code, exception.code)
             }
         }
 
@@ -1467,7 +1467,7 @@ class CriteriaServiceTest {
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE.code, exception.code)
             }
 
             @Test
@@ -1511,7 +1511,7 @@ class CriteriaServiceTest {
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE.code, exception.code)
             }
         }
 
@@ -1569,7 +1569,7 @@ class CriteriaServiceTest {
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE.code, exception.code)
             }
         }
 
@@ -1624,7 +1624,7 @@ class CriteriaServiceTest {
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE.code, exception.code)
             }
         }
 
@@ -1657,7 +1657,7 @@ class CriteriaServiceTest {
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_PERIOD_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_PERIOD_VALUE.code, exception.code)
             }
         }
 
@@ -1692,7 +1692,7 @@ class CriteriaServiceTest {
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_PERIOD_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_PERIOD_VALUE.code, exception.code)
             }
         }
 
@@ -1756,7 +1756,7 @@ class CriteriaServiceTest {
                 val cm = commandMessage(CommandType.CHECK_RESPONSES, data = requestNode)
 
                 val exception = assertThrows<ErrorException> { criteriaService.checkResponses(cm, context = context) }
-                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE, exception.error)
+                assertEquals(ErrorType.INVALID_REQUIREMENT_VALUE.code, exception.code)
             }
         }
 

@@ -1,17 +1,15 @@
 package com.procurement.dossier.infrastructure.generator
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.dossier.infrastructure.model.dto.bpe.ApiVersion
+import com.procurement.dossier.infrastructure.dto.ApiVersion
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandType
 import com.procurement.dossier.infrastructure.model.dto.bpe.Context
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.*
 
 object CommandMessageGenerator {
     const val COMMAND_ID = "COMMAND_ID"
-    val COMMAND_VERSION: ApiVersion = ApiVersion.V_0_0_1
+    val COMMAND_VERSION = ApiVersion(major = 1, minor = 0, patch = 0)
 
     fun generate(
         id: String = COMMAND_ID,
@@ -79,4 +77,3 @@ object ContextGenerator {
         )
     }
 }
-

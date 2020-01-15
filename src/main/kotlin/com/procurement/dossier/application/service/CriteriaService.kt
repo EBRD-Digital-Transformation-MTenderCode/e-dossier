@@ -38,12 +38,10 @@ import com.procurement.dossier.application.service.command.extractCreatedCriteri
 import com.procurement.dossier.application.service.command.toEntity
 import com.procurement.dossier.application.service.context.CheckResponsesContext
 import com.procurement.dossier.application.service.context.CreateCriteriaContext
-import com.procurement.dossier.application.service.context.EvPanelsContext
 import com.procurement.dossier.application.service.context.GetCriteriaContext
 import com.procurement.dossier.infrastructure.converter.createResponseData
 import com.procurement.dossier.infrastructure.converter.toData
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
-import com.procurement.dossier.infrastructure.model.dto.bpe.ResponseDto
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
@@ -57,10 +55,7 @@ class CriteriaService(
 ) {
 
     fun createCriteria(cm: CommandMessage, context: CreateCriteriaContext): CreatedCriteria {
-        val request: CreateCriteriaRequest = toObject(
-            CreateCriteriaRequest::class.java,
-            cm.data
-        )
+        val request: CreateCriteriaRequest = toObject(CreateCriteriaRequest::class.java, cm.data)
         val requestData = request.toData()
         val createdCriteria = buildCriteria(requestData, generationService)
         val createdCriteriaEntity = createdCriteria.toEntity()
@@ -69,7 +64,7 @@ class CriteriaService(
         return createdCriteria
     }
 
-    fun checkCriteria(cm: CommandMessage): ResponseDto {
+    fun checkCriteria(cm: CommandMessage) {
         val request = medeiaValidationService.validateCriteria(cm)
 
         request
@@ -94,24 +89,23 @@ class CriteriaService(
             .checkAwardCriteriaEnum()          // FReq-1.1.1.15
             .checkAwardCriteriaDetailsEnum()   // FReq-1.1.1.15
             .checkArrays()                     // FReq-1.1.1.16
-
-        return ResponseDto(data = "ok")
     }
 
-    fun checkResponses(cm: CommandMessage, context: CheckResponsesContext): ResponseDto {
+    fun checkResponses(cm: CommandMessage, context: CheckResponsesContext) {
         val request = medeiaValidationService.validateResponses(cm)
-        val cnEntity = criteriaRepository.findBy(context.cpid) ?: throw ErrorException(
-            error = ErrorType.ENTITY_NOT_FOUND,
-            message = "Cannot found record with cpid=${context.cpid}."
-        )
-        val createdCriteria = cnEntity
-            .extractCreatedCriteria()
+        val cnEntity = criteriaRepository.findBy(context.cpid)
+            ?: throw ErrorException(
+                error = ErrorType.ENTITY_NOT_FOUND,
+                message = "Cannot found record with cpid=${context.cpid}."
+            )
+        val createdCriteria = cnEntity.extractCreatedCriteria()
             .toData()
 
-        if (createdCriteria.criteria != null && request.bid.requirementResponses == null) throw ErrorException(
-            error = ErrorType.INVALID_REQUIREMENT_RESPONSE,
-            message = "No requirement responses found for requirement from criteria"
-        )
+        if (createdCriteria.criteria != null && request.bid.requirementResponses == null)
+            throw ErrorException(
+                error = ErrorType.INVALID_REQUIREMENT_RESPONSE,
+                message = "No requirement responses found for requirement from criteria."
+            )
 
         request
             .toData()
@@ -121,16 +115,15 @@ class CriteriaService(
             .checkDataTypeValue(createdCriteria)                // FReq-1.2.1.4
             .checkPeriod()                                      // FReq-1.2.1.5 & FReq-1.2.1.7
             .checkIdsUniqueness()                               // FReq-1.2.1.6
-
-        return ResponseDto(data = "ok")
     }
 
     fun getCriteriaDetails(context: GetCriteriaContext): GetCriteriaData? {
-        return criteriaRepository.findBy(context.cpid)?.let { cnEntity ->
-            cnEntity.extractCreatedCriteria()
-                .toData()
-                .let { createResponseData(it) }
-        }
+        return criteriaRepository.findBy(context.cpid)
+            ?.let { cnEntity ->
+                cnEntity.extractCreatedCriteria()
+                    .toData()
+                    .let { createResponseData(it) }
+            }
     }
 
     fun createRequestsForEvPanels(): RequestsForEvPanelsData {
@@ -156,9 +149,7 @@ class CriteriaService(
                         )
                     )
                 )
-
             )
         )
     }
 }
-
