@@ -19,6 +19,7 @@ import com.procurement.dossier.application.service.command.checkAwardCriteriaEnu
 import com.procurement.dossier.application.service.command.checkCastCoefficient
 import com.procurement.dossier.application.service.command.checkCoefficient
 import com.procurement.dossier.application.service.command.checkCoefficientDataType
+import com.procurement.dossier.application.service.command.checkCoefficientRelatedOption
 import com.procurement.dossier.application.service.command.checkCoefficientValueUniqueness
 import com.procurement.dossier.application.service.command.checkConversionRelatesToEnum
 import com.procurement.dossier.application.service.command.checkConversionRelation
@@ -85,6 +86,7 @@ class CriteriaService(
             .checkCoefficient()                // FReq-1.1.1.11
             .checkCoefficientDataType()        // FReq-1.1.1.12
             .checkCastCoefficient()            // FReq-1.1.1.13
+            .checkCoefficientRelatedOption()   // FReq-1.1.1.28
             .checkConversionRelatesToEnum()    // FReq-1.1.1.14
             .checkAwardCriteriaEnum()          // FReq-1.1.1.15
             .checkAwardCriteriaDetailsEnum()   // FReq-1.1.1.15
