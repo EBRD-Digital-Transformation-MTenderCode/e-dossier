@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.dossier.application.model.data.CoefficientRate
 import com.procurement.dossier.application.model.data.CoefficientValue
+import com.procurement.dossier.application.model.data.RelatedOption
 import com.procurement.dossier.application.model.data.Requirement
 import com.procurement.dossier.infrastructure.bind.coefficient.CoefficientRateDeserializer
 import com.procurement.dossier.infrastructure.bind.coefficient.CoefficientRateSerializer
@@ -86,6 +87,9 @@ data class CheckCriteriaRequest(
         ) {
             data class Coefficient(
                 @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
+
+                @JsonInclude(JsonInclude.Include.NON_NULL)
+                @field:JsonProperty("relatedOption") @param:JsonProperty("relatedOption") val relatedOption: RelatedOption?,
 
                 @JsonDeserialize(using = CoefficientValueDeserializer::class)
                 @JsonSerialize(using = CoefficientValueSerializer::class)

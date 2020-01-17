@@ -48,6 +48,7 @@ data class CheckCriteriaData(
         ) {
             data class Coefficient(
                 val id: String,
+                val relatedOption: RelatedOption?,
                 val value: CoefficientValue,
                 val coefficient: CoefficientRate
             )
