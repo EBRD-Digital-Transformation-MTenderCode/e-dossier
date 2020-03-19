@@ -155,7 +155,7 @@ private fun getApiErrorResponse(id: String, version: ApiVersion, code: String, m
     return ApiErrorResponse(
         errors = listOf(
             ApiErrorResponse.Error(
-                code = "400.${GlobalProperties.serviceId}." + code,
+                code = "400.${GlobalProperties.service.id}." + code,
                 description = message
             )
         ),
