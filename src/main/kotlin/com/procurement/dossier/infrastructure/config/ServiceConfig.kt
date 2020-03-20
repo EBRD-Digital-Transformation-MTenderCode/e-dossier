@@ -13,7 +13,9 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ComponentScan(
     basePackages = [
-        "com.procurement.dossier.infrastructure.service"
+        "com.procurement.dossier.infrastructure.service",
+        "com.procurement.dossier.infrastructure.handler",
+        "com.procurement.dossier.application.service"
     ]
 )
 class ServiceConfig {
