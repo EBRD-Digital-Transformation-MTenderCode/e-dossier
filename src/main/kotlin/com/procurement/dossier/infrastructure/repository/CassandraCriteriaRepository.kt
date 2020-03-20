@@ -7,6 +7,10 @@ import com.datastax.driver.core.Session
 import com.procurement.dossier.application.exception.DatabaseInteractionException
 import com.procurement.dossier.application.model.entity.CnEntity
 import com.procurement.dossier.application.repository.CriteriaRepository
+import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.asFailure
+import com.procurement.dossier.domain.util.asSuccess
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -51,6 +55,25 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
             ?.let { convertToContractEntity(it) }
     }
 
+    override fun tryFindBy(cpid: String): Result<CnEntity?, Fail.Incident> {
+        val query = preparedFindByCpidCQL.bind()
+            .apply {
+                setString(columnCpid, cpid)
+            }
+        return query.tryLoad()
+            .doOnError { error -> return error.asFailure() }
+            .get
+            .one()
+            ?.let { convertToContractEntity(it) }
+            .asSuccess()
+    }
+
+    protected fun BoundStatement.tryLoad(): Result<ResultSet, Fail.Incident> = try {
+        Result.success(session.execute(this))
+    } catch (expected: Exception) {
+        Result.failure(Fail.Incident.Database(exception = expected))
+    }
+
     protected fun load(statement: BoundStatement): ResultSet = try {
         session.execute(statement)
     } catch (exception: Exception) {
@@ -74,6 +97,19 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
             }
 
         return saveCn(statements).wasApplied()
+    }
+
+    override fun trySave(cn: CnEntity): Result<CnEntity, Fail.Incident> {
+        val statements = preparedSaveCnIdCQL.bind()
+            .apply {
+                setString(columnCpid, cn.cpid)
+                setString(columnOwner, cn.owner)
+                setString(columnJsonData, cn.jsonData)
+            }
+        statements.tryLoad()
+            .doOnError { error -> return error.asFailure() }
+
+        return cn.asSuccess()
     }
 
     private fun saveCn(statement: BoundStatement): ResultSet = try {
