@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 enum class Command2Type(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
-    ;
+    VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse");
 
     override fun toString(): String = key
 
@@ -49,7 +49,7 @@ fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Va
             ApiDataErrorResponse2.Error(
                 code = "${fail.code}/${GlobalProperties.service.id}",
                 description = fail.description,
-                attributeName = fail.name
+                details = listOf(ApiDataErrorResponse2.Detail(name = fail.name))
             )
         )
     )

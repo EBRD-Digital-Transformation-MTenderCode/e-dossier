@@ -1,20 +1,21 @@
 package com.procurement.dossier.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
+import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
+import com.procurement.dossier.infrastructure.model.dto.bpe.Command2Type
 import com.procurement.dossier.infrastructure.model.dto.bpe.errorResponse
 import com.procurement.dossier.infrastructure.model.dto.bpe.getAction
 import com.procurement.dossier.infrastructure.model.dto.bpe.getId
 import com.procurement.dossier.infrastructure.model.dto.bpe.getVersion
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class Command2Service {
-
-    companion object {
-        private val log = LoggerFactory.getLogger(Command2Service::class.java)
-    }
+class Command2Service(
+    val logger: Logger,
+    val validationRequirementResponseHandler: ValidateRequirementResponseHandler
+) {
 
     fun execute(request: JsonNode): ApiResponse2 {
 
@@ -36,11 +37,10 @@ class Command2Service {
             .get
 
         val response: ApiResponse2 = when (action) {
-            else -> TODO()
+            Command2Type.VALIDATE_REQUIREMENT_RESPONSE -> validationRequirementResponseHandler.handle(node = request)
         }
 
-        if (log.isDebugEnabled)
-            log.debug("DataOfResponse: '$response'.")
+        logger.info("DataOfResponse: '$response'.")
 
         return response
     }
