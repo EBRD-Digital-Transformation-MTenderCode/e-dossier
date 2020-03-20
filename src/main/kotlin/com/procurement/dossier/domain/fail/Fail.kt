@@ -72,6 +72,16 @@ sealed class Fail {
                 logger.error(message = message, exception = exception)
             }
         }
+        class DatabaseIncident() :
+            Incident(
+                level = Level.ERROR,
+                number = "04",
+                description = "Internal Server Error."
+            ) {
+            override fun logging(logger: Logger) {
+                logger.error(message = message)
+            }
+        }
 
         enum class Level(override val key: String) : EnumElementProvider.Key {
             ERROR("error"),
