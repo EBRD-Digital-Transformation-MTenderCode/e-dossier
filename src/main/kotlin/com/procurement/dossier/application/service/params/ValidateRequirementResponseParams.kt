@@ -23,7 +23,7 @@ class ValidateRequirementResponseParams private constructor(
             requirementId: String,
             value: RequirementRsValue
         ): Result<ValidateRequirementResponseParams, DataErrors> {
-            val cpidResult = Cpid.tryCreate(cpid = cpid)
+            val cpidResult = Cpid.tryCreate(value = cpid)
                 .doOnError { pattert ->
                     return DataErrors.Validation.DataMismatchToPattern(
                         actualValue = cpid,
@@ -33,7 +33,7 @@ class ValidateRequirementResponseParams private constructor(
                 }
                 .get
 
-            val ocidResult = Ocid.tryCreate(ocid = ocid)
+            val ocidResult = Ocid.tryCreate(value = ocid)
                 .doOnError { pattert ->
                     return DataErrors.Validation.DataMismatchToPattern(
                         actualValue = ocid,

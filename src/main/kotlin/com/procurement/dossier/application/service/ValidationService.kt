@@ -24,7 +24,7 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
 
     fun validateRequirementResponse(params: ValidateRequirementResponseParams): ValidationResult<Fail> {
 
-        val createdCriteriaEntity = getCnEntityByCpid(cpid = params.cpid.value)
+        val createdCriteriaEntity = getCnEntityByCpid(cpid = params.cpid.toString())
             .doOnError { error -> return ValidationResult.error(error) }
             .get
             .jsonData

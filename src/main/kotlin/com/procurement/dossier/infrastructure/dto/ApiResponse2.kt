@@ -3,7 +3,7 @@ package com.procurement.dossier.infrastructure.dto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.dossier.domain.fail.Fail
-import com.procurement.dossier.domain.model.enum.ResponseStatus
+import com.procurement.dossier.domain.model.enums.ResponseStatus
 import java.time.LocalDateTime
 import java.util.*
 

@@ -1,4 +1,4 @@
-package com.procurement.dossier.domain.model.enum
+package com.procurement.dossier.domain.model.enums
 
 import com.fasterxml.jackson.annotation.JsonValue
 
