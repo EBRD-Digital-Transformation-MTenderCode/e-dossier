@@ -7,16 +7,16 @@ import com.procurement.dossier.domain.fail.Fail
 sealed class ValidationErrors(
     numberError: String,
     override val description: String
-) : Fail.Error(prefix = "VE-") {
+) : Fail.Error(prefix = "VR-") {
 
     override val code: String = prefix + numberError
 
     class RequirementNotFound(requirementId: String) : ValidationErrors(
-        numberError = "01", description = "Requirement with id '$requirementId' not found."
+        numberError = "10.5.1.1", description = "Requirement with id '$requirementId' not found."
     )
 
     class RequirementValueCompareError(rvActual: RequirementRsValue, rvExpected: RequirementValue) : ValidationErrors(
-        numberError = "02",
+        numberError = "10.5.1.2",
         description = "Requirement.dataType mismatch. ${rvActual} != ${rvExpected}"
     )
 }
