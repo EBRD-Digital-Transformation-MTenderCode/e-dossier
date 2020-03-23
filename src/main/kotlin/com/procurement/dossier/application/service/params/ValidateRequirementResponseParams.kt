@@ -1,6 +1,8 @@
 package com.procurement.dossier.application.service.params
 
 import com.procurement.dossier.application.model.data.RequirementRsValue
+import com.procurement.dossier.application.model.parseCpid
+import com.procurement.dossier.application.model.parseOcid
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
@@ -23,23 +25,15 @@ class ValidateRequirementResponseParams private constructor(
             requirementId: String,
             value: RequirementRsValue
         ): Result<ValidateRequirementResponseParams, DataErrors> {
-            val cpidResult = Cpid.tryCreate(value = cpid)
-                .doOnError { pattert ->
-                    return DataErrors.Validation.DataMismatchToPattern(
-                        actualValue = cpid,
-                        name = "cpid",
-                        pattern = pattert
-                    ).asFailure()
+            val cpidResult = parseCpid(value = cpid)
+                .doOnError { error ->
+                    return error.asFailure()
                 }
                 .get
 
-            val ocidResult = Ocid.tryCreate(value = ocid)
-                .doOnError { pattert ->
-                    return DataErrors.Validation.DataMismatchToPattern(
-                        actualValue = ocid,
-                        name = "ocid",
-                        pattern = pattert
-                    ).asFailure()
+            val ocidResult = parseOcid(value = ocid)
+                .doOnError { error ->
+                    return error.asFailure()
                 }
                 .get
 

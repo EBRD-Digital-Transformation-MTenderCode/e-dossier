@@ -3,12 +3,16 @@ package com.procurement.dossier.infrastructure.model.dto.bpe
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.fail.error.BadRequestErrors
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.util.Action
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.Result.Companion.failure
+import com.procurement.dossier.domain.util.Result.Companion.success
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.bind
 import com.procurement.dossier.infrastructure.config.properties.GlobalProperties
@@ -17,6 +21,7 @@ import com.procurement.dossier.infrastructure.dto.ApiErrorResponse2
 import com.procurement.dossier.infrastructure.dto.ApiIncidentResponse2
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.dto.ApiVersion
+import com.procurement.dossier.infrastructure.utils.tryToObject
 
 import java.time.LocalDateTime
 import java.util.*
@@ -101,15 +106,14 @@ fun JsonNode.getId(): Result<UUID, DataErrors> {
 }
 
 fun JsonNode.getVersion(): Result<ApiVersion, DataErrors> {
-    return this.getAttribute("version")
-        .bind {
-            val value = it.asText()
-            when (val result = ApiVersion.tryOf(value)) {
+    return this.tryGetStringAttribute("version")
+        .bind { version ->
+            when (val result = ApiVersion.tryOf(version)) {
                 is Result.Success -> result
                 is Result.Failure -> result.mapError {
                     DataErrors.Validation.DataFormatMismatch(
                         name = "version",
-                        actualValue = value,
+                        actualValue = version,
                         expectedFormat = "00.00.00"
                     )
                 }
@@ -131,6 +135,52 @@ fun JsonNode.getAction(): Result<Command2Type, DataErrors> {
         }
 }
 
+fun <T : Any> JsonNode.tryParamsToObject(target: Class<T>): Result<T, BadRequestErrors> {
+    return tryToObject(target = target)
+        .doOnError {
+            return Result.failure(
+                BadRequestErrors.Parsing(message = "Can not parse 'params'.", request = this.toString())
+            )
+        }
+        .get
+        .asSuccess()
+}
+
+private fun JsonNode.tryGetStringAttribute(name: String): Result<String, DataErrors> {
+    return this.tryGetAttribute(name = name, type = JsonNodeType.STRING)
+        .map {
+            it.asText()
+        }
+}
+
+private fun JsonNode.tryGetAttribute(name: String, type: JsonNodeType): Result<JsonNode, DataErrors> =
+    getAttribute(name = name)
+        .bind { node ->
+            if (node.nodeType == type)
+                success(node)
+            else
+                failure(
+                    DataErrors.Validation.DataTypeMismatch(
+                        name = name,
+                        expectedType = type.name,
+                        actualType = node.nodeType.name
+                    )
+                )
+        }
+
+private fun JsonNode.getAttribute(name: String): Result<JsonNode, DataErrors> {
+    return if (has(name)) {
+        val attr = get(name)
+        if (attr !is NullNode)
+            Result.success(attr)
+        else
+            Result.failure(
+                DataErrors.Validation.DataTypeMismatch(name = "$attr", actualType = "null", expectedType = "not null")
+            )
+    } else
+        Result.failure(DataErrors.Validation.MissingRequiredAttribute(name = name))
+}
+
 private fun asUUID(value: String): Result<UUID, DataErrors> =
     try {
         Result.success<UUID>(UUID.fromString(value))
@@ -143,19 +193,6 @@ private fun asUUID(value: String): Result<UUID, DataErrors> =
             )
         )
     }
-
-fun JsonNode.getAttribute(name: String): Result<JsonNode, DataErrors> {
-    return if (has(name)) {
-        val attr = get(name)
-        if (attr !is NullNode)
-            Result.success(attr)
-        else
-            Result.failure(
-                DataErrors.Validation.DataTypeMismatch(name = "$attr", actualType = "null", expectedType = "not null")
-            )
-    } else
-        Result.failure(DataErrors.Validation.MissingRequiredAttribute(name = name))
-}
 
 fun JsonNode.tryGetParams(): Result<JsonNode, DataErrors> =
     getAttribute("params")
