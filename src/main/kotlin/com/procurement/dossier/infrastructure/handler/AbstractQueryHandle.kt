@@ -22,13 +22,13 @@ abstract class AbstractQueryHandler<ACTION : Action, R : Any>(
         val version = node.getVersion().get
 
         val result = execute(node)
-            .also {
-                logger.info("The '${action.key}' has been executed. Result: '${toJson(it)}'")
-            }
             .doOnError {error -> return responseError(id = id, version = version, fail = error)  }
             .get
 
         return ApiSuccessResponse2(id = id, version = version, result = result)
+            .also {
+                logger.info("The '${action.key}' has been executed. Result: '${toJson(it)}'")
+            }
     }
 
     abstract fun execute(node: JsonNode): Result<R, Fail>
