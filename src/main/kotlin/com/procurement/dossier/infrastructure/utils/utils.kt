@@ -106,7 +106,7 @@ fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Pars
     Result.failure(Fail.Incident.Parsing(className = target.canonicalName, exception = expected))
 }
 
-fun String.toNode(): Result<JsonNode, Fail> = try {
+fun String.toNode(): Result<JsonNode, Fail.Incident.Transforming> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
     Result.failure(Fail.Incident.Transforming(exception = exception))

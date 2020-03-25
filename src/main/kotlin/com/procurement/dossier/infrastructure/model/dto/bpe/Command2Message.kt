@@ -139,7 +139,11 @@ fun <T : Any> JsonNode.tryParamsToObject(target: Class<T>): Result<T, BadRequest
     return tryToObject(target = target)
         .doOnError {
             return Result.failure(
-                BadRequestErrors.Parsing(message = "Can not parse 'params'.", request = this.toString())
+                BadRequestErrors.Parsing(
+                    message = "Can not parse 'params'.",
+                    request = this.toString(),
+                    exception = it.exception
+                )
             )
         }
         .get
