@@ -49,7 +49,7 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
             }
             ?: return ValidationResult.error(ValidationErrors.RequirementNotFound(params.requirementId))
 
-        if (compareRequirementValues(requestValue = params.value, dbValue = requirement.value))
+        if (!isMatchingRequirementValues(requestValue = params.value, dbValue = requirement.value))
             return ValidationResult.error(
                 ValidationErrors.RequirementValueCompareError(
                     rvActual = params.value,
@@ -59,7 +59,7 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
         return ValidationResult.ok()
     }
 
-    private fun compareRequirementValues(requestValue: RequirementRsValue, dbValue: RequirementValue): Boolean =
+    private fun isMatchingRequirementValues(requestValue: RequirementRsValue, dbValue: RequirementValue): Boolean =
         when (dbValue) {
             is ExpectedValue -> {
                 when (dbValue) {
