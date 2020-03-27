@@ -98,10 +98,9 @@ val NaN: UUID
     get() = UUID(0, 0)
 
 fun JsonNode.getId(): Result<UUID, DataErrors> {
-    return this.getAttribute("id")
-        .bind {
-            val value = it.asText()
-            asUUID(value)
+    return this.tryGetStringAttribute("id")
+        .bind {text->
+            asUUID(text)
         }
 }
 
@@ -122,17 +121,7 @@ fun JsonNode.getVersion(): Result<ApiVersion, DataErrors> {
 }
 
 fun JsonNode.getAction(): Result<Command2Type, DataErrors> {
-    return this.getAttribute("action")
-        .bind {
-            val value = it.asText()
-            Command2Type.orNull(value)?.asSuccess<Command2Type, DataErrors>() ?: Result.failure(
-                DataErrors.Validation.UnknownValue(
-                    name = "action",
-                    actualValue = value,
-                    expectedValues = Command2Type.allowedValues
-                )
-            )
-        }
+    return this.tryGetEnumAttribute(name = "action", enumProvider = Command2Type)
 }
 
 fun <T : Any> JsonNode.tryParamsToObject(target: Class<T>): Result<T, BadRequestErrors> {
@@ -149,6 +138,22 @@ fun <T : Any> JsonNode.tryParamsToObject(target: Class<T>): Result<T, BadRequest
         .get
         .asSuccess()
 }
+
+private fun <T> JsonNode.tryGetEnumAttribute(name: String, enumProvider: EnumElementProvider<T>)
+    : Result<T, DataErrors> where T : Enum<T>,
+                                  T : EnumElementProvider.Key =
+    this.tryGetStringAttribute(name)
+        .bind { enum ->
+            enumProvider.orNull(enum)
+                ?.asSuccess<T, DataErrors>()
+                ?: failure(
+                    DataErrors.Validation.UnknownValue(
+                        name = name,
+                        expectedValues = enumProvider.allowedValues,
+                        actualValue = enum
+                    )
+                )
+        }
 
 private fun JsonNode.tryGetStringAttribute(name: String): Result<String, DataErrors> {
     return this.tryGetAttribute(name = name, type = JsonNodeType.STRING)
