@@ -2,11 +2,13 @@ package com.procurement.dossier.infrastructure.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.enums.ResponseStatus
 import java.time.LocalDateTime
 import java.util.*
 
+@JsonPropertyOrder("version", "id", "status", "result")
 sealed class ApiResponse2(
     @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
 
@@ -42,23 +44,21 @@ class ApiErrorResponse2(
     @field:JsonProperty("status")
     override val status: ResponseStatus = ResponseStatus.ERROR
 
-    class Error(val code: String?, val description: String?)
-}
+    class Error(
+        val code: String,
+        val description: String,
 
-class ApiDataErrorResponse2(
-    version: ApiVersion,
-    id: UUID,
-    result: List<Error>
-) : ApiResponse2(
-    version = version,
-    result = result,
-    id = id
-) {
-    @field:JsonProperty("status")
-    override val status: ResponseStatus = ResponseStatus.ERROR
+        @field:JsonInclude(JsonInclude.Include.NON_EMPTY)
+        val details: List<Detail>? = null
+    ) {
+        class Detail(
+            @field:JsonInclude(JsonInclude.Include.NON_NULL)
+            val name: String? = null,
 
-    class Error(val code: String?, val description: String?, val details: List<Detail>)
-    class Detail(val name: String)
+            @field:JsonInclude(JsonInclude.Include.NON_NULL)
+            val id: String? = null
+        )
+    }
 }
 
 class ApiIncidentResponse2(
@@ -81,6 +81,12 @@ class ApiIncidentResponse2(
         val details: List<Detail>
     ) {
         class Service(val id: String, val name: String, val version: String)
-        class Detail(val code: String, val description: String, val metadata: Any?)
+        class Detail(
+            val code: String,
+            val description: String,
+
+            @field:JsonInclude(JsonInclude.Include.NON_NULL)
+            val metadata: Any?
+        )
     }
 }

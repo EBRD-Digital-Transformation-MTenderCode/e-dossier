@@ -1,5 +1,6 @@
 package com.procurement.dossier.domain.fail
 
+import com.fasterxml.jackson.annotation.JsonValue
 import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.util.Result
@@ -84,7 +85,7 @@ sealed class Fail {
             }
         }
 
-        enum class Level(override val key: String) : EnumElementProvider.Key {
+        enum class Level(@JsonValue override val key: String) : EnumElementProvider.Key {
             ERROR("error"),
             WARNING("warning"),
             INFO("info");

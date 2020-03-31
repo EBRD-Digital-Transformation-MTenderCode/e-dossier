@@ -9,6 +9,7 @@ import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.BadRequestErrors
 import com.procurement.dossier.domain.fail.error.DataErrors
+import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.util.Action
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.Result.Companion.failure
@@ -16,13 +17,11 @@ import com.procurement.dossier.domain.util.Result.Companion.success
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.bind
 import com.procurement.dossier.infrastructure.config.properties.GlobalProperties
-import com.procurement.dossier.infrastructure.dto.ApiDataErrorResponse2
 import com.procurement.dossier.infrastructure.dto.ApiErrorResponse2
 import com.procurement.dossier.infrastructure.dto.ApiIncidentResponse2
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.dto.ApiVersion
 import com.procurement.dossier.infrastructure.utils.tryToObject
-
 import java.time.LocalDateTime
 import java.util.*
 
@@ -46,15 +45,15 @@ fun errorResponse(fail: Fail, id: UUID = NaN, version: ApiVersion = GlobalProper
         is Fail.Incident -> generateIncidentResponse(id = id, version = version, fail = fail)
     }
 
-fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Validation): ApiDataErrorResponse2 =
-    ApiDataErrorResponse2(
+fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Validation): ApiErrorResponse2 =
+    ApiErrorResponse2(
         version = version,
         id = id,
         result = listOf(
-            ApiDataErrorResponse2.Error(
+            ApiErrorResponse2.Error(
                 code = "${fail.code}/${GlobalProperties.service.id}",
                 description = fail.description,
-                details = listOf(ApiDataErrorResponse2.Detail(name = fail.name))
+                details = listOf(ApiErrorResponse2.Error.Detail(name = fail.name))
             )
         )
     )
@@ -67,6 +66,19 @@ fun generateErrorResponse(id: UUID, version: ApiVersion, fail: Fail.Error): ApiE
             ApiErrorResponse2.Error(
                 code = "${fail.code}/${GlobalProperties.service.id}",
                 description = fail.description
+            )
+        )
+    )
+
+fun generateValidationErrorResponse(id: UUID, version: ApiVersion, fail: ValidationErrors): ApiErrorResponse2 =
+    ApiErrorResponse2(
+        version = version,
+        id = id,
+        result = listOf(
+            ApiErrorResponse2.Error(
+                code = "${fail.code}/${GlobalProperties.service.id}",
+                description = fail.description,
+                details = if (fail.entityId == null) null else listOf(ApiErrorResponse2.Error.Detail(id = fail.entityId))
             )
         )
     )
