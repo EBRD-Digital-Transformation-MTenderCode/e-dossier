@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
+import com.procurement.access.lib.toList
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.BadRequestErrors
 import com.procurement.dossier.domain.fail.error.DataErrors
+import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.util.Action
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.Result.Companion.failure
@@ -16,13 +18,11 @@ import com.procurement.dossier.domain.util.Result.Companion.success
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.bind
 import com.procurement.dossier.infrastructure.config.properties.GlobalProperties
-import com.procurement.dossier.infrastructure.dto.ApiDataErrorResponse2
 import com.procurement.dossier.infrastructure.dto.ApiErrorResponse2
 import com.procurement.dossier.infrastructure.dto.ApiIncidentResponse2
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.dto.ApiVersion
 import com.procurement.dossier.infrastructure.utils.tryToObject
-
 import java.time.LocalDateTime
 import java.util.*
 
@@ -42,19 +42,19 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
 fun errorResponse(fail: Fail, id: UUID = NaN, version: ApiVersion = GlobalProperties.App.apiVersion): ApiResponse2 =
     when (fail) {
         is DataErrors.Validation -> generateDataErrorResponse(id = id, version = version, fail = fail)
-        is Fail.Error -> generateErrorResponse(id = id, version = version, fail = fail)
-        is Fail.Incident -> generateIncidentResponse(id = id, version = version, fail = fail)
+        is Fail.Error            -> generateErrorResponse(id = id, version = version, fail = fail)
+        is Fail.Incident         -> generateIncidentResponse(id = id, version = version, fail = fail)
     }
 
-fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Validation): ApiDataErrorResponse2 =
-    ApiDataErrorResponse2(
+fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Validation): ApiErrorResponse2 =
+    ApiErrorResponse2(
         version = version,
         id = id,
         result = listOf(
-            ApiDataErrorResponse2.Error(
+            ApiErrorResponse2.Error(
                 code = "${fail.code}/${GlobalProperties.service.id}",
                 description = fail.description,
-                details = listOf(ApiDataErrorResponse2.Detail(name = fail.name))
+                details = ApiErrorResponse2.Error.Detail.tryCreateOrNull(name = fail.name).toList()
             )
         )
     )
@@ -67,6 +67,19 @@ fun generateErrorResponse(id: UUID, version: ApiVersion, fail: Fail.Error): ApiE
             ApiErrorResponse2.Error(
                 code = "${fail.code}/${GlobalProperties.service.id}",
                 description = fail.description
+            )
+        )
+    )
+
+fun generateValidationErrorResponse(id: UUID, version: ApiVersion, fail: ValidationErrors): ApiErrorResponse2 =
+    ApiErrorResponse2(
+        version = version,
+        id = id,
+        result = listOf(
+            ApiErrorResponse2.Error(
+                code = "${fail.code}/${GlobalProperties.service.id}",
+                description = fail.description,
+                details = ApiErrorResponse2.Error.Detail.tryCreateOrNull(id = fail.entityId).toList()
             )
         )
     )
@@ -99,7 +112,7 @@ val NaN: UUID
 
 fun JsonNode.getId(): Result<UUID, DataErrors> {
     return this.tryGetStringAttribute("id")
-        .bind {text->
+        .bind { text ->
             asUUID(text)
         }
 }
