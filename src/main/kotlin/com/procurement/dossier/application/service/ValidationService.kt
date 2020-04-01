@@ -3,6 +3,7 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.model.data.ExpectedValue
 import com.procurement.dossier.application.model.data.MaxValue
 import com.procurement.dossier.application.model.data.MinValue
+import com.procurement.dossier.application.model.data.RangeValue
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.data.RequirementValue
 import com.procurement.dossier.application.model.entity.CnEntity
@@ -79,6 +80,12 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
                 when (dbValue) {
                     is MinValue.AsNumber -> requestValue is RequirementRsValue.AsNumber
                     is MinValue.AsInteger -> requestValue is RequirementRsValue.AsInteger
+                }
+            }
+            is RangeValue -> {
+                when (dbValue) {
+                    is RangeValue.AsNumber -> requestValue is RequirementRsValue.AsNumber
+                    is RangeValue.AsInteger -> requestValue is RequirementRsValue.AsInteger
                 }
             }
             else -> false
