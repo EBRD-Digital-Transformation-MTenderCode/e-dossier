@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
+import com.procurement.access.lib.toList
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.BadRequestErrors
@@ -41,8 +42,8 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
 fun errorResponse(fail: Fail, id: UUID = NaN, version: ApiVersion = GlobalProperties.App.apiVersion): ApiResponse2 =
     when (fail) {
         is DataErrors.Validation -> generateDataErrorResponse(id = id, version = version, fail = fail)
-        is Fail.Error -> generateErrorResponse(id = id, version = version, fail = fail)
-        is Fail.Incident -> generateIncidentResponse(id = id, version = version, fail = fail)
+        is Fail.Error            -> generateErrorResponse(id = id, version = version, fail = fail)
+        is Fail.Incident         -> generateIncidentResponse(id = id, version = version, fail = fail)
     }
 
 fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Validation): ApiErrorResponse2 =
@@ -53,7 +54,7 @@ fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Va
             ApiErrorResponse2.Error(
                 code = "${fail.code}/${GlobalProperties.service.id}",
                 description = fail.description,
-                details = listOf(ApiErrorResponse2.Error.Detail(name = fail.name))
+                details = ApiErrorResponse2.Error.Detail.tryCreateOrNull(name = fail.name).toList()
             )
         )
     )
@@ -78,7 +79,7 @@ fun generateValidationErrorResponse(id: UUID, version: ApiVersion, fail: Validat
             ApiErrorResponse2.Error(
                 code = "${fail.code}/${GlobalProperties.service.id}",
                 description = fail.description,
-                details = if (fail.entityId == null) null else listOf(ApiErrorResponse2.Error.Detail(id = fail.entityId))
+                details = ApiErrorResponse2.Error.Detail.tryCreateOrNull(id = fail.entityId).toList()
             )
         )
     )
@@ -111,7 +112,7 @@ val NaN: UUID
 
 fun JsonNode.getId(): Result<UUID, DataErrors> {
     return this.tryGetStringAttribute("id")
-        .bind {text->
+        .bind { text ->
             asUUID(text)
         }
 }

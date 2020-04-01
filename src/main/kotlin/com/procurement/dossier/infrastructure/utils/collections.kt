@@ -15,3 +15,5 @@ inline fun <T, V> Collection<T>.toSetBy(selector: (T) -> V): Set<V> {
     }
     return collections
 }
+
+fun <T> T?.toList(): List<T> = if (this != null) listOf(this) else emptyList()
