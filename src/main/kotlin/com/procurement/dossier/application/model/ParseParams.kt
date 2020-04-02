@@ -43,7 +43,7 @@ fun parseRequirementId(id: String): Result<RequirementId, DataErrors> =
         .doReturn {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
-                    name = "requirementId",
+                    name = "requirementResponse.requirement.id",
                     expectedFormat = "string",
                     actualValue = id
                 )
@@ -55,7 +55,7 @@ fun parseRequirementResponseId(id: String): Result<RequirementResponseId, DataEr
         .doReturn {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
-                    name = "requirementResponseId",
+                    name = "requirementResponse.id",
                     expectedFormat = "string",
                     actualValue = id
                 )
