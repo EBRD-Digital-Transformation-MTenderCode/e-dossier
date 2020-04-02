@@ -35,25 +35,27 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
             }
             .get
 
+        val requirementId = params.requirementResponse.requirement.id
+
         val requirements = createdCriteriaEntity.criteria
             ?.flatMap { it.requirementGroups }
             ?.flatMap { it.requirements }
-            ?: return ValidationResult.error(ValidationErrors.RequirementNotFound(params.requirementId))
+            ?: return ValidationResult.error(ValidationErrors.RequirementNotFound(requirementId))
 
         if (requirements.isEmpty()) {
-            return ValidationResult.error(ValidationErrors.RequirementNotFound(params.requirementId))
+            return ValidationResult.error(ValidationErrors.RequirementNotFound(requirementId))
         }
 
         val requirement = requirements
             .find { requirement ->
-                requirement.id == params.requirementId
+                requirement.id == requirementId
             }
-            ?: return ValidationResult.error(ValidationErrors.RequirementNotFound(params.requirementId))
+            ?: return ValidationResult.error(ValidationErrors.RequirementNotFound(requirementId))
 
-        if (!isMatchingRequirementValues(requestValue = params.value, dbValue = requirement.value))
+        if (!isMatchingRequirementValues(requestValue = params.requirementResponse.value, dbValue = requirement.value))
             return ValidationResult.error(
                 ValidationErrors.RequirementValueCompareError(
-                    rvActual = params.value,
+                    rvActual = params.requirementResponse.value,
                     rvExpected = requirement.value
                 )
             )
