@@ -1,11 +1,6 @@
 package com.procurement.dossier.application.service
 
-import com.procurement.dossier.application.model.data.ExpectedValue
-import com.procurement.dossier.application.model.data.MaxValue
-import com.procurement.dossier.application.model.data.MinValue
-import com.procurement.dossier.application.model.data.RangeValue
 import com.procurement.dossier.application.model.data.RequirementRsValue
-import com.procurement.dossier.application.model.data.RequirementValue
 import com.procurement.dossier.application.model.entity.CnEntity
 import com.procurement.dossier.application.repository.CriteriaRepository
 import com.procurement.dossier.application.service.params.ValidateRequirementResponseParams
@@ -16,6 +11,7 @@ import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.dossier.infrastructure.model.entity.CreatedCriteriaEntity
 import com.procurement.dossier.infrastructure.utils.tryToObject
 import org.springframework.stereotype.Service
@@ -52,7 +48,7 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
             }
             ?: return ValidationResult.error(ValidationErrors.RequirementNotFound(requirementId))
 
-        if (!isMatchingRequirementValues(requestValue = params.requirementResponse.value, dbValue = requirement.value))
+        if (!isMatchingRequirementValues(value = params.requirementResponse.value, dataType = requirement.dataType))
             return ValidationResult.error(
                 ValidationErrors.RequirementValueCompareError(
                     rvActual = params.requirementResponse.value,
@@ -62,35 +58,12 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
         return ValidationResult.ok()
     }
 
-    private fun isMatchingRequirementValues(requestValue: RequirementRsValue, dbValue: RequirementValue): Boolean =
-        when (dbValue) {
-            is ExpectedValue -> {
-                when (dbValue) {
-                    is ExpectedValue.AsNumber -> requestValue is RequirementRsValue.AsNumber
-                    is ExpectedValue.AsString -> requestValue is RequirementRsValue.AsString
-                    is ExpectedValue.AsInteger -> requestValue is RequirementRsValue.AsInteger
-                    is ExpectedValue.AsBoolean -> requestValue is RequirementRsValue.AsBoolean
-                }
-            }
-            is MaxValue -> {
-                when (dbValue) {
-                    is MaxValue.AsNumber -> requestValue is RequirementRsValue.AsNumber
-                    is MaxValue.AsInteger -> requestValue is RequirementRsValue.AsInteger
-                }
-            }
-            is MinValue -> {
-                when (dbValue) {
-                    is MinValue.AsNumber -> requestValue is RequirementRsValue.AsNumber
-                    is MinValue.AsInteger -> requestValue is RequirementRsValue.AsInteger
-                }
-            }
-            is RangeValue -> {
-                when (dbValue) {
-                    is RangeValue.AsNumber -> requestValue is RequirementRsValue.AsNumber
-                    is RangeValue.AsInteger -> requestValue is RequirementRsValue.AsInteger
-                }
-            }
-            else -> false
+    private fun isMatchingRequirementValues(value: RequirementRsValue, dataType: RequirementDataType): Boolean =
+        when (dataType) {
+            RequirementDataType.NUMBER -> value is RequirementRsValue.AsNumber
+            RequirementDataType.BOOLEAN -> value is RequirementRsValue.AsBoolean
+            RequirementDataType.STRING -> value is RequirementRsValue.AsString
+            RequirementDataType.INTEGER -> value is RequirementRsValue.AsInteger
         }
 
     private fun getCnEntityByCpid(cpid: String): Result<CnEntity, Fail> {
