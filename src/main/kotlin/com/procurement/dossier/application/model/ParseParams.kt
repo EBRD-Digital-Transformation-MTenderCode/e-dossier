@@ -4,6 +4,7 @@ import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.requirement.RequirementId
+import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.requirement.response.tryRequirementResponseId
 import com.procurement.dossier.domain.model.requirement.tryRequirementId
 import com.procurement.dossier.domain.util.Result
@@ -49,7 +50,7 @@ fun parseRequirementId(id: String): Result<RequirementId, DataErrors> =
             )
         }.asSuccess()
 
-fun parseRequirementResponseId(id: String): Result<RequirementId, DataErrors> =
+fun parseRequirementResponseId(id: String): Result<RequirementResponseId, DataErrors> =
     id.tryRequirementResponseId()
         .doReturn {
             return Result.failure(
