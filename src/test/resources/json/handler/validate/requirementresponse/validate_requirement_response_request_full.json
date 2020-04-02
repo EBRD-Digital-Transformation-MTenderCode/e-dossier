@@ -1,7 +1,11 @@
 {
-  "cpid": "ocds-b3wdp1-MD-1580458690892",
+  "cpid": "ocds-t1s2t3-MD-1581934265105",
   "ocid": "ocds-b3wdp1-MD-1580458690892-EV-1580458791896",
-  "id": "string",
-  "value": true,
-  "requirementId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  "requirementResponse": {
+    "id": "2a969a8f-ea14-45df-b773-def05a76b2ef",
+    "value": true,
+    "requirement": {
+      "id": "6ae12896-d555-4cdb-b35a-ef2b493c5451"
+    }
+  }
 }
