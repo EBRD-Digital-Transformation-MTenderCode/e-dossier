@@ -10,11 +10,19 @@ import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueSeri
 
 data class ValidateRequirementResponseRequest(
     @field:JsonProperty("cpid") @param:JsonProperty("cpid") val cpid: String,
-    @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
     @field:JsonProperty("ocid") @param:JsonProperty("ocid") val ocid: String,
-    @field:JsonProperty("requirementId") @param:JsonProperty("requirementId") val requirementId: String,
+    @field:JsonProperty("requirementResponse") @param:JsonProperty("requirementResponse") val requirementResponse: RequirementResponse
+) {
+    data class RequirementResponse(
+        @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
+        @JsonDeserialize(using = RequirementValueDeserializer::class)
+        @JsonSerialize(using = RequirementValueSerializer::class)
+        @field:JsonProperty("value") @param:JsonProperty("value") val value: RequirementRsValue,
+        @field:JsonProperty("requirement") @param:JsonProperty("requirement") val requirement: Requirement
+    ) {
 
-    @JsonDeserialize(using = RequirementValueDeserializer::class)
-    @JsonSerialize(using = RequirementValueSerializer::class)
-    @field:JsonProperty("value") @param:JsonProperty("value") val value: RequirementRsValue
-)
+        data class Requirement(
+            @field:JsonProperty("id") @param:JsonProperty("id") val id: String
+        )
+    }
+}
