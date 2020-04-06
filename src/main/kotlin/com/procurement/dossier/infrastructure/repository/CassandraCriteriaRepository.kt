@@ -31,18 +31,24 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
                 WHERE $columnCpid=?
             """
 
-        private const val SAVE_CN_CQL = """
+        private const val SAVE_NEW_CN_CQL = """
                INSERT INTO $keySpace.$tableName
                      ($columnCpid,
                       $columnOwner,
                       $columnJsonData)
                   VALUES ( ?, ?, ? )
-                IF NOT EXISTS
+            """
+
+        private const val UPDATE_CN_CQL = """
+               UPDATE $keySpace.$tableName
+                 SET   $columnJsonData=?
+                 WHERE $columnCpid=?
             """
     }
 
     private val preparedFindByCpidCQL = session.prepare(FIND_BY_CPID_CQL)
-    private val preparedSaveCnIdCQL = session.prepare(SAVE_CN_CQL)
+    private val preparedSaveNewCnCQL = session.prepare(SAVE_NEW_CN_CQL)
+    private val preparedUpdateCnCQL = session.prepare(UPDATE_CN_CQL)
 
     override fun findBy(cpid: String): CnEntity? {
         val query = preparedFindByCpidCQL.bind()
@@ -86,10 +92,8 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
         jsonData = row.getString(columnJsonData)
     )
 
-    override fun save(
-        cn: CnEntity
-    ): Boolean {
-        val statements = preparedSaveCnIdCQL.bind()
+    override fun save(cn: CnEntity): Boolean {
+        val statements = preparedSaveNewCnCQL.bind()
             .apply {
                 setString(columnCpid, cn.cpid)
                 setString(columnOwner, cn.owner)
@@ -100,7 +104,7 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
     }
 
     override fun trySave(cn: CnEntity): Result<CnEntity, Fail.Incident> {
-        val statements = preparedSaveCnIdCQL.bind()
+        val statements = preparedSaveNewCnCQL.bind()
             .apply {
                 setString(columnCpid, cn.cpid)
                 setString(columnOwner, cn.owner)
@@ -111,6 +115,18 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
 
         return cn.asSuccess()
     }
+
+    override fun update(cn: CnEntity) {
+        val statements = preparedUpdateCnCQL.bind()
+            .apply {
+                setString(columnJsonData, cn.jsonData)
+                setString(columnCpid, cn.cpid)
+                setString(columnOwner, cn.owner)
+            }
+
+        saveCn(statements)
+    }
+
 
     private fun saveCn(statement: BoundStatement): ResultSet = try {
         session.execute(statement)
