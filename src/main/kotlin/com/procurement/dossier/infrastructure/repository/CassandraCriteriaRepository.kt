@@ -31,7 +31,7 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
                 WHERE $columnCpid=?
             """
 
-        private const val SAVE_NEW_CN_CQL = """
+        private const val SAVE_CN_CQL = """
                INSERT INTO $keySpace.$tableName
                      ($columnCpid,
                       $columnOwner,
@@ -47,7 +47,7 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
     }
 
     private val preparedFindByCpidCQL = session.prepare(FIND_BY_CPID_CQL)
-    private val preparedSaveNewCnCQL = session.prepare(SAVE_NEW_CN_CQL)
+    private val preparedSaveNewCnCQL = session.prepare(SAVE_CN_CQL)
     private val preparedUpdateCnCQL = session.prepare(UPDATE_CN_CQL)
 
     override fun findBy(cpid: String): CnEntity? {
