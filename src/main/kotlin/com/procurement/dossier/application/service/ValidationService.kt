@@ -11,6 +11,7 @@ import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.dossier.infrastructure.model.entity.CreatedCriteriaEntity
 import com.procurement.dossier.infrastructure.utils.tryToObject
@@ -55,6 +56,21 @@ class ValidationService(private val criteriaRepository: CriteriaRepository, priv
                     rvExpected = requirement.value
                 )
             )
+
+        val criteria = createdCriteriaEntity.criteria
+            .find { criteria ->
+                criteria.requirementGroups
+                    .flatMap { it.requirements }
+                    .any { it.id == requirementId }
+            }
+            ?: return ValidationResult.error(ValidationErrors.RequirementNotFound(requirementId))
+
+        val expectedSource = CriteriaSource.PROCURING_ENTITY
+        if (criteria.source != null && criteria.source != expectedSource)
+            return ValidationResult.error(
+                ValidationErrors.UnexpectedCriteriaSource(actual = criteria.source, expected = expectedSource)
+            )
+
         return ValidationResult.ok()
     }
 
