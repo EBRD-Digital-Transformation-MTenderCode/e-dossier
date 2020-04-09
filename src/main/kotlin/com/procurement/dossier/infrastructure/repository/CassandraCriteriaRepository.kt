@@ -121,7 +121,6 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
             .apply {
                 setString(columnJsonData, cn.jsonData)
                 setString(columnCpid, cn.cpid)
-                setString(columnOwner, cn.owner)
             }
 
         saveCn(statements)
