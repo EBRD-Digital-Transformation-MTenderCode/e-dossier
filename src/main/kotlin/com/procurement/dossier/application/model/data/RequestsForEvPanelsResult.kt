@@ -4,7 +4,7 @@ import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import java.util.*
 
-data class RequestsForEvPanelsData(
+data class RequestsForEvPanelsResult(
     val criteria: Criteria
 ) {
     data class Criteria(

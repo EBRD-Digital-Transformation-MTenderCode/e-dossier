@@ -8,6 +8,7 @@ import com.procurement.dossier.application.service.CriteriaService
 import com.procurement.dossier.application.service.command.generateCreateCriteriaResponse
 import com.procurement.dossier.application.service.context.CheckResponsesContext
 import com.procurement.dossier.application.service.context.CreateCriteriaContext
+import com.procurement.dossier.application.service.context.EvPanelsContext
 import com.procurement.dossier.application.service.context.GetCriteriaContext
 import com.procurement.dossier.infrastructure.converter.toResponseDto
 import com.procurement.dossier.infrastructure.dto.ApiSuccessResponse
@@ -131,7 +132,8 @@ class CommandService(
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV -> {
-                        criteriaService.createRequestsForEvPanels()
+                        val context = EvPanelsContext(cpid = cm.cpid, owner = cm.owner)
+                        criteriaService.createRequestsForEvPanels(context = context)
                             .also { result ->
                                 if (log.isDebugEnabled)
                                     log.debug("Requests for EV panels was created. Result: ${toJson(result)}")

@@ -5,7 +5,7 @@ import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.data.CreatedCriteria
 import com.procurement.dossier.application.model.data.GetCriteriaData
 import com.procurement.dossier.application.model.data.NoneValue
-import com.procurement.dossier.application.model.data.RequestsForEvPanelsData
+import com.procurement.dossier.application.model.data.RequestsForEvPanelsResult
 import com.procurement.dossier.application.model.data.Requirement
 import com.procurement.dossier.application.repository.CriteriaRepository
 import com.procurement.dossier.application.service.command.buildCriteria
@@ -39,7 +39,9 @@ import com.procurement.dossier.application.service.command.extractCreatedCriteri
 import com.procurement.dossier.application.service.command.toEntity
 import com.procurement.dossier.application.service.context.CheckResponsesContext
 import com.procurement.dossier.application.service.context.CreateCriteriaContext
+import com.procurement.dossier.application.service.context.EvPanelsContext
 import com.procurement.dossier.application.service.context.GetCriteriaContext
+import com.procurement.dossier.infrastructure.converter.convert
 import com.procurement.dossier.infrastructure.converter.createResponseData
 import com.procurement.dossier.infrastructure.converter.toData
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
@@ -47,6 +49,7 @@ import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.dossier.infrastructure.model.dto.request.CreateCriteriaRequest
+import com.procurement.dossier.infrastructure.utils.toJson
 import com.procurement.dossier.infrastructure.utils.toObject
 
 class CriteriaService(
@@ -60,7 +63,11 @@ class CriteriaService(
         val requestData = request.toData()
         val createdCriteria = buildCriteria(requestData, generationService)
         val createdCriteriaEntity = createdCriteria.toEntity()
-        val cn = createCnEntity(createdCriteriaEntity, context)
+        val cn = createCnEntity(
+            entity = createdCriteriaEntity,
+            cpid = context.cpid,
+            owner = context.owner
+        )
         criteriaRepository.save(cn)
         return createdCriteria
     }
@@ -128,17 +135,27 @@ class CriteriaService(
             }
     }
 
-    fun createRequestsForEvPanels(): RequestsForEvPanelsData {
-        return RequestsForEvPanelsData(
-            criteria = RequestsForEvPanelsData.Criteria(
-                id = generationService.generatePermanentCriteriaId(),
+    fun createRequestsForEvPanels(context: EvPanelsContext): RequestsForEvPanelsResult {
+
+        val dbNonPriceIndicators = criteriaRepository.findBy(cpid = context.cpid)
+            ?.extractCreatedCriteria()
+            ?.toData()
+            ?: throw ErrorException(
+                error = ErrorType.ENTITY_NOT_FOUND,
+                message = "Cannot found record with cpid='${context.cpid}'."
+            )
+
+        val requestForEvPanel = CreatedCriteria.Criteria(
+                id = generationService.generatePermanentCriteriaId().toString(),
                 title = "",
                 description = "",
                 source = CriteriaSource.PROCURING_ENTITY,
                 relatesTo = CriteriaRelatesTo.AWARD,
+                relatedItem = null,
                 requirementGroups = listOf(
-                    RequestsForEvPanelsData.Criteria.RequirementGroup(
-                        id = generationService.generatePermanentRequirementGroupId(),
+                    CreatedCriteria.Criteria.RequirementGroup(
+                        id = generationService.generatePermanentRequirementGroupId().toString(),
+                        description = null,
                         requirements = listOf(
                             Requirement(
                                 id = generationService.generatePermanentRequirementId().toString(),
@@ -152,6 +169,18 @@ class CriteriaService(
                     )
                 )
             )
-        )
+        val result = requestForEvPanel.convert()
+
+        val availableCriteria = dbNonPriceIndicators.criteria.orEmpty()
+        val updatedCriteria = availableCriteria + listOf(requestForEvPanel)
+
+        val updatedNonPriceIndicators = dbNonPriceIndicators.copy(criteria = updatedCriteria)
+
+        val createdCriteriaEntity = updatedNonPriceIndicators.toEntity()
+
+        criteriaRepository.update(cpid = context.cpid, json = toJson(createdCriteriaEntity))
+
+        return result
     }
+
 }
