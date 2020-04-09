@@ -49,6 +49,7 @@ import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.dossier.infrastructure.model.dto.request.CreateCriteriaRequest
+import com.procurement.dossier.infrastructure.utils.toJson
 import com.procurement.dossier.infrastructure.utils.toObject
 
 class CriteriaService(
@@ -176,12 +177,8 @@ class CriteriaService(
         val updatedNonPriceIndicators = dbNonPriceIndicators.copy(criteria = updatedCriteria)
 
         val createdCriteriaEntity = updatedNonPriceIndicators.toEntity()
-        val cn = createCnEntity(
-            entity = createdCriteriaEntity,
-            cpid = context.cpid,
-            owner = context.owner
-        )
-        criteriaRepository.update(cn)
+
+        criteriaRepository.update(cpid = context.cpid, json = toJson(createdCriteriaEntity))
 
         return result
     }

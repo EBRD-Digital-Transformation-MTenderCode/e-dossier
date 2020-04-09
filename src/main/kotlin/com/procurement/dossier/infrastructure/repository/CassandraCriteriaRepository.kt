@@ -116,11 +116,11 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
         return cn.asSuccess()
     }
 
-    override fun update(cn: CnEntity) {
+    override fun update(cpid: String, json: String) {
         val statements = preparedUpdateCnCQL.bind()
             .apply {
-                setString(columnJsonData, cn.jsonData)
-                setString(columnCpid, cn.cpid)
+                setString(columnJsonData, json)
+                setString(columnCpid, cpid.toString())
             }
 
         saveCn(statements)

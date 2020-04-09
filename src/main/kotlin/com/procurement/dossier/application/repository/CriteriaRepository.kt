@@ -9,5 +9,5 @@ interface CriteriaRepository {
     fun tryFindBy(cpid: String): Result<CnEntity?, Fail.Incident>
     fun save(cn: CnEntity): Boolean
     fun trySave(cn: CnEntity): Result<CnEntity, Fail.Incident>
-    fun update(cn: CnEntity)
+    fun update(cpid: String, json: String)
 }
