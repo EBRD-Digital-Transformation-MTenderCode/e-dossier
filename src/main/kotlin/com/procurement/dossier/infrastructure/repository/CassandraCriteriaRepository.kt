@@ -120,7 +120,7 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
         val statements = preparedUpdateCnCQL.bind()
             .apply {
                 setString(columnJsonData, json)
-                setString(columnCpid, cpid.toString())
+                setString(columnCpid, cpid)
             }
 
         saveCn(statements)
