@@ -8,6 +8,7 @@ import com.procurement.dossier.application.exception.DatabaseInteractionExceptio
 import com.procurement.dossier.application.model.entity.CnEntity
 import com.procurement.dossier.application.repository.CriteriaRepository
 import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
@@ -61,10 +62,10 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
             ?.let { convertToContractEntity(it) }
     }
 
-    override fun tryFindBy(cpid: String): Result<CnEntity?, Fail.Incident> {
+    override fun tryFindBy(cpid: Cpid): Result<CnEntity?, Fail.Incident> {
         val query = preparedFindByCpidCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
+                setString(columnCpid, cpid.toString())
             }
         return query.tryLoad()
             .doOnError { error -> return error.asFailure() }

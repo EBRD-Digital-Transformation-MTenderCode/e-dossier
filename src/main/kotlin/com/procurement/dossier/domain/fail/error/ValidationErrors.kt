@@ -3,6 +3,8 @@ package com.procurement.dossier.domain.fail.error
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.data.RequirementValue
 import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.model.Cpid
+import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 
 sealed class ValidationErrors(
@@ -13,10 +15,15 @@ sealed class ValidationErrors(
 
     override val code: String = prefix + numberError
 
-    class RequirementNotFound(requirementId: String) : ValidationErrors(
+    class RequirementNotFoundOnValidateRequirementResponse(requirementId: RequirementId) : ValidationErrors(
         numberError = "10.5.1.1",
         description = "Requirement with id '$requirementId' not found.",
         entityId = requirementId
+    )
+
+    class RequirementsNotFoundOnValidateRequirementResponse(cpid: Cpid) : ValidationErrors(
+        numberError = "10.5.1.3",
+        description = "Requirements not found by cpid '$cpid'."
     )
 
     class RequirementValueCompareError(rvActual: RequirementRsValue, rvExpected: RequirementValue) : ValidationErrors(
