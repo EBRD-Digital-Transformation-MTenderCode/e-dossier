@@ -1,13 +1,11 @@
 package com.procurement.dossier.application.service
 
-import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.repository.CriteriaRepository
 import com.procurement.dossier.application.service.params.ValidateRequirementResponseParams
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
-import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.dossier.infrastructure.model.entity.CreatedCriteriaEntity
 import com.procurement.dossier.infrastructure.utils.tryToObject
 import org.springframework.stereotype.Service
@@ -47,11 +45,11 @@ class ValidationService(private val criteriaRepository: CriteriaRepository) {
                 ValidationErrors.RequirementNotFoundOnValidateRequirementResponse(requirementId)
             )
 
-        if (!isMatchingRequirementValues(value = params.requirementResponse.value, dataType = requirement.dataType))
+        if (params.requirementResponse.value.dataType != requirement.dataType)
             return ValidationResult.error(
-                ValidationErrors.RequirementValueCompareError(
-                    rvActual = params.requirementResponse.value,
-                    rvExpected = requirement.value
+                ValidationErrors.RequirementDataTypeCompareError(
+                    expectedDataType = requirement.dataType,
+                    actualDataType = params.requirementResponse.value.dataType
                 )
             )
 
@@ -75,12 +73,4 @@ class ValidationService(private val criteriaRepository: CriteriaRepository) {
 
         return ValidationResult.ok()
     }
-
-    private fun isMatchingRequirementValues(value: RequirementRsValue, dataType: RequirementDataType): Boolean =
-        when (dataType) {
-            RequirementDataType.NUMBER -> value is RequirementRsValue.AsNumber
-            RequirementDataType.BOOLEAN -> value is RequirementRsValue.AsBoolean
-            RequirementDataType.STRING -> value is RequirementRsValue.AsString
-            RequirementDataType.INTEGER -> value is RequirementRsValue.AsInteger
-        }
 }
