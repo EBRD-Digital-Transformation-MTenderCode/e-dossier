@@ -34,15 +34,10 @@ class ValidationService(private val criteriaRepository: CriteriaRepository) {
         val requirements = createdCriteriaEntity.criteria
             ?.flatMap { it.requirementGroups }
             ?.flatMap { it.requirements }
+            ?.takeIf { it.isNotEmpty() }
             ?: return ValidationResult.error(
                 ValidationErrors.RequirementsNotFoundOnValidateRequirementResponse(params.cpid)
             )
-
-        if (requirements.isEmpty()) {
-            return ValidationResult.error(
-                ValidationErrors.RequirementsNotFoundOnValidateRequirementResponse(params.cpid)
-            )
-        }
 
         val requirement = requirements
             .find { requirement ->
