@@ -19,15 +19,6 @@ sealed class BadRequestErrors(
         }
     }
 
-    class EntityNotFound(entityName: String, cpid: String) : BadRequestErrors(
-        numberError = "02",
-        description = "Entity '$entityName' not found by '$cpid'."
-    ) {
-        override fun logging(logger: Logger) {
-            logger.error(message = "$message.")
-        }
-    }
-
     override fun logging(logger: Logger) {
         logger.error(message = message)
     }
