@@ -10,7 +10,6 @@ import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueSeri
 
 data class ValidateRequirementResponseRequest(
     @field:JsonProperty("cpid") @param:JsonProperty("cpid") val cpid: String,
-    @field:JsonProperty("ocid") @param:JsonProperty("ocid") val ocid: String,
     @field:JsonProperty("requirementResponse") @param:JsonProperty("requirementResponse") val requirementResponse: RequirementResponse
 ) {
     data class RequirementResponse(

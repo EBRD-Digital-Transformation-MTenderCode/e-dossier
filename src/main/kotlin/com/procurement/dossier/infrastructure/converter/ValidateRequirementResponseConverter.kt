@@ -8,10 +8,9 @@ import com.procurement.dossier.infrastructure.handler.validate.requirementrespon
 
 fun ValidateRequirementResponseRequest.convert(): Result<ValidateRequirementResponseParams, DataErrors> =
     ValidateRequirementResponseParams.tryCreate(
+        cpid = cpid,
         requirementResponse = requirementResponse.convert()
-            .doReturn { error -> return failure(error) },
-        ocid = ocid,
-        cpid = cpid
+            .doReturn { error -> return failure(error) }
     )
 
 fun ValidateRequirementResponseRequest.RequirementResponse.convert():
@@ -25,6 +24,4 @@ fun ValidateRequirementResponseRequest.RequirementResponse.convert():
 
 fun ValidateRequirementResponseRequest.RequirementResponse.Requirement.convert():
     Result<ValidateRequirementResponseParams.RequirementResponse.Requirement, DataErrors> =
-    ValidateRequirementResponseParams.RequirementResponse.Requirement.tryCreate(
-        id = id
-    )
+    ValidateRequirementResponseParams.RequirementResponse.Requirement.tryCreate(id = id)
