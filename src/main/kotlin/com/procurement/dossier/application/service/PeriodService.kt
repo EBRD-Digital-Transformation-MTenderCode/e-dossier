@@ -13,8 +13,9 @@ import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
-class PeriodService(private val periodRulesRepository: PeriodRulesRepository,
-                    private val periodRepository: PeriodRepository
+class PeriodService(
+    private val periodRulesRepository: PeriodRulesRepository,
+    private val periodRepository: PeriodRepository
 ) {
     fun validatePeriod(data: ValidatePeriodData, context: ValidatePeriodContext) {
         val period = data.period
