@@ -55,6 +55,6 @@ class ServiceConfig {
     }
 
     @Bean
-    fun periodService(): PeriodService = PeriodService(periodRulesRepository)
+    fun periodService(): PeriodService = PeriodService(periodRulesRepository, periodRepository)
 
 }
