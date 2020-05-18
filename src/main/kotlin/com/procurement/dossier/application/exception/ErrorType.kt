@@ -18,5 +18,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_COEFFICIENT("10.76", "Invalid coefficient."),
     INVALID_PERIOD_DATES("10.77", "Period start date must precede end date."),
     PERIOD_RULE_NOT_FOUND("10.78", "Period rule not found."),
-    INVALID_PERIOD_DURATION("10.79", "Period duration is invalid")
+    INVALID_PERIOD_DURATION("10.79", "Period duration is invalid"),
+    INVALID_PERIOD_END_DATE("10.80", "Period end date must be equal or greater than previously stored period end date."),
 }
