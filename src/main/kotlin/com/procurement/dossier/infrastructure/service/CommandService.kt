@@ -4,6 +4,7 @@ import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.data.CreatedCriteria
 import com.procurement.dossier.application.model.data.GetCriteriaData
+import com.procurement.dossier.application.model.data.period.check.CheckPeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
 import com.procurement.dossier.application.service.CriteriaService
 import com.procurement.dossier.application.service.PeriodService
@@ -19,9 +20,12 @@ import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandType
 import com.procurement.dossier.infrastructure.model.dto.bpe.country
 import com.procurement.dossier.infrastructure.model.dto.bpe.cpid
+import com.procurement.dossier.infrastructure.model.dto.bpe.cpidParsed
+import com.procurement.dossier.infrastructure.model.dto.bpe.ocidParsed
 import com.procurement.dossier.infrastructure.model.dto.bpe.owner
 import com.procurement.dossier.infrastructure.model.dto.bpe.pmd
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
+import com.procurement.dossier.infrastructure.model.dto.request.period.CheckPeriodRequest
 import com.procurement.dossier.infrastructure.model.dto.request.period.ValidatePeriodRequest
 import com.procurement.dossier.infrastructure.utils.toJson
 import com.procurement.dossier.infrastructure.utils.toObject
@@ -181,10 +185,29 @@ class CommandService(
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
-                    ProcurementMethod.OP, ProcurementMethod.TEST_OP
-                    -> {
-                        throw ErrorException(ErrorType.INVALID_PMD)
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
+
+                }
+            }
+            CommandType.CHECK_PERIOD -> {
+                when (cm.pmd) {
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
+                        val context = CheckPeriodContext(cpid = cm.cpidParsed(), ocid = cm.ocidParsed())
+                        val data = toObject(CheckPeriodRequest::class.java, cm.data).convert()
+                        periodService.checkPeriod(data = data, context = context)
+                            .also {
+                                if (log.isDebugEnabled)
+                                    log.debug("Period check completed successfully")
+                            }
                     }
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
         }
