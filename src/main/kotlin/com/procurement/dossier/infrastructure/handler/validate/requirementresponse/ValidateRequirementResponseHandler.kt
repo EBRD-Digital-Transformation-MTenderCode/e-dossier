@@ -9,25 +9,18 @@ import com.procurement.dossier.infrastructure.converter.convert
 import com.procurement.dossier.infrastructure.handler.AbstractValidationHandler
 import com.procurement.dossier.infrastructure.model.dto.bpe.Command2Type
 import com.procurement.dossier.infrastructure.model.dto.bpe.tryGetParams
-import com.procurement.dossier.infrastructure.model.dto.bpe.tryParamsToObject
 import org.springframework.stereotype.Service
 
 @Service
 class ValidateRequirementResponseHandler(
-    private val logget: Logger,
+    logget: Logger,
     private val validationService: ValidationService
 ) : AbstractValidationHandler<Command2Type>(logger = logget) {
 
     override fun execute(node: JsonNode): ValidationResult<Fail> {
 
-        val paramsNode = node.tryGetParams()
-            .doOnError { error -> return ValidationResult.error(error) }
-            .get
-        val params = paramsNode.tryParamsToObject(ValidateRequirementResponseRequest::class.java)
-            .doOnError { error ->
-                return ValidationResult.error(error)
-            }
-            .get
+        val params = node.tryGetParams(ValidateRequirementResponseRequest::class.java)
+            .doReturn { error -> return ValidationResult.error(error) }
             .convert()
             .doOnError { error -> return ValidationResult.error(error) }
             .get
