@@ -1,12 +1,15 @@
 package com.procurement.dossier.application.service
 
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodContext
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodResult
+import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
+import com.procurement.dossier.application.model.data.period.save.SavePeriodData
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodData
 import com.procurement.dossier.application.repository.PeriodRepository
@@ -255,5 +258,45 @@ internal class PeriodServiceTest {
             )
 
         private fun stubContext() = CheckPeriodContext(cpid = CPID, ocid = OCID)
+    }
+
+    @Nested
+    inner class SavePeriod {
+        @Test
+        fun repositoryMethod_isCalled() {
+            val startDate = DATE
+            val endDate = startDate.plusDays(1)
+            val data = createSavePeriodData(startDate = startDate, endDate = endDate)
+            val context = SavePeriodContext(cpid = CPID, ocid = OCID)
+
+            periodService.savePeriod(data = data, context = context)
+
+            verify(periodRepository).saveOrUpdatePeriod(
+                period = PeriodEntity(
+                    cpid = context.cpid,
+                    ocid = context.ocid,
+                    endDate = data.period.endDate,
+                    startDate = data.period.startDate
+                )
+            )
+        }
+
+        @Test
+        fun success() {
+            val startDate = DATE
+            val endDate = startDate.plusDays(2)
+            val data = createSavePeriodData(startDate = startDate, endDate = endDate)
+            val context = SavePeriodContext(cpid = CPID, ocid = OCID)
+
+            periodService.savePeriod(data = data, context = context)
+        }
+
+
+        private fun createSavePeriodData(startDate: LocalDateTime, endDate: LocalDateTime) =
+            SavePeriodData(
+                period = SavePeriodData.Period(
+                    startDate = startDate, endDate = endDate
+                )
+            )
     }
 }
