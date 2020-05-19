@@ -27,4 +27,13 @@ CREATE TABLE IF NOT EXISTS  dossier.period_rules (
     primary key(country, pmd)
 );
 
+CREATE TABLE IF NOT EXISTS  dossier.history
+(
+    command_id text,
+    command text,
+    command_date timestamp,
+    json_data text,
+    primary key(command_id, command)
+);
+
 INSERT INTO dossier.period_rules (country, pmd, value)  VALUES ('MD', 'GPA', 864000);
