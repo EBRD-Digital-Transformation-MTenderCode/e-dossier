@@ -1,0 +1,43 @@
+{
+  "id": "string",
+  "candidates": [
+    {
+      "id": "string",
+      "name": "string",
+      "identifier": {
+        "id": "string",
+        "legalName": "string",
+        "scheme": "string",
+        "uri": "string"
+      },
+      "address": {
+        "streetAddress": "string",
+        "addressDetails": {
+          "country": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string"
+          },
+          "region": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string"
+          },
+          "locality": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string"
+          }
+        }
+      },
+      "contactPoint": {
+        "name": "string",
+        "email": "string",
+        "telephone": "string"
+      },
+      "details": {
+        "scale": "micro"
+      }
+    }
+  ]
+}
