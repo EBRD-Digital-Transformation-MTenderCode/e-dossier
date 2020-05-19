@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.access.lib.toList
 import com.procurement.dossier.domain.EnumElementProvider
+import com.procurement.dossier.domain.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.BadRequestErrors
 import com.procurement.dossier.domain.fail.error.DataErrors
@@ -27,7 +28,8 @@ import java.time.LocalDateTime
 import java.util.*
 
 enum class Command2Type(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
-    VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse");
+    VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse"),
+    VALIDATE_SUBMISSION("validateSubmission");
 
     override fun toString(): String = key
 
@@ -42,8 +44,8 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
 fun errorResponse(fail: Fail, id: UUID = NaN, version: ApiVersion = GlobalProperties.App.apiVersion): ApiResponse2 =
     when (fail) {
         is DataErrors.Validation -> generateDataErrorResponse(id = id, version = version, fail = fail)
-        is Fail.Error            -> generateErrorResponse(id = id, version = version, fail = fail)
-        is Fail.Incident         -> generateIncidentResponse(id = id, version = version, fail = fail)
+        is Fail.Error -> generateErrorResponse(id = id, version = version, fail = fail)
+        is Fail.Incident -> generateIncidentResponse(id = id, version = version, fail = fail)
     }
 
 fun generateDataErrorResponse(id: UUID, version: ApiVersion, fail: DataErrors.Validation): ApiErrorResponse2 =
@@ -137,21 +139,6 @@ fun JsonNode.getAction(): Result<Command2Type, DataErrors> {
     return this.tryGetEnumAttribute(name = "action", enumProvider = Command2Type)
 }
 
-fun <T : Any> JsonNode.tryParamsToObject(target: Class<T>): Result<T, BadRequestErrors> {
-    return tryToObject(target = target)
-        .doOnError {
-            return Result.failure(
-                BadRequestErrors.Parsing(
-                    message = "Can not parse 'params'.",
-                    request = this.toString(),
-                    exception = it.exception
-                )
-            )
-        }
-        .get
-        .asSuccess()
-}
-
 private fun <T> JsonNode.tryGetEnumAttribute(name: String, enumProvider: EnumElementProvider<T>)
     : Result<T, DataErrors> where T : Enum<T>,
                                   T : EnumElementProvider.Key =
@@ -162,7 +149,7 @@ private fun <T> JsonNode.tryGetEnumAttribute(name: String, enumProvider: EnumEle
                 ?: failure(
                     DataErrors.Validation.UnknownValue(
                         name = name,
-                        expectedValues = enumProvider.allowedValues,
+                        expectedValues = enumProvider.allowedElements.keysAsStrings(),
                         actualValue = enum
                     )
                 )
@@ -194,20 +181,20 @@ private fun JsonNode.getAttribute(name: String): Result<JsonNode, DataErrors> {
     return if (has(name)) {
         val attr = get(name)
         if (attr !is NullNode)
-            Result.success(attr)
+            success(attr)
         else
-            Result.failure(
+            failure(
                 DataErrors.Validation.DataTypeMismatch(name = "$attr", actualType = "null", expectedType = "not null")
             )
     } else
-        Result.failure(DataErrors.Validation.MissingRequiredAttribute(name = name))
+        failure(DataErrors.Validation.MissingRequiredAttribute(name = name))
 }
 
 private fun asUUID(value: String): Result<UUID, DataErrors> =
     try {
-        Result.success<UUID>(UUID.fromString(value))
+        success<UUID>(UUID.fromString(value))
     } catch (exception: IllegalArgumentException) {
-        Result.failure(
+        failure(
             DataErrors.Validation.DataFormatMismatch(
                 name = "id",
                 expectedFormat = "uuid",
@@ -216,5 +203,18 @@ private fun asUUID(value: String): Result<UUID, DataErrors> =
         )
     }
 
-fun JsonNode.tryGetParams(): Result<JsonNode, DataErrors> =
-    getAttribute("params")
+fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
+    val name = "params"
+    return getAttribute(name).bind {
+        when (val result = it.tryToObject(target)) {
+            is Result.Success -> result
+            is Result.Failure -> failure(
+                BadRequestErrors.Parsing(
+                    message = "Can not parse 'params'.",
+                    request = this.toString(),
+                    exception = result.error.exception
+                )
+            )
+        }
+    }
+}
