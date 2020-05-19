@@ -145,7 +145,8 @@ enum class CommandType(private val value: String) {
     GET_CRITERIA("getCriteria"),
     CREATE_REQUESTS_FOR_EV_PANELS("createRequestsForEvPanels"),
     VALIDATE_PERIOD("validatePeriod"),
-    CHECK_PERIOD("checkPeriod");
+    CHECK_PERIOD("checkPeriod"),
+    SAVE_PERIOD("savePeriod");
 
     @JsonValue
     fun value(): String {
