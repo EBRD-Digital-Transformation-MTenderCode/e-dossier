@@ -5,7 +5,9 @@ import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.data.CreatedCriteria
 import com.procurement.dossier.application.model.data.GetCriteriaData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodContext
+import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
+import com.procurement.dossier.application.repository.HistoryDao
 import com.procurement.dossier.application.service.CriteriaService
 import com.procurement.dossier.application.service.PeriodService
 import com.procurement.dossier.application.service.command.generateCreateCriteriaResponse
@@ -26,6 +28,7 @@ import com.procurement.dossier.infrastructure.model.dto.bpe.owner
 import com.procurement.dossier.infrastructure.model.dto.bpe.pmd
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.dossier.infrastructure.model.dto.request.period.CheckPeriodRequest
+import com.procurement.dossier.infrastructure.model.dto.request.period.SavePeriodRequest
 import com.procurement.dossier.infrastructure.model.dto.request.period.ValidatePeriodRequest
 import com.procurement.dossier.infrastructure.utils.toJson
 import com.procurement.dossier.infrastructure.utils.toObject
@@ -34,6 +37,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CommandService(
+    private val historyDao: HistoryDao,
     private val criteriaService: CriteriaService,
     private val periodService: PeriodService
 ) {
@@ -195,10 +199,36 @@ class CommandService(
                         val context = CheckPeriodContext(cpid = cm.cpidParsed(), ocid = cm.ocidParsed())
                         val data = toObject(CheckPeriodRequest::class.java, cm.data).convert()
                         periodService.checkPeriod(data = data, context = context)
-                            .also {
+                            .also { result ->
                                 if (log.isDebugEnabled)
-                                    log.debug("Period check completed successfully")
+                                    log.debug("Period check completed successfully. Result: ${toJson(result)}")
                             }
+                    }
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
+                }
+            }
+            CommandType.SAVE_PERIOD -> {
+                when (cm.pmd) {
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
+                        val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
+                        if (historyEntity != null) Unit
+                        else {
+                            val context = SavePeriodContext(cpid = cm.cpidParsed(), ocid = cm.ocidParsed())
+                            val data = toObject(SavePeriodRequest::class.java, cm.data).convert()
+                            periodService.savePeriod(data = data, context = context)
+                                .also {
+                                    historyDao.saveHistory(cm.id, cm.command.value(), it)
+                                    if (log.isDebugEnabled)
+                                        log.debug("Period save completed successfully")
+                                }
+                        }
                     }
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
