@@ -5,6 +5,8 @@ import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodContext
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodResult
+import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
+import com.procurement.dossier.application.model.data.period.save.SavePeriodData
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodData
 import com.procurement.dossier.application.repository.PeriodRepository
@@ -41,7 +43,6 @@ class PeriodService(
             throw ErrorException(ErrorType.INVALID_PERIOD_DURATION)
     }
 
-
     fun checkPeriod(data: CheckPeriodData, context: CheckPeriodContext): CheckPeriodResult{
         val requestPeriod = data.period
         checkPeriodDates(startDate = requestPeriod.startDate, endDate = requestPeriod.endDate)
@@ -69,4 +70,13 @@ class PeriodService(
         requestPeriod: CheckPeriodData.Period, storedPeriod: PeriodEntity
     ) = !requestPeriod.endDate.isEqual(storedPeriod.endDate)
 
+    fun savePeriod(data: SavePeriodData, context: SavePeriodContext) =
+        periodRepository.saveOrUpdatePeriod(
+            PeriodEntity(
+                cpid = context.cpid,
+                ocid = context.ocid,
+                endDate = data.period.endDate,
+                startDate = data.period.startDate
+            )
+        )
 }
