@@ -3,6 +3,7 @@ package com.procurement.dossier.infrastructure.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
+import com.procurement.dossier.infrastructure.handler.submission.ValidateSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
 import com.procurement.dossier.infrastructure.model.dto.bpe.Command2Type
 import com.procurement.dossier.infrastructure.model.dto.bpe.errorResponse
@@ -13,8 +14,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class Command2Service(
-    val logger: Logger,
-    val validationRequirementResponseHandler: ValidateRequirementResponseHandler
+    private val logger: Logger,
+    private val validationRequirementResponseHandler: ValidateRequirementResponseHandler,
+    private val validateSubmissionHandler: ValidateSubmissionHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -38,6 +40,7 @@ class Command2Service(
 
         val response: ApiResponse2 = when (action) {
             Command2Type.VALIDATE_REQUIREMENT_RESPONSE -> validationRequirementResponseHandler.handle(node = request)
+            Command2Type.VALIDATE_SUBMISSION -> validateSubmissionHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
