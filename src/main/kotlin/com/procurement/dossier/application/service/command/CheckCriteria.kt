@@ -706,3 +706,36 @@ fun CheckCriteriaData.checkCriteriaAndConversionAreRequired(): CheckCriteriaData
 
     return this
 }
+
+fun CheckCriteriaData.checkCoefficientRelatedOption(): CheckCriteriaData {
+    val requirementsByIds = tender.criteria
+        ?.asSequence()
+        ?.flatMap { criteria -> criteria.requirementGroups.asSequence() }
+        ?.flatMap { requirementGroup -> requirementGroup.requirements.asSequence() }
+        ?.associateBy { requirement -> requirement.id }
+        ?: emptyMap()
+
+    tender.conversions
+        ?.asSequence()
+        ?.filter { conversion -> conversion.relatesTo == ConversionsRelatesTo.REQUIREMENT }
+        ?.forEach { conversion ->
+            val requirement = requirementsByIds[conversion.relatedItem]
+                ?: throw ErrorException(
+                    error = ErrorType.INVALID_CONVERSION,
+                    message = "The conversion '${conversion.id}' related with unknown the requirement '${conversion.relatedItem}'."
+                )
+
+            if (requirement.dataType == RequirementDataType.STRING) {
+                conversion.coefficients
+                    .forEach { coefficient ->
+                        if (coefficient.relatedOption == null)
+                            throw ErrorException(
+                                error = ErrorType.INVALID_COEFFICIENT,
+                                message = "The coefficient '${coefficient.id}' which is related to the requirement '${conversion.relatedItem}' of data type '${requirement.dataType.value()}' does not contain attribute 'relatedOption'."
+                            )
+                    }
+            }
+        }
+
+    return this
+}

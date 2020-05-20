@@ -7,6 +7,11 @@ import com.datastax.driver.core.Session
 import com.procurement.dossier.application.exception.DatabaseInteractionException
 import com.procurement.dossier.application.model.entity.CnEntity
 import com.procurement.dossier.application.repository.CriteriaRepository
+import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.model.Cpid
+import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.asFailure
+import com.procurement.dossier.domain.util.asSuccess
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -33,12 +38,18 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
                       $columnOwner,
                       $columnJsonData)
                   VALUES ( ?, ?, ? )
-                IF NOT EXISTS
+            """
+
+        private const val UPDATE_CN_CQL = """
+               UPDATE $keySpace.$tableName
+                 SET   $columnJsonData=?
+                 WHERE $columnCpid=?
             """
     }
 
     private val preparedFindByCpidCQL = session.prepare(FIND_BY_CPID_CQL)
-    private val preparedSaveCnIdCQL = session.prepare(SAVE_CN_CQL)
+    private val preparedSaveNewCnCQL = session.prepare(SAVE_CN_CQL)
+    private val preparedUpdateCnCQL = session.prepare(UPDATE_CN_CQL)
 
     override fun findBy(cpid: String): CnEntity? {
         val query = preparedFindByCpidCQL.bind()
@@ -49,6 +60,25 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
         val resultSet = load(query)
         return resultSet.one()
             ?.let { convertToContractEntity(it) }
+    }
+
+    override fun tryFindBy(cpid: Cpid): Result<CnEntity?, Fail.Incident> {
+        val query = preparedFindByCpidCQL.bind()
+            .apply {
+                setString(columnCpid, cpid.toString())
+            }
+        return query.tryLoad()
+            .doOnError { error -> return error.asFailure() }
+            .get
+            .one()
+            ?.let { convertToContractEntity(it) }
+            .asSuccess()
+    }
+
+    protected fun BoundStatement.tryLoad(): Result<ResultSet, Fail.Incident> = try {
+        Result.success(session.execute(this))
+    } catch (expected: Exception) {
+        Result.failure(Fail.Incident.Database(exception = expected))
     }
 
     protected fun load(statement: BoundStatement): ResultSet = try {
@@ -63,10 +93,8 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
         jsonData = row.getString(columnJsonData)
     )
 
-    override fun save(
-        cn: CnEntity
-    ): Boolean {
-        val statements = preparedSaveCnIdCQL.bind()
+    override fun save(cn: CnEntity): Boolean {
+        val statements = preparedSaveNewCnCQL.bind()
             .apply {
                 setString(columnCpid, cn.cpid)
                 setString(columnOwner, cn.owner)
@@ -75,6 +103,30 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
 
         return saveCn(statements).wasApplied()
     }
+
+    override fun trySave(cn: CnEntity): Result<CnEntity, Fail.Incident> {
+        val statements = preparedSaveNewCnCQL.bind()
+            .apply {
+                setString(columnCpid, cn.cpid)
+                setString(columnOwner, cn.owner)
+                setString(columnJsonData, cn.jsonData)
+            }
+        statements.tryLoad()
+            .doOnError { error -> return error.asFailure() }
+
+        return cn.asSuccess()
+    }
+
+    override fun update(cpid: String, json: String) {
+        val statements = preparedUpdateCnCQL.bind()
+            .apply {
+                setString(columnJsonData, json)
+                setString(columnCpid, cpid)
+            }
+
+        saveCn(statements)
+    }
+
 
     private fun saveCn(statement: BoundStatement): ResultSet = try {
         session.execute(statement)

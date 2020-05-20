@@ -14,5 +14,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     ENTITY_NOT_FOUND("10.72", "No entity found in db with specified parameters."),
     INVALID_REQUIREMENT_RESPONSE("10.73", "Invalid requirement response."),
     EMPTY_LIST("10.74", "Collection is empty."),
-    NOT_UNIQUE_IDS("10.75", "Elements in collection is not unique by id.");
+    NOT_UNIQUE_IDS("10.75", "Elements in collection is not unique by id."),
+    INVALID_COEFFICIENT("10.76", "Invalid coefficient."),
 }

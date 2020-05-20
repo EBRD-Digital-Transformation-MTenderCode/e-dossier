@@ -1,0 +1,10 @@
+{
+  "cpid": "ocds-t1s2t3-MD-1581934265105",
+  "requirementResponse": {
+    "id": "2a969a8f-ea14-45df-b773-def05a76b2ef",
+    "value": true,
+    "requirement": {
+      "id": "6ae12896-d555-4cdb-b35a-ef2b493c5451"
+    }
+  }
+}

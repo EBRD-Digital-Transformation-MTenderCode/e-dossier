@@ -2,18 +2,17 @@ package com.procurement.dossier.application.service.command
 
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
-import com.procurement.dossier.application.model.entity.CnEntity
 import com.procurement.dossier.application.model.data.CreateCriteriaData
 import com.procurement.dossier.application.model.data.CreatedCriteria
 import com.procurement.dossier.application.model.data.Requirement
+import com.procurement.dossier.application.model.entity.CnEntity
 import com.procurement.dossier.application.service.Generable
-import com.procurement.dossier.application.service.context.CreateCriteriaContext
-import com.procurement.dossier.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.dossier.infrastructure.model.dto.ocds.ConversionsRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
+import com.procurement.dossier.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.dossier.infrastructure.model.entity.CreatedCriteriaEntity
 import com.procurement.dossier.infrastructure.utils.toJson
 
@@ -133,14 +132,11 @@ private fun defineSource(criteria: CreateCriteriaData.Tender.Criteria): Criteria
 private fun setAwardCriteriaDetails(awardCriteria: AwardCriteria): AwardCriteriaDetails? =
     if (awardCriteria == AwardCriteria.PRICE_ONLY) AwardCriteriaDetails.AUTOMATED else null
 
-fun createCnEntity(
-    createdCriteriaEntity: CreatedCriteriaEntity,
-    context: CreateCriteriaContext
-): CnEntity {
+fun createCnEntity(entity: CreatedCriteriaEntity, cpid: String, owner: String): CnEntity {
     return CnEntity(
-        cpid = context.cpid,
-        owner = context.owner,
-        jsonData = toJson(createdCriteriaEntity)
+        cpid = cpid,
+        owner = owner,
+        jsonData = toJson(entity)
     )
 }
 

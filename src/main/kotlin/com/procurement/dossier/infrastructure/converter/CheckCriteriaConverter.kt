@@ -39,6 +39,7 @@ fun CheckCriteriaRequest.toData(): CheckCriteriaData {
                     coefficients = conversion.coefficients.map { coefficient ->
                         CheckCriteriaData.Tender.Conversion.Coefficient(
                             id = coefficient.id,
+                            relatedOption = coefficient.relatedOption,
                             value = coefficient.value,
                             coefficient = coefficient.coefficient
                         )
