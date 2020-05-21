@@ -63,7 +63,7 @@ private fun ValidateSubmissionRequest.Candidate.convert() =
                 }
             )
         },
-        additionalIdentifier = additionalIdentifiers?.map { additionalIdentifier ->
+        additionalIdentifiers = additionalIdentifiers?.map { additionalIdentifier ->
             ValidateSubmissionParams.Candidate.AdditionalIdentifier(
                 id = additionalIdentifier.id,
                 uri = additionalIdentifier.uri,
@@ -94,7 +94,7 @@ private fun ValidateSubmissionRequest.Candidate.Details.convert() =
                 uri = legalForm.uri
             )
         },
-        mainEconomicActivity = mainEconomicActivities?.map { mainEconomicActivity ->
+        mainEconomicActivities = mainEconomicActivities?.map { mainEconomicActivity ->
             ValidateSubmissionParams.Candidate.Details.MainEconomicActivity(
                 scheme = mainEconomicActivity.scheme,
                 uri = mainEconomicActivity.uri,

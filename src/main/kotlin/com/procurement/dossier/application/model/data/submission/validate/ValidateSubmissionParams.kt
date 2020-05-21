@@ -46,7 +46,7 @@ class ValidateSubmissionParams private constructor(
         val id: String,
         val name: String,
         val identifier: Identifier,
-        val additionalIdentifier: List<AdditionalIdentifier>,
+        val additionalIdentifiers: List<AdditionalIdentifier>,
         val address: Address,
         val contactPoint: ContactPoint,
         val persones: List<Person>,
@@ -59,14 +59,14 @@ class ValidateSubmissionParams private constructor(
                 id: String,
                 name: String,
                 identifier: Identifier,
-                additionalIdentifier: List<AdditionalIdentifier>?,
+                additionalIdentifiers: List<AdditionalIdentifier>?,
                 address: Address,
                 contactPoint: ContactPoint,
                 persones: List<Person>?,
                 details: Details
             ): Result<Candidate, DataErrors> {
 
-                if (additionalIdentifier != null && additionalIdentifier.isEmpty())
+                if (additionalIdentifiers != null && additionalIdentifiers.isEmpty())
                     return failure(DataErrors.Validation.EmptyArray(name = ADDITIONAL_IDENTIFIER_ATTRIBUTE_NAME))
 
                 if (persones != null && persones.isEmpty())
@@ -76,7 +76,7 @@ class ValidateSubmissionParams private constructor(
                     id = id,
                     name = name,
                     identifier = identifier,
-                    additionalIdentifier = additionalIdentifier ?: emptyList(),
+                    additionalIdentifiers = additionalIdentifiers ?: emptyList(),
                     address = address,
                     contactPoint = contactPoint,
                     persones = persones ?: emptyList(),
@@ -284,7 +284,7 @@ class ValidateSubmissionParams private constructor(
 
         class Details private constructor(
             val typeOfSupplier: SupplierType?,
-            val mainEconomicActivity: List<MainEconomicActivity>,
+            val mainEconomicActivities: List<MainEconomicActivity>,
             val scale: Scale,
             val bankAccounts: List<BankAccount>,
             val legalForm: LegalForm?
@@ -313,12 +313,12 @@ class ValidateSubmissionParams private constructor(
 
                 fun tryCreate(
                     typeOfSupplier: String?,
-                    mainEconomicActivity: List<MainEconomicActivity>?,
+                    mainEconomicActivities: List<MainEconomicActivity>?,
                     scale: String,
                     bankAccounts: List<BankAccount>?,
                     legalForm: LegalForm?
                 ): Result<Details, DataErrors> {
-                    if (mainEconomicActivity != null && mainEconomicActivity.isEmpty())
+                    if (mainEconomicActivities != null && mainEconomicActivities.isEmpty())
                         return failure(DataErrors.Validation.EmptyArray(name = MAIN_ECONOMIC_ACTIVITY_ATTRIBUTE_NAME))
 
                     val parsedTypeOfSupplier = typeOfSupplier?.let {
@@ -337,7 +337,7 @@ class ValidateSubmissionParams private constructor(
 
                     return Details(
                         typeOfSupplier = parsedTypeOfSupplier,
-                        mainEconomicActivity = mainEconomicActivity ?: emptyList(),
+                        mainEconomicActivities = mainEconomicActivities ?: emptyList(),
                         scale = parsedScale,
                         bankAccounts = bankAccounts ?: emptyList(),
                         legalForm = legalForm
