@@ -1,6 +1,7 @@
 package com.procurement.dossier.infrastructure.service
 
 import com.procurement.dossier.application.service.Generable
+import com.procurement.dossier.domain.model.Token
 import java.util.*
 
 class GenerationService : Generable {
@@ -22,6 +23,10 @@ class GenerationService : Generable {
     }
 
     override fun generatePermanentCoefficientId(): UUID {
+        return UUID.randomUUID()
+    }
+
+    override fun generateToken(): Token {
         return UUID.randomUUID()
     }
 }
