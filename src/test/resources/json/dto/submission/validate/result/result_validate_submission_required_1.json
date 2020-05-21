@@ -1,0 +1,19 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "date": "2020-05-21T15:11:47Z",
+  "candidates": [
+    {
+      "id": "string",
+      "name": "string"
+    }
+  ],
+  "documents": [
+    {
+      "documentType": "illustration",
+      "id": "string",
+      "title": "string"
+    }
+  ],
+  "status": "pending",
+  "token": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
