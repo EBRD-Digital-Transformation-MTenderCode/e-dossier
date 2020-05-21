@@ -5,6 +5,7 @@ import com.procurement.dossier.domain.EnumElementProvider.Companion.keysAsString
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.model.Owner
 import com.procurement.dossier.domain.model.document.DocumentId
 import com.procurement.dossier.domain.model.document.tryDocumentId
 import com.procurement.dossier.domain.model.enums.BusinessFunctionType
@@ -16,6 +17,9 @@ import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.requirement.response.tryRequirementResponseId
 import com.procurement.dossier.domain.model.requirement.tryRequirementId
+import com.procurement.dossier.domain.model.submission.SubmissionId
+import com.procurement.dossier.domain.model.submission.trySubmissionId
+import com.procurement.dossier.domain.model.tryOwner
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.tryParseLocalDateTime
@@ -42,6 +46,17 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
                 actualValue = value
             )
         )
+fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMismatch> =
+    value.tryOwner()
+        .doReturn {
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = "owner",
+                    expectedFormat = "uuid",
+                    actualValue = value
+                )
+            )
+        }.asSuccess()
 
 fun parseRequirementId(id: String): Result<RequirementId, DataErrors> =
     id.tryRequirementId()
@@ -77,6 +92,20 @@ fun parseDocumentId(
                 DataErrors.Validation.DataFormatMismatch(
                     name = attributeName,
                     expectedFormat = "string",
+                    actualValue = value
+                )
+            )
+        }.asSuccess()
+
+fun parseSubmissionId(
+    value: String, attributeName: String
+): Result<SubmissionId, DataErrors.Validation.DataFormatMismatch> =
+    value.trySubmissionId()
+        .doReturn {
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = attributeName,
+                    expectedFormat = "uuid",
                     actualValue = value
                 )
             )
