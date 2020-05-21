@@ -3,6 +3,7 @@ package com.procurement.dossier.infrastructure.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
+import com.procurement.dossier.infrastructure.handler.submission.CreateSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.submission.ValidateSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
 import com.procurement.dossier.infrastructure.model.dto.bpe.Command2Type
@@ -16,7 +17,8 @@ import org.springframework.stereotype.Service
 class Command2Service(
     private val logger: Logger,
     private val validationRequirementResponseHandler: ValidateRequirementResponseHandler,
-    private val validateSubmissionHandler: ValidateSubmissionHandler
+    private val validateSubmissionHandler: ValidateSubmissionHandler,
+    private val createSubmissionHandler: CreateSubmissionHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -24,7 +26,7 @@ class Command2Service(
         val version = request.getVersion()
             .doOnError { versionError ->
                 val id = request.getId()
-                    .doOnError { idError -> return errorResponse(fail = versionError) }
+                    .doOnError { return errorResponse(fail = versionError) }
                     .get
                 return errorResponse(fail = versionError, id = id)
             }
@@ -41,6 +43,7 @@ class Command2Service(
         val response: ApiResponse2 = when (action) {
             Command2Type.VALIDATE_REQUIREMENT_RESPONSE -> validationRequirementResponseHandler.handle(node = request)
             Command2Type.VALIDATE_SUBMISSION -> validateSubmissionHandler.handle(node = request)
+            Command2Type.CREATE_SUBMISSION -> createSubmissionHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
