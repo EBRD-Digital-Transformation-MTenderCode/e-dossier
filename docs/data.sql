@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS dossier.submission
 (
     cpid text,
     ocid text,
-    id text,
+    id uuid,
     status text,
-    token uuid,
+    token_entity uuid,
     owner uuid,
     json_data text,
     primary key (cpid, ocid, id)

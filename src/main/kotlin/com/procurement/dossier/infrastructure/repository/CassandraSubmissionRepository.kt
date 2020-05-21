@@ -21,7 +21,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         private const val columnOcid = "ocid"
         private const val columnId = "id"
         private const val columnStatus = "status"
-        private const val columnToken = "token"
+        private const val columnToken = "token_entity"
         private const val columnOwner = "owner"
         private const val columnJsonData = "json_data"
 
@@ -48,6 +48,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             .apply {
                 setString(columnCpid, cpid.toString())
                 setString(columnOcid, ocid.toString())
+                setUUID(columnId, submission.id)
                 setString(columnStatus, submission.status.key)
                 setUUID(columnToken, submission.token)
                 setUUID(columnOwner, submission.owner)
