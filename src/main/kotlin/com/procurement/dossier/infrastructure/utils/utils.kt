@@ -69,11 +69,11 @@ fun <Any> toJson(obj: Any): String {
     }
 }
 
-fun <Any> tryToJson(obj: Any): Result<String, Fail.Incident.Parsing>  =
+fun <Any> tryToJson(obj: Any): Result<String, Fail.Incident.Transform.Parsing>  =
     try {
         JsonMapper.mapper.writeValueAsString(obj).asSuccess()
     } catch (expected: JsonProcessingException) {
-        Result.failure(Fail.Incident.Parsing(className = String::class.java.canonicalName, exception = expected))
+        Result.failure(Fail.Incident.Transform.Parsing(className = String::class.java.canonicalName, exception = expected))
     }
 
 fun <T> toObject(clazz: Class<T>, json: String): T {
@@ -92,20 +92,20 @@ fun <T> toObject(clazz: Class<T>, json: JsonNode): T {
     }
 }
 
-fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
+fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.treeToValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Parsing(className = target.canonicalName, exception = expected))
+    Result.failure(Fail.Incident.Transform.Parsing(className = target.canonicalName, exception = expected))
 }
 
-fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.readValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Parsing(className = target.canonicalName, exception = expected))
+    Result.failure(Fail.Incident.Transform.Parsing(className = target.canonicalName, exception = expected))
 }
 
-fun String.toNode(): Result<JsonNode, Fail.Incident.Transforming> = try {
+fun String.toNode(): Result<JsonNode, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(Fail.Incident.Transforming(exception = exception))
+    Result.failure(Fail.Incident.Transform.Parsing(className = JsonNode::class.java.canonicalName, exception = exception))
 }

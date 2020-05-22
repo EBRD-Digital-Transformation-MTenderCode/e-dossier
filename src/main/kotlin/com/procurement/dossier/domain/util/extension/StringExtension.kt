@@ -6,9 +6,9 @@ import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import java.util.*
 
-fun String.tryUUID(): Result<UUID, Fail.Incident.Parsing> =
+fun String.tryUUID(): Result<UUID, Fail.Incident.Transform.Parsing> =
     try {
         UUID.fromString(this).asSuccess()
     } catch (ex: Exception) {
-        Fail.Incident.Parsing(UUID::class.java.canonicalName, ex).asFailure()
+        Fail.Incident.Transform.Parsing(UUID::class.java.canonicalName, ex).asFailure()
     }

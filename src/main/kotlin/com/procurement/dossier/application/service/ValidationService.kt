@@ -24,7 +24,11 @@ class ValidationService(private val criteriaRepository: CriteriaRepository) {
         val createdCriteriaEntity = cnEntity.jsonData
             .tryToObject(CreatedCriteriaEntity::class.java)
             .doReturn { error ->
-                return ValidationResult.error(Fail.Incident.DatabaseIncident(exception = error.exception))
+                return ValidationResult.error(
+                    Fail.Incident.Transform.ParseFromDatabaseIncident(
+                        jsonData = cnEntity.jsonData, exception = error.exception
+                    )
+                )
             }
 
         val requirementId = params.requirementResponse.requirement.id

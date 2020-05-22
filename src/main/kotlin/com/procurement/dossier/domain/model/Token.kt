@@ -7,5 +7,5 @@ import java.util.*
 
 typealias Token = UUID
 
-fun String.tryToken(): Result<Token, Fail.Incident.Parsing> =
+fun String.tryToken(): Result<Token, Fail.Incident.Transform.Parsing> =
     this.tryUUID()

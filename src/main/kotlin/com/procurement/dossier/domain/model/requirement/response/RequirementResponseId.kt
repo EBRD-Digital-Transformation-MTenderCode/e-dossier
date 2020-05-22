@@ -5,5 +5,5 @@ import com.procurement.dossier.domain.util.Result
 
 typealias RequirementResponseId = String
 
-fun String.tryRequirementResponseId(): Result<RequirementResponseId, Fail.Incident.Transforming> =
+fun String.tryRequirementResponseId(): Result<RequirementResponseId, Fail.Incident.Transform.Parsing> =
     Result.success(this)

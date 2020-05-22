@@ -78,7 +78,7 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
     protected fun BoundStatement.tryLoad(): Result<ResultSet, Fail.Incident> = try {
         Result.success(session.execute(this))
     } catch (expected: Exception) {
-        Result.failure(Fail.Incident.Database(exception = expected))
+        Result.failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = expected))
     }
 
     protected fun load(statement: BoundStatement): ResultSet = try {

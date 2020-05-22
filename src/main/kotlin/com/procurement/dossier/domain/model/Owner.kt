@@ -7,5 +7,5 @@ import java.util.*
 
 typealias Owner = UUID
 
-fun String.tryOwner(): Result<Owner, Fail.Incident.Parsing> =
+fun String.tryOwner(): Result<Owner, Fail.Incident.Transform.Parsing> =
     this.tryUUID()

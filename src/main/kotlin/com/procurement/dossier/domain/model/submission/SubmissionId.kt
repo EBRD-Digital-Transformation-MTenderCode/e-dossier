@@ -7,5 +7,5 @@ import java.util.*
 
 typealias SubmissionId = UUID
 
-fun String.trySubmissionId(): Result<SubmissionId, Fail.Incident.Parsing> =
+fun String.trySubmissionId(): Result<SubmissionId, Fail.Incident.Transform.Parsing> =
     this.tryUUID()

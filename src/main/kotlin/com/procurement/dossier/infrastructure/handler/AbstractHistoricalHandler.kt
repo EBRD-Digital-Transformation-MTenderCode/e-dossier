@@ -33,7 +33,7 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
                     return responseError(
                         id = id,
                         version = version,
-                        fail = Fail.Incident.Database(incident.exception)
+                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(data, incident.exception)
                     )
                 }
             return ApiSuccessResponse2(version = version, id = id, result = result)
