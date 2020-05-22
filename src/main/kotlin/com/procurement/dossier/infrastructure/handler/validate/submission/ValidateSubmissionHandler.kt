@@ -1,4 +1,4 @@
-package com.procurement.dossier.infrastructure.handler.submission
+package com.procurement.dossier.infrastructure.handler.validate.submission
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.dossier.application.service.Logger
