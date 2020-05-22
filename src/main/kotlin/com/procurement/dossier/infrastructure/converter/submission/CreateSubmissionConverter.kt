@@ -2,9 +2,9 @@ package com.procurement.dossier.infrastructure.converter.submission
 
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
+import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.util.extension.mapResult
 import com.procurement.dossier.infrastructure.model.dto.request.submission.CreateSubmissionRequest
-import com.procurement.dossier.infrastructure.model.submission.Submission
 
 fun CreateSubmissionRequest.convert() =
     CreateSubmissionParams.tryCreate(

@@ -1,4 +1,4 @@
-package com.procurement.dossier.infrastructure.model.submission
+package com.procurement.dossier.domain.model.submission
 
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.domain.model.Owner
@@ -11,7 +11,6 @@ import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
-import com.procurement.dossier.domain.model.submission.SubmissionId
 import java.time.LocalDateTime
 
 data class Submission(

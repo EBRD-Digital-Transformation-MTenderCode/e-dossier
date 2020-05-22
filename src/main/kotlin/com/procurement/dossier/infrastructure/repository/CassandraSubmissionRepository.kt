@@ -5,10 +5,10 @@ import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
 import com.procurement.dossier.infrastructure.model.entity.submission.SubmissionDataEntity
-import com.procurement.dossier.infrastructure.model.submission.Submission
 import com.procurement.dossier.infrastructure.utils.tryToJson
 import org.springframework.stereotype.Repository
 

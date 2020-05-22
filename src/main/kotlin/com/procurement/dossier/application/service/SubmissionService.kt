@@ -5,11 +5,11 @@ import com.procurement.dossier.application.model.data.submission.create.CreateSu
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
+import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
-import com.procurement.dossier.infrastructure.model.submission.Submission
 import org.springframework.stereotype.Service
 
 @Service
