@@ -35,4 +35,14 @@ sealed class ValidationErrors(
         numberError = "10.5.1.4",
         description = "Unexpected criteria.source value. Expected: '${expected}', actual: '${actual}'."
     )
+
+    class InvalidPeriodDateComparedWithStartDate() : ValidationErrors(
+        numberError = "5.6.3",
+        description = "Period date must be after stored period start date."
+    )
+
+    class InvalidPeriodDateComparedWithEndDate() : ValidationErrors(
+        numberError = "5.6.4",
+        description = "Period date must precede stored period end date."
+    )
 }
