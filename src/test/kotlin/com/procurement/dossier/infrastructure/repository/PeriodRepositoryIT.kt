@@ -91,6 +91,15 @@ class PeriodRepositoryIT {
     }
 
     @Test
+    fun tryFindBy() {
+        val period = stubPeriod()
+        insertPeriod(period)
+        val actualPeriod = periodRepository.tryFindBy(cpid = period.cpid, ocid = period.ocid).get
+
+        assertEquals(actualPeriod, period)
+    }
+
+    @Test
     fun saveNewPeriod() {
         val period = stubPeriod()
         periodRepository.saveNewPeriod(period)
