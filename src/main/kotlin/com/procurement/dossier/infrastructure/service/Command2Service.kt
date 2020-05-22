@@ -3,7 +3,7 @@ package com.procurement.dossier.infrastructure.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
-import com.procurement.dossier.infrastructure.handler.submission.CreateSubmissionHandler
+import com.procurement.dossier.infrastructure.handler.historical.submission.CreateSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.validate.period.CheckPeriod2Handler
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
 import com.procurement.dossier.infrastructure.handler.validate.submission.ValidateSubmissionHandler
