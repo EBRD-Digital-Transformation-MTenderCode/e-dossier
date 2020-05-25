@@ -46,6 +46,7 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
                 actualValue = value
             )
         )
+
 fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMismatch> =
     value.tryOwner()
         .doReturn {
