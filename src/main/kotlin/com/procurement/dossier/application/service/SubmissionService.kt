@@ -6,11 +6,15 @@ import com.procurement.dossier.application.model.data.submission.state.get.GetSu
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
+import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.extension.getUnknownElements
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
 import org.springframework.stereotype.Service
 
@@ -233,11 +237,23 @@ class SubmissionService(
             }
         )
 
-    fun getSubmissionStateByIds(params: GetSubmissionStateByIdsParams): Result<List<GetSubmissionStateByIdsResult>, Fail> =
-        submissionRepository.getSubmissionState(
+    fun getSubmissionStateByIds(params: GetSubmissionStateByIdsParams): Result<List<GetSubmissionStateByIdsResult>, Fail> {
+        val states = submissionRepository.getSubmissionState(
             cpid = params.cpid, ocid = params.ocid, submissionIds = params.submissionIds
-        )
-            .orForwardFail { fail -> return fail }
-            .map { state -> GetSubmissionStateByIdsResult(id = state.id, status = state.status) }
-            .asSuccess()
+        ).orForwardFail { fail -> return fail }
+
+        checkForUnknownElements(received = params.submissionIds, known = states.map { it.id })
+            .doOnError { error -> return error.asFailure() }
+
+        return states.map { state -> GetSubmissionStateByIdsResult(id = state.id, status = state.status) }.asSuccess()
+    }
+
+    private fun checkForUnknownElements(
+        received: List<SubmissionId>, known: List<SubmissionId>
+    ): ValidationResult<ValidationErrors.SubmissionNotFound> {
+        val unknownElements = known.getUnknownElements(received = received)
+        return if (unknownElements.isNotEmpty())
+            ValidationResult.error(ValidationErrors.SubmissionNotFound(unknownElements.joinToString()))
+        else ValidationResult.ok()
+    }
 }
