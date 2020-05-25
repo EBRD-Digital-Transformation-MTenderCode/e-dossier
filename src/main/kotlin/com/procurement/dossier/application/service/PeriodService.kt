@@ -47,7 +47,7 @@ class PeriodService(
             throw ErrorException(ErrorType.INVALID_PERIOD_DURATION)
     }
 
-    fun checkPeriod(data: CheckPeriodData, context: CheckPeriodContext): CheckPeriodResult{
+    fun checkPeriod(data: CheckPeriodData, context: CheckPeriodContext): CheckPeriodResult {
         val requestPeriod = data.period
         checkPeriodDates(startDate = requestPeriod.startDate, endDate = requestPeriod.endDate)
 
@@ -91,10 +91,18 @@ class PeriodService(
         val requestDate = params.date
 
         if (!requestDate.isAfter(storedPeriod.startDate))
-            return ValidationResult.error(ValidationErrors.InvalidPeriodDateComparedWithStartDate())
+            return ValidationResult.error(
+                ValidationErrors.InvalidPeriodDateComparedWithStartDate(
+                    requestDate = requestDate, startDate = storedPeriod.startDate
+                )
+            )
 
         if (!requestDate.isBefore(storedPeriod.endDate))
-            return ValidationResult.error(ValidationErrors.InvalidPeriodDateComparedWithEndDate())
+            return ValidationResult.error(
+                ValidationErrors.InvalidPeriodDateComparedWithEndDate(
+                    requestDate = requestDate, endDate = storedPeriod.endDate
+                )
+            )
 
         return ValidationResult.ok()
     }
