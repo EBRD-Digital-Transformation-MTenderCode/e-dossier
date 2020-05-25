@@ -48,7 +48,7 @@ class PeriodService(
         checkPeriodDates(startDate = requestPeriod.startDate, endDate = requestPeriod.endDate)
 
         val storedPeriod = periodRepository.findBy(cpid = context.cpid, ocid = context.ocid)!!
-        requestPeriod.compareWith(storedPeriod = storedPeriod)
+        requestPeriod.validateGreaterOrEq(storedPeriod = storedPeriod)
 
         return CheckPeriodResult(
             isPreQualificationPeriodChanged = isPreQualificationPeriodChanged(requestPeriod, storedPeriod),
@@ -61,7 +61,7 @@ class PeriodService(
         )
     }
 
-    private fun CheckPeriodData.Period.compareWith(storedPeriod: PeriodEntity) {
+    private fun CheckPeriodData.Period.validateGreaterOrEq(storedPeriod: PeriodEntity) {
         if (endDate.isBefore(storedPeriod.endDate))
             throw ErrorException(ErrorType.INVALID_PERIOD_END_DATE)
     }
