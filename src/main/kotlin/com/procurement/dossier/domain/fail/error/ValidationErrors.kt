@@ -45,4 +45,9 @@ sealed class ValidationErrors(
         numberError = "5.6.4",
         description = "Period date must precede stored period end date."
     )
+
+    class SubmissionNotFound(id: String): ValidationErrors(
+        numberError = "5.10.1",
+        description = "Submission id(s) '$id' not found."
+    )
 }
