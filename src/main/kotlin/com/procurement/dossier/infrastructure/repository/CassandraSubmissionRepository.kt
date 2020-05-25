@@ -1,12 +1,18 @@
 package com.procurement.dossier.infrastructure.repository
 
+import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
+import com.procurement.dossier.domain.model.submission.SubmissionId
+import com.procurement.dossier.domain.model.submission.SubmissionState
+import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
+import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
 import com.procurement.dossier.infrastructure.model.entity.submission.SubmissionDataEntity
 import com.procurement.dossier.infrastructure.utils.tryToJson
@@ -24,22 +30,32 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         private const val columnToken = "token_entity"
         private const val columnOwner = "owner"
         private const val columnJsonData = "json_data"
+        private const val idValues = "id_values"
 
         private const val SAVE_SUBMISSION_CQL = """
-               INSERT INTO ${keySpace}.${tableName}(
-                      ${columnCpid},
-                      ${columnOcid},
-                      ${columnId},
-                      ${columnStatus},
-                      ${columnToken},
-                      ${columnOwner},
-                      ${columnJsonData}
+               INSERT INTO $keySpace.$tableName(
+                      $columnCpid,
+                      $columnOcid,
+                      $columnId,
+                      $columnStatus,
+                      $columnToken,
+                      $columnOwner,
+                      $columnJsonData
                )
                VALUES(?, ?, ?, ?, ?, ?, ?)                
+            """
+
+        private const val GET_SUBMISSION_STATUS_CQL = """
+               SELECT $columnStatus
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId IN :$idValues;
             """
     }
 
     private val preparedSaveSubmissionCQL = session.prepare(SAVE_SUBMISSION_CQL)
+    private val preparedGetSubmissionStatusCQL = session.prepare(GET_SUBMISSION_STATUS_CQL)
 
     override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident> {
         val entity = submission.convert()
@@ -262,4 +278,24 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                 )
             }
         )
+
+    override fun getSubmissionState(
+        cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>
+    ): Result<List<SubmissionState>, Fail.Incident> {
+        val query = preparedGetSubmissionStatusCQL.bind()
+            .setList(idValues, submissionIds)
+            .setString(columnCpid, cpid.toString())
+            .setString(columnOcid, ocid.toString())
+
+        return query.tryExecute(session)
+            .orForwardFail { error -> return error }
+            .map { row -> convertToState(row = row) }
+            .asSuccess()
+    }
+
+    private fun convertToState(row: Row): SubmissionState {
+        val id = row.getUUID(columnId)
+        val status = SubmissionStatus.creator(row.getString(columnStatus))
+       return SubmissionState(id = id, status = status)
+    }
 }
