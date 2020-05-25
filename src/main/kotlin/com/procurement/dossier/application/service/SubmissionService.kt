@@ -2,6 +2,8 @@ package com.procurement.dossier.application.service
 
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
+import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
+import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
@@ -230,4 +232,12 @@ class SubmissionService(
                 )
             }
         )
+
+    fun getSubmissionStateByIds(params: GetSubmissionStateByIdsParams): Result<List<GetSubmissionStateByIdsResult>, Fail> =
+        submissionRepository.getSubmissionState(
+            cpid = params.cpid, ocid = params.ocid, submissionIds = params.submissionIds
+        )
+            .orForwardFail { fail -> return fail }
+            .map { state -> GetSubmissionStateByIdsResult(id = state.id, status = state.status) }
+            .asSuccess()
 }
