@@ -1,5 +1,7 @@
 package com.procurement.dossier.application.model.data.submission.state.get
 
+import com.procurement.dossier.application.model.noDuplicatesRule
+import com.procurement.dossier.application.model.notEmptyRule
 import com.procurement.dossier.application.model.parseCpid
 import com.procurement.dossier.application.model.parseOcid
 import com.procurement.dossier.application.model.parseSubmissionId
@@ -10,6 +12,7 @@ import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.mapResult
+import com.procurement.dossier.domain.util.validate
 
 class GetSubmissionStateByIdsParams private constructor(
     val submissionIds: List<SubmissionId>,
@@ -19,12 +22,13 @@ class GetSubmissionStateByIdsParams private constructor(
     companion object {
         private const val SUBMISSION_IDS_ATTRIBUTE_NAME = "submissionIds"
         fun tryCreate(
-            submissionIds: List<String>,
-            cpid: String,
-            ocid: String
+            submissionIds: List<String>, cpid: String, ocid: String
         ): Result<GetSubmissionStateByIdsParams, DataErrors> {
-            if (submissionIds.isEmpty())
-                return Result.failure(DataErrors.Validation.EmptyArray(name = SUBMISSION_IDS_ATTRIBUTE_NAME))
+            submissionIds
+                .validate(notEmptyRule(SUBMISSION_IDS_ATTRIBUTE_NAME))
+                .orForwardFail { fail -> return fail }
+                .validate(noDuplicatesRule(SUBMISSION_IDS_ATTRIBUTE_NAME))
+                .orForwardFail { fail -> return fail }
 
             val cpidParsed = parseCpid(cpid).orForwardFail { error -> return error }
             val ocidParsed = parseOcid(ocid).orForwardFail { error -> return error }
