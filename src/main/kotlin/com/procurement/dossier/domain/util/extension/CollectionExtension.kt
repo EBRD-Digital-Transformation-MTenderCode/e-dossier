@@ -11,6 +11,14 @@ inline fun <T, V> Collection<T>.isUnique(selector: (T) -> V): Boolean {
     return true
 }
 
+inline fun <T, V> Collection<T>?.getDuplicate(selector: (T) -> V): T? {
+    val unique = HashSet<V>()
+    this?.forEach { item ->
+        if (!unique.add(selector(item))) return item
+    }
+    return null
+}
+
 inline fun <T, V> Collection<T>.toSetBy(selector: (T) -> V): Set<V> {
     val collections = LinkedHashSet<V>()
     forEach {
