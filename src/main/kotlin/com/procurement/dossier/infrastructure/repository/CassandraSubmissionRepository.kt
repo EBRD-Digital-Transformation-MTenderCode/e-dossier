@@ -46,7 +46,8 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             """
 
         private const val GET_SUBMISSION_STATUS_CQL = """
-               SELECT $columnStatus
+               SELECT $columnStatus,
+                      $columnId
                  FROM $keySpace.$tableName
                 WHERE $columnCpid=? 
                   AND $columnOcid=?
