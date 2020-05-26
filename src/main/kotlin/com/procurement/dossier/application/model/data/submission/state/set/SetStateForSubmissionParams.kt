@@ -28,7 +28,7 @@ class SetStateForSubmissionParams private constructor(
         }
     }
 
-    data class Submission(
+    class Submission private constructor(
         val id: SubmissionId, val status: SubmissionStatus
     ) {
         companion object {
