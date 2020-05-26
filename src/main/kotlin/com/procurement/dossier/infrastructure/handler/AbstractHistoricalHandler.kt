@@ -10,6 +10,7 @@ import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.dto.ApiSuccessResponse2
 import com.procurement.dossier.infrastructure.model.dto.bpe.getId
 import com.procurement.dossier.infrastructure.model.dto.bpe.getVersion
+import com.procurement.dossier.infrastructure.repository.history.HistoryRepositoryCassandra
 import com.procurement.dossier.infrastructure.utils.toJson
 import com.procurement.dossier.infrastructure.utils.tryToObject
 
@@ -33,7 +34,11 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
                     return responseError(
                         id = id,
                         version = version,
-                        fail = Fail.Incident.Transform.ParseFromDatabaseIncident(data, incident.exception)
+                        fail = Fail.Incident.Database.Parsing(
+                            column = HistoryRepositoryCassandra.JSON_DATA,
+                            value = data,
+                            exception = incident.exception
+                        )
                     )
                 }
             return ApiSuccessResponse2(version = version, id = id, result = result)

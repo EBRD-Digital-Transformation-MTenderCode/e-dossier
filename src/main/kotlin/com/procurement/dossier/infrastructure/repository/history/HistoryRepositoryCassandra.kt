@@ -21,7 +21,7 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
         private const val COMMAND_ID = "command_id"
         private const val COMMAND = "command"
         private const val COMMAND_DATE = "command_date"
-        private const val JSON_DATA = "json_data"
+        const val JSON_DATA = "json_data"
 
         private const val SAVE_HISTORY_CQL = """
                INSERT INTO $KEYSPACE.$HISTORY_TABLE(

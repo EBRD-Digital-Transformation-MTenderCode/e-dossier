@@ -22,8 +22,8 @@ fun BoundStatement.executeWrite(session: Session, errorMessage: String): ResultS
     throw SaveEntityException(message = errorMessage, cause = expected)
 }
 
-fun BoundStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.Database.DatabaseInteractionIncident> = try {
+fun BoundStatement.tryExecute(session: Session): Result<ResultSet, Fail.Incident.Database.Interaction> = try {
     success(session.execute(this))
 } catch (expected: Exception) {
-    failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = expected))
+    failure(Fail.Incident.Database.Interaction(exception = expected))
 }
