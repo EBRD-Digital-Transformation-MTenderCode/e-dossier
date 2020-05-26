@@ -324,7 +324,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             }
 
         return statements.tryExecute(session).bind { resultSet ->
-            resultSet.wasApplied().asSuccess()
+            resultSet.wasApplied().asSuccess<Boolean, Fail.Incident>()
         }
     }
 }
