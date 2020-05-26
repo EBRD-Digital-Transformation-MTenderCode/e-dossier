@@ -22,7 +22,7 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
         private const val tableName = "tenders"
         private const val columnCpid = "cp_id"
         private const val columnOwner = "owner"
-        private const val columnJsonData = "json_data"
+        const val columnJsonData = "json_data"
 
         private const val FIND_BY_CPID_CQL = """
                SELECT $columnCpid,
@@ -78,7 +78,7 @@ class CassandraCriteriaRepository(private val session: Session) : CriteriaReposi
     protected fun BoundStatement.tryLoad(): Result<ResultSet, Fail.Incident> = try {
         Result.success(session.execute(this))
     } catch (expected: Exception) {
-        Result.failure(Fail.Incident.Database.DatabaseInteractionIncident(exception = expected))
+        Result.failure(Fail.Incident.Database.Interaction(exception = expected))
     }
 
     protected fun load(statement: BoundStatement): ResultSet = try {
