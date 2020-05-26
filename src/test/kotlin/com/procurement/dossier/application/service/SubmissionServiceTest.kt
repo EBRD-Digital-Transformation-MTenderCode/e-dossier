@@ -4,6 +4,8 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
+import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
+import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
@@ -71,7 +73,7 @@ internal class SubmissionServiceTest {
 
             val actual = submissionService.getSubmissionStateByIds(params = params).error
 
-            assertTrue(actual is ValidationErrors.SubmissionNotFound)
+            assertTrue(actual is ValidationErrors.SubmissionNotFoundFor)
         }
 
         @Test
@@ -79,9 +81,7 @@ internal class SubmissionServiceTest {
             val params = getParams()
             val expected = Result.failure(
                 Fail.Incident.Database.DatabaseInteractionIncident(
-                    exception = RuntimeException(
-                        ""
-                    )
+                    exception = RuntimeException("")
                 )
             )
             whenever(
@@ -103,6 +103,70 @@ internal class SubmissionServiceTest {
                 submissionIds = listOf(
                     SUBMISSION_ID_1.toString(), SUBMISSION_ID_2.toString()
                 )
+            ).get
+    }
+
+    @Nested
+    inner class SetStateForSubmission {
+        @Test
+        fun success() {
+            val params = getParams()
+            val submission = params.submission
+            whenever(
+                submissionRepository.setSubmissionStatus(
+                    cpid = params.cpid, ocid = params.ocid, status = submission.status, id = submission.id
+                )
+            ).thenReturn(true.asSuccess())
+
+            val actual = submissionService.setStateForSubmission(params = params).get
+            val expected = SetStateForSubmissionResult(id = submission.id, status = submission.status)
+
+            assertEquals(actual, expected)
+        }
+
+        @Test
+        fun submissionNotFound_fail() {
+            val params = getParams()
+            val submission = params.submission
+            whenever(
+                submissionRepository.setSubmissionStatus(
+                    cpid = params.cpid, ocid = params.ocid, status = submission.status, id = submission.id
+                )
+            ).thenReturn(false.asSuccess())
+
+            val actual = submissionService.setStateForSubmission(params = params).error
+
+            assertTrue(actual is ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission)
+        }
+
+        @Test
+        fun databaseIncident_fail() {
+            val params = getParams()
+            val submission = params.submission
+            val expected = Result.failure(
+                Fail.Incident.Database.DatabaseInteractionIncident(
+                    exception = RuntimeException("")
+                )
+            )
+            whenever(
+                submissionRepository.setSubmissionStatus(
+                    cpid = params.cpid, ocid = params.ocid, status = submission.status, id = submission.id
+                )
+            ).thenReturn(expected)
+
+            val actual = submissionService.setStateForSubmission(params = params)
+
+            assertEquals(expected, actual)
+        }
+
+        private fun getParams(): SetStateForSubmissionParams =
+            SetStateForSubmissionParams.tryCreate(
+                cpid = CPID.toString(),
+                ocid = OCID.toString(),
+                submission = SetStateForSubmissionParams.Submission.tryCreate(
+                    id = SUBMISSION_ID_1.toString(),
+                    status = SubmissionStatus.PENDING.key
+                ).get
             ).get
     }
 }
