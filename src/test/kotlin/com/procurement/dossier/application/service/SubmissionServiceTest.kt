@@ -80,7 +80,7 @@ internal class SubmissionServiceTest {
         fun databaseIncident_fail() {
             val params = getParams()
             val expected = Result.failure(
-                Fail.Incident.Database.DatabaseInteractionIncident(
+                Fail.Incident.Database.Interaction(
                     exception = RuntimeException("")
                 )
             )
@@ -144,7 +144,7 @@ internal class SubmissionServiceTest {
             val params = getParams()
             val submission = params.submission
             val expected = Result.failure(
-                Fail.Incident.Database.DatabaseInteractionIncident(
+                Fail.Incident.Database.Interaction(
                     exception = RuntimeException("")
                 )
             )
