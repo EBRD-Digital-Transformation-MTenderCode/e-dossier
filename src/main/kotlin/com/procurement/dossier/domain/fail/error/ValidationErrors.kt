@@ -38,18 +38,22 @@ sealed class ValidationErrors(
         description = "Unexpected criteria.source value. Expected: '${expected}', actual: '${actual}'."
     )
 
-    class InvalidPeriodDateComparedWithStartDate(requestDate: LocalDateTime, startDate: LocalDateTime) : ValidationErrors(
-        numberError = "5.6.3",
-        description = "Period date '${requestDate.format()}' must be after stored period start date '${startDate.format()}'."
-    )
+    class InvalidPeriodDateComparedWithStartDate(requestDate: LocalDateTime, startDate: LocalDateTime) :
+        ValidationErrors(
+            numberError = "5.6.3",
+            description = "Period date '${requestDate.format()}' must be after stored period start date '${startDate.format()}'."
+        )
 
     class InvalidPeriodDateComparedWithEndDate(requestDate: LocalDateTime, endDate: LocalDateTime) : ValidationErrors(
         numberError = "5.6.4",
         description = "Period date '${requestDate.format()}' must precede stored period end date '${endDate.format()}'."
     )
 
-    class SubmissionNotFound(id: String): ValidationErrors(
-        numberError = "5.10.1",
+    sealed class SubmissionNotFoundFor(id: String, numberError: String) : ValidationErrors(
+        numberError = numberError,
         description = "Submission id(s) '$id' not found."
-    )
+    ) {
+        class GetSubmissionStateByIds(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.10.1")
+        class SetStateForSubmission(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.11.1")
+    }
 }

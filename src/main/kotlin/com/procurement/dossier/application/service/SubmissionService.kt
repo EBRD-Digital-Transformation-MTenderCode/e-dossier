@@ -16,6 +16,7 @@ import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.extension.doOnFalse
 import com.procurement.dossier.domain.util.extension.getUnknownElements
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
 import org.springframework.stereotype.Service
@@ -252,14 +253,23 @@ class SubmissionService(
 
     private fun checkForUnknownElements(
         received: List<SubmissionId>, known: List<SubmissionId>
-    ): ValidationResult<ValidationErrors.SubmissionNotFound> {
+    ): ValidationResult<ValidationErrors.SubmissionNotFoundFor> {
         val unknownElements = known.getUnknownElements(received = received)
         return if (unknownElements.isNotEmpty())
-            ValidationResult.error(ValidationErrors.SubmissionNotFound(unknownElements.joinToString()))
+            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.joinToString()))
         else ValidationResult.ok()
     }
 
     fun setStateForSubmission(params: SetStateForSubmissionParams): Result<SetStateForSubmissionResult, Fail> {
-        TODO()
+        val submission = params.submission
+
+        submissionRepository.setSubmissionStatus(
+            cpid = params.cpid, ocid = params.ocid, id = submission.id, status = submission.status
+        ).orForwardFail { fail -> return fail }
+            .doOnFalse {
+                return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = submission.id.toString())
+                    .asFailure()
+            }
+        return SetStateForSubmissionResult(id = submission.id, status = submission.status).asSuccess()
     }
 }
