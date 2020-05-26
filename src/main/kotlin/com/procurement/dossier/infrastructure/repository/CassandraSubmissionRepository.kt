@@ -280,7 +280,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             }
         )
 
-    override fun getSubmissionState(
+    override fun getSubmissionsStates(
         cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>
     ): Result<List<SubmissionState>, Fail.Incident> {
         val query = preparedGetSubmissionStatusCQL.bind()

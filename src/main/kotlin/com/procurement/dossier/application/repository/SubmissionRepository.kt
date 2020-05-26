@@ -11,5 +11,5 @@ import com.procurement.dossier.domain.util.ValidationResult
 
 interface SubmissionRepository {
      fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident>
-     fun getSubmissionState(cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>): Result<List<SubmissionState>, Fail.Incident>
+     fun getSubmissionsStates(cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>): Result<List<SubmissionState>, Fail.Incident>
 }

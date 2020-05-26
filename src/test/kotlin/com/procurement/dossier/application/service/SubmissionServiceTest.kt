@@ -42,7 +42,7 @@ internal class SubmissionServiceTest {
                 SubmissionState(id = params.submissionIds[1], status = SubmissionStatus.PENDING)
             )
             whenever(
-                submissionRepository.getSubmissionState(
+                submissionRepository.getSubmissionsStates(
                     cpid = params.cpid, ocid = params.ocid, submissionIds = params.submissionIds
                 )
             )
@@ -61,7 +61,7 @@ internal class SubmissionServiceTest {
         fun notAllSubmissionsFound_fail() {
             val params = getParams()
             whenever(
-                submissionRepository.getSubmissionState(
+                submissionRepository.getSubmissionsStates(
                     cpid = params.cpid, ocid = params.ocid, submissionIds = params.submissionIds
                 )
             )
@@ -85,7 +85,7 @@ internal class SubmissionServiceTest {
                 )
             )
             whenever(
-                submissionRepository.getSubmissionState(
+                submissionRepository.getSubmissionsStates(
                     cpid = params.cpid, ocid = params.ocid, submissionIds = params.submissionIds
                 )
             )

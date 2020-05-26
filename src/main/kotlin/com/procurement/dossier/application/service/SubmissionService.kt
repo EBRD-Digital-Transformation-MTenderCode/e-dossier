@@ -4,6 +4,8 @@ import com.procurement.dossier.application.model.data.submission.create.CreateSu
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
+import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
+import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
@@ -238,7 +240,7 @@ class SubmissionService(
         )
 
     fun getSubmissionStateByIds(params: GetSubmissionStateByIdsParams): Result<List<GetSubmissionStateByIdsResult>, Fail> {
-        val states = submissionRepository.getSubmissionState(
+        val states = submissionRepository.getSubmissionsStates(
             cpid = params.cpid, ocid = params.ocid, submissionIds = params.submissionIds
         ).orForwardFail { fail -> return fail }
 
@@ -255,5 +257,9 @@ class SubmissionService(
         return if (unknownElements.isNotEmpty())
             ValidationResult.error(ValidationErrors.SubmissionNotFound(unknownElements.joinToString()))
         else ValidationResult.ok()
+    }
+
+    fun setStateForSubmission(params: SetStateForSubmissionParams): Result<SetStateForSubmissionResult, Fail> {
+        TODO()
     }
 }
