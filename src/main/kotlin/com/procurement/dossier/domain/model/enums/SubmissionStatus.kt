@@ -6,7 +6,10 @@ import com.procurement.dossier.domain.EnumElementProvider
 
 enum class SubmissionStatus (@JsonValue override val key: String) : EnumElementProvider.Key {
 
-    PENDING("pending");
+    PENDING("pending"),
+    DISQUALIFIED("disqualified"),
+    VALID("valid"),
+    WITHDRAWN("withdrawn");
 
     override fun toString(): String = key
 
