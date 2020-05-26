@@ -13,6 +13,7 @@ import com.procurement.dossier.domain.model.submission.SubmissionState
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.bind
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
 import com.procurement.dossier.infrastructure.model.entity.submission.SubmissionDataEntity
 import com.procurement.dossier.infrastructure.utils.tryToJson
@@ -53,10 +54,20 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                   AND $columnOcid=?
                   AND $columnId IN :$idValues;
             """
+
+        private const val SET_SUBMISSION_STATUS = """
+               UPDATE $keySpace.$tableName
+                  SET $columnStatus=?
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId=?               
+               IF EXISTS
+            """
     }
 
     private val preparedSaveSubmissionCQL = session.prepare(SAVE_SUBMISSION_CQL)
     private val preparedGetSubmissionStatusCQL = session.prepare(GET_SUBMISSION_STATUS_CQL)
+    private val preparedSetSubmissionStatusCQL = session.prepare(SET_SUBMISSION_STATUS)
 
     override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident> {
         val entity = submission.convert()
@@ -297,6 +308,23 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     private fun convertToState(row: Row): SubmissionState {
         val id = row.getUUID(columnId)
         val status = SubmissionStatus.creator(row.getString(columnStatus))
-       return SubmissionState(id = id, status = status)
+        return SubmissionState(id = id, status = status)
+    }
+
+    override fun setSubmissionStatus(
+        cpid: Cpid, ocid: Ocid, id: SubmissionId,
+        status: SubmissionStatus
+    ): Result<Boolean, Fail.Incident> {
+        val statements = preparedSetSubmissionStatusCQL.bind()
+            .apply {
+                setString(columnCpid, cpid.toString())
+                setString(columnOcid, ocid.toString())
+                setUUID(columnId, id)
+                setString(columnStatus, status.key)
+            }
+
+        return statements.tryExecute(session).bind { resultSet ->
+            resultSet.wasApplied().asSuccess()
+        }
     }
 }
