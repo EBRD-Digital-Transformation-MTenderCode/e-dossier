@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.handler.historical.submission.CreateSubmissionHandler
+import com.procurement.dossier.infrastructure.handler.historical.submission.SetStateForSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionStateByIdsHandler
 import com.procurement.dossier.infrastructure.handler.validate.period.CheckPeriod2Handler
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
@@ -22,7 +23,8 @@ class Command2Service(
     private val validateSubmissionHandler: ValidateSubmissionHandler,
     private val createSubmissionHandler: CreateSubmissionHandler,
     private val checkPeriod2Handler: CheckPeriod2Handler,
-    private val getSubmissionStateByIdsHandler: GetSubmissionStateByIdsHandler
+    private val getSubmissionStateByIdsHandler: GetSubmissionStateByIdsHandler,
+    private val setStateForSubmissionHandler: SetStateForSubmissionHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -50,6 +52,7 @@ class Command2Service(
             Command2Type.CREATE_SUBMISSION -> createSubmissionHandler.handle(node = request)
             Command2Type.CHECK_PERIOD_2 -> checkPeriod2Handler.handle(node = request)
             Command2Type.GET_SUBMISSION_STATE_BY_IDS -> getSubmissionStateByIdsHandler.handle(node = request)
+            Command2Type.SET_STATE_FOR_SUBMISSION ->setStateForSubmissionHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
