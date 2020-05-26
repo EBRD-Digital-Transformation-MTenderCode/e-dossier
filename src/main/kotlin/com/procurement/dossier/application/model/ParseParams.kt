@@ -12,6 +12,7 @@ import com.procurement.dossier.domain.model.enums.BusinessFunctionType
 import com.procurement.dossier.domain.model.enums.DocumentType
 import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
+import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
@@ -136,6 +137,11 @@ fun parseScale(
     value: String, allowedEnums: List<Scale>, attributeName: String
 ): Result<Scale, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Scale)
+
+fun parseSubmissionStatus(
+    value: String, allowedEnums: List<SubmissionStatus>, attributeName: String
+): Result<SubmissionStatus, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SubmissionStatus)
 
 private fun <T> parseEnum(
     value: String, allowedEnums: List<T>, attributeName: String, target: EnumElementProvider<T>
