@@ -1,5 +1,6 @@
 package com.procurement.dossier.application.service
 
+import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
@@ -271,5 +272,20 @@ class SubmissionService(
                     .asFailure()
             }
         return SetStateForSubmissionResult(id = submission.id, status = submission.status).asSuccess()
+    }
+
+    fun checkAccessToSubmission(params: CheckAccessToSubmissionParams): ValidationResult<Fail> {
+        val credentials = submissionRepository.getSubmissionCredentials(
+            cpid = params.cpid, ocid = params.ocid, id = params.submissionId
+        ).doReturn { incident -> return ValidationResult.error(incident) }
+            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId.toString()))
+
+        if (params.token != credentials.token)
+            return ValidationResult.error(ValidationErrors.InvalidToken())
+
+        if (params.owner != credentials.owner)
+            return ValidationResult.error(ValidationErrors.InvalidOwner())
+
+        return ValidationResult.ok()
     }
 }
