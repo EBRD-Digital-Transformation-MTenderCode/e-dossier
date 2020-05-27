@@ -55,5 +55,16 @@ sealed class ValidationErrors(
     ) {
         class GetSubmissionStateByIds(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.10.1")
         class SetStateForSubmission(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.11.1")
+        class CheckAccessToSubmission(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
     }
+
+    class InvalidToken(): ValidationErrors(
+        numberError = "5.9.1",
+        description = "Received token does not match submission token."
+    )
+
+    class InvalidOwner(): ValidationErrors(
+        numberError = "5.9.2",
+        description = "Received owner does not match submission owner."
+    )
 }
