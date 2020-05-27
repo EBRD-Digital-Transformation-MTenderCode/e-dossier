@@ -8,10 +8,12 @@ import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
+import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.SubmissionState
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
+import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.bind
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
@@ -63,11 +65,22 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                   AND $columnId=?               
                IF EXISTS
             """
+
+        private const val GET_SUBMISSION_CREDENTIALS_CQL = """
+               SELECT $columnToken,
+                      $columnOwner
+                      $columnId
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId=?
+            """
     }
 
     private val preparedSaveSubmissionCQL = session.prepare(SAVE_SUBMISSION_CQL)
     private val preparedGetSubmissionStatusCQL = session.prepare(GET_SUBMISSION_STATUS_CQL)
     private val preparedSetSubmissionStatusCQL = session.prepare(SET_SUBMISSION_STATUS)
+    private val preparedGetSubmissionCredentialsCQL = session.prepare(GET_SUBMISSION_CREDENTIALS_CQL)
 
     override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident> {
         val entity = submission.convert()
@@ -301,14 +314,16 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
 
         return query.tryExecute(session)
             .orForwardFail { error -> return error }
-            .map { row -> convertToState(row = row) }
+            .map { row -> convertToState(row = row).orForwardFail { fail -> return fail } }
             .asSuccess()
     }
 
-    private fun convertToState(row: Row): SubmissionState {
+    private fun convertToState(row: Row): Result<SubmissionState, Fail.Incident.Database.Parsing> {
         val id = row.getUUID(columnId)
-        val status = SubmissionStatus.creator(row.getString(columnStatus))
-        return SubmissionState(id = id, status = status)
+        val status = row.getString(columnStatus)
+        val statusParsed = SubmissionStatus.orNull(row.getString(columnStatus))
+            ?: return Fail.Incident.Database.Parsing(column = columnStatus, value = status).asFailure()
+        return SubmissionState(id = id, status = statusParsed).asSuccess()
     }
 
     override fun setSubmissionStatus(
@@ -326,5 +341,29 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         return statements.tryExecute(session).bind { resultSet ->
             resultSet.wasApplied().asSuccess<Boolean, Fail.Incident>()
         }
+    }
+
+    override fun getSubmissionCredentials(
+        cpid: Cpid,
+        ocid: Ocid,
+        id: SubmissionId
+    ): Result<SubmissionCredentials?, Fail.Incident> {
+        val query = preparedGetSubmissionCredentialsCQL.bind()
+            .setUUID(columnId, id)
+            .setString(columnCpid, cpid.toString())
+            .setString(columnOcid, ocid.toString())
+
+        return query.tryExecute(session)
+            .orForwardFail { error -> return error }
+            .one()
+            ?.let { row -> convertToCredentials(row = row) }
+            .asSuccess()
+    }
+
+    private fun convertToCredentials(row: Row): SubmissionCredentials {
+        val id = row.getUUID(columnId)
+        val token = row.getUUID(columnToken)
+        val owner = row.getUUID(columnOwner)
+        return SubmissionCredentials(id = id, token = token, owner = owner)
     }
 }
