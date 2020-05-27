@@ -8,6 +8,7 @@ import com.procurement.dossier.infrastructure.handler.historical.submission.SetS
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionStateByIdsHandler
 import com.procurement.dossier.infrastructure.handler.validate.period.CheckPeriod2Handler
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
+import com.procurement.dossier.infrastructure.handler.validate.submission.CheckAccessToSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.validate.submission.ValidateSubmissionHandler
 import com.procurement.dossier.infrastructure.model.dto.bpe.Command2Type
 import com.procurement.dossier.infrastructure.model.dto.bpe.errorResponse
@@ -24,7 +25,8 @@ class Command2Service(
     private val createSubmissionHandler: CreateSubmissionHandler,
     private val checkPeriod2Handler: CheckPeriod2Handler,
     private val getSubmissionStateByIdsHandler: GetSubmissionStateByIdsHandler,
-    private val setStateForSubmissionHandler: SetStateForSubmissionHandler
+    private val setStateForSubmissionHandler: SetStateForSubmissionHandler,
+    private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -52,7 +54,8 @@ class Command2Service(
             Command2Type.CREATE_SUBMISSION -> createSubmissionHandler.handle(node = request)
             Command2Type.CHECK_PERIOD_2 -> checkPeriod2Handler.handle(node = request)
             Command2Type.GET_SUBMISSION_STATE_BY_IDS -> getSubmissionStateByIdsHandler.handle(node = request)
-            Command2Type.SET_STATE_FOR_SUBMISSION ->setStateForSubmissionHandler.handle(node = request)
+            Command2Type.SET_STATE_FOR_SUBMISSION -> setStateForSubmissionHandler.handle(node = request)
+            Command2Type.CHECK_ACCESS_TO_SUBMISSION -> checkAccessToSubmissionHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
