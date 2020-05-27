@@ -13,7 +13,25 @@ import com.procurement.dossier.domain.util.ValidationResult
 
 interface SubmissionRepository {
     fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident>
-    fun getSubmissionsStates(cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>): Result<List<SubmissionState>, Fail.Incident>
-    fun setSubmissionStatus(cpid: Cpid, ocid: Ocid, id: SubmissionId, status: SubmissionStatus):  Result<Boolean, Fail.Incident>
-    fun getSubmissionCredentials(cpid: Cpid, ocid: Ocid, id: SubmissionId): Result<SubmissionCredentials?, Fail.Incident>
+
+    fun getSubmissionsStates(
+        cpid: Cpid,
+        ocid: Ocid,
+        submissionIds: List<SubmissionId>
+    ): Result<List<SubmissionState>, Fail.Incident>
+
+    fun setSubmissionStatus(
+        cpid: Cpid,
+        ocid: Ocid,
+        id: SubmissionId,
+        status: SubmissionStatus
+    ): Result<Boolean, Fail.Incident>
+
+    fun getSubmissionCredentials(
+        cpid: Cpid,
+        ocid: Ocid,
+        id: SubmissionId
+    ): Result<SubmissionCredentials?, Fail.Incident>
+
+    fun findSubmission(cpid: Cpid, ocid: Ocid, id: SubmissionId): Result<Submission?, Fail.Incident>
 }

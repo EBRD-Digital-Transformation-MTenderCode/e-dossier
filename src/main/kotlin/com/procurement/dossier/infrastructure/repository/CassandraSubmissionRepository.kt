@@ -6,6 +6,8 @@ import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.model.Owner
+import com.procurement.dossier.domain.model.Token
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
@@ -19,6 +21,7 @@ import com.procurement.dossier.domain.util.bind
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
 import com.procurement.dossier.infrastructure.model.entity.submission.SubmissionDataEntity
 import com.procurement.dossier.infrastructure.utils.tryToJson
+import com.procurement.dossier.infrastructure.utils.tryToObject
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -68,12 +71,23 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
 
         private const val GET_SUBMISSION_CREDENTIALS_CQL = """
                SELECT $columnToken,
-                      $columnOwner
+                      $columnOwner,
                       $columnId
                  FROM $keySpace.$tableName
                 WHERE $columnCpid=? 
                   AND $columnOcid=?
                   AND $columnId=?
+            """
+
+        private const val FIND_SUBMISSION_CQL = """
+               SELECT $columnStatus,
+                      $columnToken,
+                      $columnOwner,
+                      $columnJsonData
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId=?;
             """
     }
 
@@ -81,6 +95,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     private val preparedGetSubmissionStatusCQL = session.prepare(GET_SUBMISSION_STATUS_CQL)
     private val preparedSetSubmissionStatusCQL = session.prepare(SET_SUBMISSION_STATUS)
     private val preparedGetSubmissionCredentialsCQL = session.prepare(GET_SUBMISSION_CREDENTIALS_CQL)
+    private val preparedFindSubmissionCQL = session.prepare(FIND_SUBMISSION_CQL)
 
     override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident> {
         val entity = submission.convert()
@@ -366,4 +381,247 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         val owner = row.getUUID(columnOwner)
         return SubmissionCredentials(id = id, token = token, owner = owner)
     }
+
+    override fun findSubmission(cpid: Cpid, ocid: Ocid, id: SubmissionId): Result<Submission?, Fail.Incident> {
+        val query = preparedFindSubmissionCQL.bind()
+            .setUUID(columnId, id)
+            .setString(columnCpid, cpid.toString())
+            .setString(columnOcid, ocid.toString())
+
+        return query.tryExecute(session)
+            .orForwardFail { fail -> return fail }
+            .one()
+            ?.let { row -> convertToSubmission(row = row) }
+            ?.orForwardFail { fail -> return fail }
+            .asSuccess()
+    }
+
+    private fun convertToSubmission(row: Row): Result<Submission, Fail.Incident> {
+        val status = row.getString(columnStatus)
+        val statusParsed = SubmissionStatus.orNull(row.getString(columnStatus))
+            ?: return Fail.Incident.Database.Parsing(column = columnStatus, value = status).asFailure()
+
+        val token = row.getUUID(columnToken)
+        val owner = row.getUUID(columnOwner)
+        val submissionEntity = row.getString(columnJsonData).tryToObject(SubmissionDataEntity::class.java)
+            .orForwardFail { fail -> return fail }
+
+        return createSubmission(
+            status = statusParsed,
+            token = token,
+            owner = owner,
+            submissionEntity = submissionEntity
+        ).asSuccess()
+    }
+
+    private fun createSubmission(
+        status: SubmissionStatus,
+        token: Token,
+        owner: Owner,
+        submissionEntity: SubmissionDataEntity
+    ) = Submission(
+        id = submissionEntity.id,
+        date = submissionEntity.date,
+        status = status,
+        token = token,
+        owner = owner,
+        requirementResponses = submissionEntity.requirementResponses?.map { requirementResponse ->
+            Submission.RequirementResponse(
+                id = requirementResponse.id,
+                relatedCandidate = requirementResponse.relatedCandidate.let { relatedCandidate ->
+                    Submission.RequirementResponse.RelatedCandidate(
+                        id = relatedCandidate.id,
+                        name = relatedCandidate.name
+                    )
+                },
+                requirement = requirementResponse.requirement.let { requirement ->
+                    Submission.RequirementResponse.Requirement(
+                        id = requirement.id
+                    )
+                },
+                value = requirementResponse.value
+            )
+        }.orEmpty(),
+        documents = submissionEntity.documents?.map { document ->
+            Submission.Document(
+                id = document.id,
+                description = document.description,
+                documentType = document.documentType,
+                title = document.title
+            )
+        }.orEmpty(),
+        candidates = submissionEntity.candidates.map { candidate ->
+            Submission.Candidate(
+                id = candidate.id,
+                name = candidate.name,
+                additionalIdentifiers = candidate.additionalIdentifiers?.map { additionalIdentifier ->
+                    Submission.Candidate.AdditionalIdentifier(
+                        id = additionalIdentifier.id,
+                        legalName = additionalIdentifier.legalName,
+                        scheme = additionalIdentifier.scheme,
+                        uri = additionalIdentifier.uri
+                    )
+                }.orEmpty(),
+                address = candidate.address.let { address ->
+                    Submission.Candidate.Address(
+                        streetAddress = address.streetAddress,
+                        postalCode = address.postalCode,
+                        addressDetails = address.addressDetails.let { addressDetails ->
+                            Submission.Candidate.Address.AddressDetails(
+                                country = addressDetails.country.let { country ->
+                                    Submission.Candidate.Address.AddressDetails.Country(
+                                        id = country.id,
+                                        scheme = country.scheme,
+                                        description = country.description
+                                    )
+                                },
+                                locality = addressDetails.locality.let { locality ->
+                                    Submission.Candidate.Address.AddressDetails.Locality(
+                                        id = locality.id,
+                                        scheme = locality.scheme,
+                                        description = locality.description
+                                    )
+                                },
+                                region = addressDetails.region.let { region ->
+                                    Submission.Candidate.Address.AddressDetails.Region(
+                                        id = region.id,
+                                        scheme = region.scheme,
+                                        description = region.description
+                                    )
+                                }
+                            )
+                        }
+                    )
+
+                },
+                contactPoint = candidate.contactPoint.let { contactPoint ->
+                    Submission.Candidate.ContactPoint(
+                        name = contactPoint.name,
+                        email = contactPoint.email,
+                        faxNumber = contactPoint.faxNumber,
+                        telephone = contactPoint.telephone,
+                        url = contactPoint.url
+                    )
+                },
+                details = candidate.details.let { details ->
+                    Submission.Candidate.Details(
+                        typeOfSupplier = details.typeOfSupplier,
+                        bankAccounts = details.bankAccounts?.map { bankAccount ->
+                            Submission.Candidate.Details.BankAccount(
+                                description = bankAccount.description,
+                                address = bankAccount.address.let { address ->
+                                    Submission.Candidate.Details.BankAccount.Address(
+                                        streetAddress = address.streetAddress,
+                                        postalCode = address.postalCode,
+                                        addressDetails = address.addressDetails.let { addressDetails ->
+                                            Submission.Candidate.Details.BankAccount.Address.AddressDetails(
+                                                country = addressDetails.country.let { country ->
+                                                    Submission.Candidate.Details.BankAccount.Address.AddressDetails.Country(
+                                                        id = country.id,
+                                                        scheme = country.scheme,
+                                                        description = country.description
+                                                    )
+                                                },
+                                                locality = addressDetails.locality.let { locality ->
+                                                    Submission.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
+                                                        id = locality.id,
+                                                        scheme = locality.scheme,
+                                                        description = locality.description
+                                                    )
+                                                },
+                                                region = addressDetails.region.let { region ->
+                                                    Submission.Candidate.Details.BankAccount.Address.AddressDetails.Region(
+                                                        id = region.id,
+                                                        scheme = region.scheme,
+                                                        description = region.description
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    )
+                                },
+                                accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
+                                    Submission.Candidate.Details.BankAccount.AccountIdentification(
+                                        id = accountIdentification.id,
+                                        scheme = accountIdentification.scheme
+                                    )
+                                },
+                                additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers?.map { additionalAccountIdentifier ->
+                                    Submission.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
+                                        id = additionalAccountIdentifier.id,
+                                        scheme = additionalAccountIdentifier.scheme
+                                    )
+                                }.orEmpty(),
+                                bankName = bankAccount.bankName,
+                                identifier = bankAccount.identifier.let { identifier ->
+                                    Submission.Candidate.Details.BankAccount.Identifier(
+                                        id = identifier.id,
+                                        scheme = identifier.scheme
+                                    )
+                                }
+                            )
+                        }.orEmpty(),
+                        legalForm = details.legalForm?.let { legalForm ->
+                            Submission.Candidate.Details.LegalForm(
+                                id = legalForm.id,
+                                scheme = legalForm.scheme,
+                                description = legalForm.description,
+                                uri = legalForm.uri
+                            )
+                        },
+                        mainEconomicActivities = details.mainEconomicActivities?.map { mainEconomicActivity ->
+                            Submission.Candidate.Details.MainEconomicActivity(
+                                id = mainEconomicActivity.id,
+                                uri = mainEconomicActivity.uri,
+                                description = mainEconomicActivity.description,
+                                scheme = mainEconomicActivity.scheme
+                            )
+                        }.orEmpty(),
+                        scale = details.scale
+                    )
+                },
+                identifier = candidate.identifier.let { identifier ->
+                    Submission.Candidate.Identifier(
+                        id = identifier.id,
+                        scheme = identifier.scheme,
+                        uri = identifier.uri,
+                        legalName = identifier.legalName
+                    )
+                },
+                persones = candidate.persones?.map { person ->
+                    Submission.Candidate.Person(
+                        title = person.title,
+                        identifier = person.identifier.let { identifier ->
+                            Submission.Candidate.Person.Identifier(
+                                id = identifier.id,
+                                uri = identifier.uri,
+                                scheme = identifier.scheme
+                            )
+                        },
+                        name = person.name,
+                        businessFunctions = person.businessFunctions.map { businessFunction ->
+                            Submission.Candidate.Person.BusinessFunction(
+                                id = businessFunction.id,
+                                documents = businessFunction.documents?.map { document ->
+                                    Submission.Candidate.Person.BusinessFunction.Document(
+                                        id = document.id,
+                                        title = document.title,
+                                        description = document.description,
+                                        documentType = document.documentType
+                                    )
+                                }.orEmpty(),
+                                jobTitle = businessFunction.jobTitle,
+                                period = businessFunction.period.let { period ->
+                                    Submission.Candidate.Person.BusinessFunction.Period(
+                                        startDate = period.startDate
+                                    )
+                                },
+                                type = businessFunction.type
+                            )
+                        }
+                    )
+                }.orEmpty()
+            )
+        }
+    )
 }
