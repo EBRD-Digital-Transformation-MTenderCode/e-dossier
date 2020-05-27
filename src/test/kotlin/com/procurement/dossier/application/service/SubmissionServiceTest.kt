@@ -2,6 +2,7 @@ package com.procurement.dossier.application.service
 
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
@@ -12,8 +13,10 @@ import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
+import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionState
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asSuccess
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -25,6 +28,8 @@ internal class SubmissionServiceTest {
     companion object {
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1565251033096")!!
         private val OCID = Ocid.tryCreateOrNull("ocds-b3wdp1-MD-1581509539187-EV-1581509653044")!!
+        private val OWNER = UUID.randomUUID()
+        private val TOKEN = UUID.randomUUID()
         private val SUBMISSION_ID_1 = UUID.randomUUID()
         private val SUBMISSION_ID_2 = UUID.randomUUID()
 
@@ -167,6 +172,77 @@ internal class SubmissionServiceTest {
                     id = SUBMISSION_ID_1.toString(),
                     status = SubmissionStatus.PENDING.key
                 ).get
+            ).get
+    }
+
+    @Nested
+    inner class CheckAccessToSubmission {
+        @Test
+        fun success() {
+            val params = getParams()
+            val credentials = SubmissionCredentials(id = params.submissionId, token = params.token, owner = params.owner)
+            whenever(
+                submissionRepository.getSubmissionCredentials(
+                    cpid = params.cpid, ocid = params.ocid, id = params.submissionId
+                )
+            ).thenReturn(credentials.asSuccess())
+
+            val actual = submissionService.checkAccessToSubmission(params)
+
+            assertTrue(actual is ValidationResult.Ok)
+        }
+
+        @Test
+        fun submissionNotFound_fail() {
+            val params = getParams()
+            whenever(
+                submissionRepository.getSubmissionCredentials(
+                    cpid = params.cpid, ocid = params.ocid, id = params.submissionId
+                )
+            ).thenReturn(null.asSuccess())
+
+            val actual = submissionService.checkAccessToSubmission(params).error
+
+            assertTrue(actual is ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission)
+        }
+
+        @Test
+        fun tokenNotMatch_fail() {
+            val params = getParams()
+            val credentials = SubmissionCredentials(id = params.submissionId, token = UUID.randomUUID(), owner = params.owner)
+            whenever(
+                submissionRepository.getSubmissionCredentials(
+                    cpid = params.cpid, ocid = params.ocid, id = params.submissionId
+                )
+            ).thenReturn(credentials.asSuccess())
+
+            val actual = submissionService.checkAccessToSubmission(params).error
+
+            assertTrue(actual is ValidationErrors.InvalidToken)
+        }
+
+        @Test
+        fun ownerNotMatch_fail() {
+            val params = getParams()
+            val credentials = SubmissionCredentials(id = params.submissionId, token = params.token, owner = UUID.randomUUID())
+            whenever(
+                submissionRepository.getSubmissionCredentials(
+                    cpid = params.cpid, ocid = params.ocid, id = params.submissionId
+                )
+            ).thenReturn(credentials.asSuccess())
+
+            val actual = submissionService.checkAccessToSubmission(params).error
+
+            assertTrue(actual is ValidationErrors.InvalidOwner)
+        }
+
+        private fun getParams() = CheckAccessToSubmissionParams
+            .tryCreate(
+                submissionId = SUBMISSION_ID_1.toString(),
+                cpid = CPID.toString(),
+                ocid = OCID.toString(),
+                owner = OWNER.toString(),
+                token = TOKEN.toString()
             ).get
     }
 }
