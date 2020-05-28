@@ -8,8 +8,8 @@ import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.SubmissionState
+import com.procurement.dossier.domain.util.MaybeFail
 import com.procurement.dossier.domain.util.Result
-import com.procurement.dossier.domain.util.ValidationResult
 
 interface SubmissionRepository {
     fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): MaybeFail<Fail.Incident>
