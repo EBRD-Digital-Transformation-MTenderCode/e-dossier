@@ -20,12 +20,14 @@
             "country": {
               "id": "string",
               "description": "string",
-              "scheme": "string"
+              "scheme": "string",
+              "uri": "string"
             },
             "region": {
               "id": "string",
               "description": "string",
-              "scheme": "string"
+              "scheme": "string",
+              "uri": "string"
             },
             "locality": {
               "id": "string",
