@@ -87,6 +87,7 @@ data class ValidateSubmissionRequest(
         )
 
         data class Person(
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
             @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
             @param:JsonProperty("name") @field:JsonProperty("name") val name: String,
             @param:JsonProperty("identifier") @field:JsonProperty("identifier") val identifier: Identifier,
