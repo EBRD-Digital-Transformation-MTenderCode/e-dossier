@@ -10,12 +10,11 @@ import com.procurement.dossier.domain.model.Owner
 import com.procurement.dossier.domain.model.Token
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
-import com.procurement.dossier.domain.util.MaybeFail
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.SubmissionState
+import com.procurement.dossier.domain.util.MaybeFail
 import com.procurement.dossier.domain.util.Result
-import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.bind
@@ -167,21 +166,24 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                                         SubmissionDataEntity.Candidate.Address.AddressDetails.Country(
                                             id = country.id,
                                             scheme = country.scheme,
-                                            description = country.description
+                                            description = country.description,
+                                            uri = country.uri
                                         )
                                     },
                                     locality = addressDetails.locality.let { locality ->
                                         SubmissionDataEntity.Candidate.Address.AddressDetails.Locality(
                                             id = locality.id,
                                             scheme = locality.scheme,
-                                            description = locality.description
+                                            description = locality.description,
+                                            uri = locality.uri
                                         )
                                     },
                                     region = addressDetails.region.let { region ->
                                         SubmissionDataEntity.Candidate.Address.AddressDetails.Region(
                                             id = region.id,
                                             scheme = region.scheme,
-                                            description = region.description
+                                            description = region.description,
+                                            uri = region.uri
                                         )
                                     }
                                 )
@@ -285,6 +287,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                     },
                     persones = candidate.persones.map { person ->
                         SubmissionDataEntity.Candidate.Person(
+                            id = person.id,
                             title = person.title,
                             identifier = person.identifier.let { identifier ->
                                 SubmissionDataEntity.Candidate.Person.Identifier(
@@ -473,21 +476,24 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                                     Submission.Candidate.Address.AddressDetails.Country(
                                         id = country.id,
                                         scheme = country.scheme,
-                                        description = country.description
+                                        description = country.description,
+                                        uri = country.uri
                                     )
                                 },
                                 locality = addressDetails.locality.let { locality ->
                                     Submission.Candidate.Address.AddressDetails.Locality(
                                         id = locality.id,
                                         scheme = locality.scheme,
-                                        description = locality.description
+                                        description = locality.description,
+                                        uri = locality.uri
                                     )
                                 },
                                 region = addressDetails.region.let { region ->
                                     Submission.Candidate.Address.AddressDetails.Region(
                                         id = region.id,
                                         scheme = region.scheme,
-                                        description = region.description
+                                        description = region.description,
+                                        uri = region.uri
                                     )
                                 }
                             )
@@ -591,6 +597,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                 },
                 persones = candidate.persones?.map { person ->
                     Submission.Candidate.Person(
+                        id = person.id,
                         title = person.title,
                         identifier = person.identifier.let { identifier ->
                             Submission.Candidate.Person.Identifier(
