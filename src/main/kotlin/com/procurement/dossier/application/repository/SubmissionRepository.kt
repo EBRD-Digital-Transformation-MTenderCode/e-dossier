@@ -12,7 +12,7 @@ import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
 
 interface SubmissionRepository {
-    fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident>
+    fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): MaybeFail<Fail.Incident>
 
     fun getSubmissionsStates(
         cpid: Cpid,

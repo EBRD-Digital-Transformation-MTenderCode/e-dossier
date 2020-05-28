@@ -77,7 +77,7 @@ sealed class Fail {
             }
 
             class Parsing(className: String, exception: Exception? = null) :
-                Transform(number = "2.2", description = "Error parsing to $className.", exception = exception)
+                Transform(number = "2.1", description = "Error parsing to $className.", exception = exception)
 
         }
 

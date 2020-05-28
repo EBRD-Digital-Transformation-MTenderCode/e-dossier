@@ -10,6 +10,7 @@ import com.procurement.dossier.domain.model.Owner
 import com.procurement.dossier.domain.model.Token
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
+import com.procurement.dossier.domain.util.MaybeFail
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.SubmissionState
@@ -97,9 +98,9 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     private val preparedGetSubmissionCredentialsCQL = session.prepare(GET_SUBMISSION_CREDENTIALS_CQL)
     private val preparedFindSubmissionCQL = session.prepare(FIND_SUBMISSION_CQL)
 
-    override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): ValidationResult<Fail.Incident> {
+    override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): MaybeFail<Fail.Incident> {
         val entity = submission.convert()
-        val jsonData = tryToJson(entity).doReturn { incident -> return ValidationResult.error(incident) }
+        val jsonData = tryToJson(entity).doReturn { incident -> return MaybeFail.fail(incident) }
         val statement = preparedSaveSubmissionCQL.bind()
             .apply {
                 setString(columnCpid, cpid.toString())
@@ -111,8 +112,8 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                 setString(columnJsonData, jsonData)
             }
 
-        statement.tryExecute(session).doReturn { fail -> return ValidationResult.error(fail) }
-        return ValidationResult.ok()
+        statement.tryExecute(session).doReturn { fail -> return MaybeFail.fail(fail) }
+        return MaybeFail.none()
     }
 
     private fun Submission.convert() =

@@ -30,7 +30,7 @@ class SubmissionService(
     fun createSubmission(params: CreateSubmissionParams): Result<CreateSubmissionResult, Fail.Incident> {
         val submission = params.convert()
         submissionRepository.saveSubmission(cpid = params.cpid, ocid = params.ocid, submission = submission)
-            .doOnError { incident -> return incident.asFailure() }
+            .doOnFail { incident -> return incident.asFailure() }
         return submission.toCreateSubmissionResult().asSuccess()
     }
 
