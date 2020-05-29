@@ -1,4 +1,4 @@
-package com.procurement.dossier.application.repository
+package com.procurement.dossier.application.repository.history
 
 import com.procurement.dossier.infrastructure.model.entity.HistoryEntity
 

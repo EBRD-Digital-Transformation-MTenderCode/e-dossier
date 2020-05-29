@@ -9,6 +9,9 @@ class CustomLogger : Logger {
         private val log: org.slf4j.Logger = LoggerFactory.getLogger(CustomLogger::class.java)
     }
 
+    override val isDebugEnabled: Boolean
+        get() = log.isDebugEnabled
+
     override fun error(message: String, mdc: Map<String, String>, exception: Exception?) {
         MDC.setContextMap(mdc)
         log.error(message, exception)
@@ -25,5 +28,9 @@ class CustomLogger : Logger {
         MDC.setContextMap(mdc)
         log.info(message, exception)
         MDC.clear()
+    }
+
+    override fun debug(message: String) {
+        log.debug(message)
     }
 }

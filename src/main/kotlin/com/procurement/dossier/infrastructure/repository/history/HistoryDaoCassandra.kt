@@ -1,7 +1,7 @@
-package com.procurement.dossier.infrastructure.repository
+package com.procurement.dossier.infrastructure.repository.history
 
 import com.datastax.driver.core.Session
-import com.procurement.dossier.application.repository.HistoryDao
+import com.procurement.dossier.application.repository.history.HistoryDao
 import com.procurement.dossier.domain.util.extension.nowDefaultUTC
 import com.procurement.dossier.domain.util.extension.toDate
 import com.procurement.dossier.infrastructure.extension.cassandra.executeRead

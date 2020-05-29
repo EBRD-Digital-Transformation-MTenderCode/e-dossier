@@ -7,6 +7,7 @@ import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.entity.CreatedCriteriaEntity
+import com.procurement.dossier.infrastructure.repository.CassandraCriteriaRepository
 import com.procurement.dossier.infrastructure.utils.tryToObject
 import org.springframework.stereotype.Service
 
@@ -24,7 +25,13 @@ class ValidationService(private val criteriaRepository: CriteriaRepository) {
         val createdCriteriaEntity = cnEntity.jsonData
             .tryToObject(CreatedCriteriaEntity::class.java)
             .doReturn { error ->
-                return ValidationResult.error(Fail.Incident.DatabaseIncident(exception = error.exception))
+                return ValidationResult.error(
+                    Fail.Incident.Database.Parsing(
+                        column = CassandraCriteriaRepository.columnJsonData,
+                        value = cnEntity.jsonData,
+                        exception = error.exception
+                    )
+                )
             }
 
         val requirementId = params.requirementResponse.requirement.id

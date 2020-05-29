@@ -7,7 +7,7 @@ import com.procurement.dossier.application.model.data.GetCriteriaData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodContext
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
-import com.procurement.dossier.application.repository.HistoryDao
+import com.procurement.dossier.application.repository.history.HistoryDao
 import com.procurement.dossier.application.service.CriteriaService
 import com.procurement.dossier.application.service.PeriodService
 import com.procurement.dossier.application.service.command.generateCreateCriteriaResponse

@@ -36,4 +36,16 @@ CREATE TABLE IF NOT EXISTS  dossier.history
     primary key(command_id, command)
 );
 
+CREATE TABLE IF NOT EXISTS dossier.submission
+(
+    cpid text,
+    ocid text,
+    id uuid,
+    status text,
+    token_entity uuid,
+    owner uuid,
+    json_data text,
+    primary key (cpid, ocid, id)
+);
+
 INSERT INTO dossier.period_rules (country, pmd, value)  VALUES ('MD', 'GPA', 10);
