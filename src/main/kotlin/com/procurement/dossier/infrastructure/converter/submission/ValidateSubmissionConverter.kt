@@ -162,6 +162,7 @@ private fun ValidateSubmissionRequest.Candidate.Details.BankAccount.convert() =
 
 private fun ValidateSubmissionRequest.Candidate.Person.convert() =
     ValidateSubmissionParams.Candidate.Person.tryCreate(
+        id = id,
         title = title,
         identifier = identifier.let { identifier ->
             ValidateSubmissionParams.Candidate.Person.Identifier(
