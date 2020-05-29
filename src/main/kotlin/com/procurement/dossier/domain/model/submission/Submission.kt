@@ -60,19 +60,22 @@ data class Submission(
                 data class Country(
                     val id: String,
                     val description: String,
-                    val scheme: String
+                    val scheme: String,
+                    val uri: String
                 )
 
                 data class Region(
                     val id: String,
                     val description: String,
-                    val scheme: String
+                    val scheme: String,
+                    val uri: String
                 )
 
                 data class Locality(
                     val id: String,
                     val description: String,
-                    val scheme: String
+                    val scheme: String,
+                    val uri: String?
                 )
             }
         }
@@ -86,6 +89,7 @@ data class Submission(
         )
 
         data class Person(
+            val id: String,
             val title: PersonTitle,
             val name: String,
             val identifier: Identifier,
