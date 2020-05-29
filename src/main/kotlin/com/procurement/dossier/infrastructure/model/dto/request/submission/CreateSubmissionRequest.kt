@@ -73,19 +73,23 @@ data class CreateSubmissionRequest(
                     data class Country(
                         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
                         @param:JsonProperty("description") @field:JsonProperty("description") val description: String,
-                        @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String
+                        @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String,
+                        @param:JsonProperty("uri") @field:JsonProperty("uri") val uri: String
                     )
 
                     data class Region(
                         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
                         @param:JsonProperty("description") @field:JsonProperty("description") val description: String,
-                        @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String
+                        @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String,
+                        @param:JsonProperty("uri") @field:JsonProperty("uri") val uri: String
                     )
 
                     data class Locality(
                         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
                         @param:JsonProperty("description") @field:JsonProperty("description") val description: String,
-                        @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String
+                        @param:JsonProperty("scheme") @field:JsonProperty("scheme") val scheme: String,
+                        @JsonInclude(JsonInclude.Include.NON_NULL)
+                        @param:JsonProperty("uri") @field:JsonProperty("uri") val uri: String?
                     )
                 }
             }
@@ -103,6 +107,7 @@ data class CreateSubmissionRequest(
             )
 
             data class Person(
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
                 @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
                 @param:JsonProperty("name") @field:JsonProperty("name") val name: String,
                 @param:JsonProperty("identifier") @field:JsonProperty("identifier") val identifier: Identifier,

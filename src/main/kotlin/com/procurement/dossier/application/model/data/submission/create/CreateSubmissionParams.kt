@@ -178,19 +178,22 @@ class CreateSubmissionParams private constructor(
                     data class Country(
                         val id: String,
                         val description: String,
-                        val scheme: String
+                        val scheme: String,
+                        val uri: String
                     )
 
                     data class Region(
                         val id: String,
                         val description: String,
-                        val scheme: String
+                        val scheme: String,
+                        val uri: String
                     )
 
                     data class Locality(
                         val id: String,
                         val description: String,
-                        val scheme: String
+                        val scheme: String,
+                        val uri: String?
                     )
                 }
             }
@@ -204,6 +207,7 @@ class CreateSubmissionParams private constructor(
             )
 
             class Person private constructor(
+                val id: String,
                 val title: PersonTitle,
                 val name: String,
                 val identifier: Identifier,
@@ -213,7 +217,7 @@ class CreateSubmissionParams private constructor(
                     private const val TITLE_ATTRIBUTE_NAME = "submission.candidates.persones.title"
                     private const val BUSINESS_FUNCTIONS_ATTRIBUTE_NAME = "submission.candidates.persones.businessFunctions"
                     fun tryCreate(
-                        title: String, name: String, identifier: Identifier, businessFunctions: List<BusinessFunction>
+                        id: String, title: String, name: String, identifier: Identifier, businessFunctions: List<BusinessFunction>
                     ): Result<Person, DataErrors> {
                         if (businessFunctions.isEmpty())
                             return failure(DataErrors.Validation.EmptyArray(name = BUSINESS_FUNCTIONS_ATTRIBUTE_NAME))
@@ -225,6 +229,7 @@ class CreateSubmissionParams private constructor(
                         ).orForwardFail { fail -> return fail }
 
                         return Person(
+                            id = id,
                             title = parsedPersonTitle,
                             name = name,
                             identifier = identifier,

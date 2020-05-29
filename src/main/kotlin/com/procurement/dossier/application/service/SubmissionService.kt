@@ -78,21 +78,24 @@ class SubmissionService(
                                         Submission.Candidate.Address.AddressDetails.Country(
                                             id = country.id,
                                             scheme = country.scheme,
-                                            description = country.description
+                                            description = country.description,
+                                            uri = country.uri
                                         )
                                     },
                                     locality = addressDetails.locality.let { locality ->
                                         Submission.Candidate.Address.AddressDetails.Locality(
                                             id = locality.id,
                                             scheme = locality.scheme,
-                                            description = locality.description
+                                            description = locality.description,
+                                            uri = locality.uri
                                         )
                                     },
                                     region = addressDetails.region.let { region ->
                                         Submission.Candidate.Address.AddressDetails.Region(
                                             id = region.id,
                                             scheme = region.scheme,
-                                            description = region.description
+                                            description = region.description,
+                                            uri = region.uri
                                         )
                                     }
                                 )
@@ -196,6 +199,7 @@ class SubmissionService(
                     },
                     persones = candidate.persones.map { person ->
                         Submission.Candidate.Person(
+                            id = person.id,
                             title = person.title,
                             identifier = person.identifier.let { identifier ->
                                 Submission.Candidate.Person.Identifier(
