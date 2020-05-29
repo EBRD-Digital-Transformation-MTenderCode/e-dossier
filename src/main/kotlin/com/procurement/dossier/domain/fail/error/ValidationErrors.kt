@@ -2,6 +2,7 @@ package com.procurement.dossier.domain.fail.error
 
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
+import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.util.extension.format
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
@@ -58,13 +59,23 @@ sealed class ValidationErrors(
         class CheckAccessToSubmission(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
     }
 
-    class InvalidToken(): ValidationErrors(
+    class InvalidToken() : ValidationErrors(
         numberError = "5.9.1",
         description = "Received token does not match submission token."
     )
 
-    class InvalidOwner(): ValidationErrors(
+    class InvalidOwner() : ValidationErrors(
         numberError = "5.9.2",
         description = "Received owner does not match submission owner."
+    )
+
+    class RecordNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+        numberError = "5.12.1",
+        description = "No record found by cpid '$cpid' and ocid '$ocid'."
+    )
+
+    class OrganizationsNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+        numberError = "5.12.2",
+        description = "No organization found by cpid '$cpid' and ocid '$ocid'."
     )
 }
