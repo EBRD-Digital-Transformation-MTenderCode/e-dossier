@@ -3,6 +3,8 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
+import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
+import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsResult
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
@@ -292,4 +294,197 @@ class SubmissionService(
 
         return ValidationResult.ok()
     }
+
+    fun getOrganizations(params: GetOrganizationsParams): Result<List<GetOrganizationsResult>, Fail> {
+        val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { fail -> return fail }
+        if (submissions.isEmpty())
+            return ValidationErrors.RecordNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
+
+        val organizations = submissions
+            .flatMap { submission -> submission.candidates }
+            .map { candidate -> candidate.toGetOrganizationsResult() }
+
+        if (organizations.isEmpty())
+            return ValidationErrors.OrganizationsNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
+
+        return organizations.asSuccess()
+    }
+
+    private fun Submission.Candidate.toGetOrganizationsResult() =
+        GetOrganizationsResult(
+            id = id,
+            name = name,
+            additionalIdentifiers = additionalIdentifiers.map { additionalIdentifier ->
+                GetOrganizationsResult.AdditionalIdentifier(
+                    id = additionalIdentifier.id,
+                    legalName = additionalIdentifier.legalName,
+                    scheme = additionalIdentifier.scheme,
+                    uri = additionalIdentifier.uri
+                )
+            },
+            address = address.let { address ->
+                GetOrganizationsResult.Address(
+                    streetAddress = address.streetAddress,
+                    postalCode = address.postalCode,
+                    addressDetails = address.addressDetails.let { addressDetails ->
+                        GetOrganizationsResult.Address.AddressDetails(
+                            country = addressDetails.country.let { country ->
+                                GetOrganizationsResult.Address.AddressDetails.Country(
+                                    id = country.id,
+                                    scheme = country.scheme,
+                                    description = country.description,
+                                    uri = country.uri
+                                )
+                            },
+                            locality = addressDetails.locality.let { locality ->
+                                GetOrganizationsResult.Address.AddressDetails.Locality(
+                                    id = locality.id,
+                                    scheme = locality.scheme,
+                                    description = locality.description,
+                                    uri = locality.uri
+                                )
+                            },
+                            region = addressDetails.region.let { region ->
+                                GetOrganizationsResult.Address.AddressDetails.Region(
+                                    id = region.id,
+                                    scheme = region.scheme,
+                                    description = region.description,
+                                    uri = region.uri
+                                )
+                            }
+                        )
+                    }
+                )
+
+            },
+            contactPoint = contactPoint.let { contactPoint ->
+                GetOrganizationsResult.ContactPoint(
+                    name = contactPoint.name,
+                    email = contactPoint.email,
+                    faxNumber = contactPoint.faxNumber,
+                    telephone = contactPoint.telephone,
+                    url = contactPoint.url
+                )
+            },
+            details = details.let { details ->
+                GetOrganizationsResult.Details(
+                    typeOfSupplier = details.typeOfSupplier,
+                    bankAccounts = details.bankAccounts.map { bankAccount ->
+                        GetOrganizationsResult.Details.BankAccount(
+                            description = bankAccount.description,
+                            address = bankAccount.address.let { address ->
+                                GetOrganizationsResult.Details.BankAccount.Address(
+                                    streetAddress = address.streetAddress,
+                                    postalCode = address.postalCode,
+                                    addressDetails = address.addressDetails.let { addressDetails ->
+                                        GetOrganizationsResult.Details.BankAccount.Address.AddressDetails(
+                                            country = addressDetails.country.let { country ->
+                                                GetOrganizationsResult.Details.BankAccount.Address.AddressDetails.Country(
+                                                    id = country.id,
+                                                    scheme = country.scheme,
+                                                    description = country.description
+                                                )
+                                            },
+                                            locality = addressDetails.locality.let { locality ->
+                                                GetOrganizationsResult.Details.BankAccount.Address.AddressDetails.Locality(
+                                                    id = locality.id,
+                                                    scheme = locality.scheme,
+                                                    description = locality.description
+                                                )
+                                            },
+                                            region = addressDetails.region.let { region ->
+                                                GetOrganizationsResult.Details.BankAccount.Address.AddressDetails.Region(
+                                                    id = region.id,
+                                                    scheme = region.scheme,
+                                                    description = region.description
+                                                )
+                                            }
+                                        )
+                                    }
+                                )
+                            },
+                            accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
+                                GetOrganizationsResult.Details.BankAccount.AccountIdentification(
+                                    id = accountIdentification.id,
+                                    scheme = accountIdentification.scheme
+                                )
+                            },
+                            additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
+                                GetOrganizationsResult.Details.BankAccount.AdditionalAccountIdentifier(
+                                    id = additionalAccountIdentifier.id,
+                                    scheme = additionalAccountIdentifier.scheme
+                                )
+                            },
+                            bankName = bankAccount.bankName,
+                            identifier = bankAccount.identifier.let { identifier ->
+                                GetOrganizationsResult.Details.BankAccount.Identifier(
+                                    id = identifier.id,
+                                    scheme = identifier.scheme
+                                )
+                            }
+                        )
+                    },
+                    legalForm = details.legalForm?.let { legalForm ->
+                        GetOrganizationsResult.Details.LegalForm(
+                            id = legalForm.id,
+                            scheme = legalForm.scheme,
+                            description = legalForm.description,
+                            uri = legalForm.uri
+                        )
+                    },
+                    mainEconomicActivities = details.mainEconomicActivities.map { mainEconomicActivity ->
+                        GetOrganizationsResult.Details.MainEconomicActivity(
+                            id = mainEconomicActivity.id,
+                            uri = mainEconomicActivity.uri,
+                            description = mainEconomicActivity.description,
+                            scheme = mainEconomicActivity.scheme
+                        )
+                    },
+                    scale = details.scale
+                )
+            },
+            identifier = identifier.let { identifier ->
+                GetOrganizationsResult.Identifier(
+                    id = identifier.id,
+                    scheme = identifier.scheme,
+                    uri = identifier.uri,
+                    legalName = identifier.legalName
+                )
+            },
+            persones = persones.map { person ->
+                GetOrganizationsResult.Person(
+                    id = person.id,
+                    title = person.title,
+                    identifier = person.identifier.let { identifier ->
+                        GetOrganizationsResult.Person.Identifier(
+                            id = identifier.id,
+                            uri = identifier.uri,
+                            scheme = identifier.scheme
+                        )
+                    },
+                    name = person.name,
+                    businessFunctions = person.businessFunctions.map { businessFunction ->
+                        GetOrganizationsResult.Person.BusinessFunction(
+                            id = businessFunction.id,
+                            documents = businessFunction.documents.map { document ->
+                                GetOrganizationsResult.Person.BusinessFunction.Document(
+                                    id = document.id,
+                                    title = document.title,
+                                    description = document.description,
+                                    documentType = document.documentType
+                                )
+                            },
+                            jobTitle = businessFunction.jobTitle,
+                            period = businessFunction.period.let { period ->
+                                GetOrganizationsResult.Person.BusinessFunction.Period(
+                                    startDate = period.startDate
+                                )
+                            },
+                            type = businessFunction.type
+                        )
+                    }
+                )
+            }
+        )
 }
