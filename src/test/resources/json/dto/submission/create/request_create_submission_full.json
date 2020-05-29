@@ -29,17 +29,20 @@
             "country": {
               "id": "string",
               "description": "string",
-              "scheme": "string"
+              "scheme": "string",
+              "uri": "string"
             },
             "region": {
               "id": "string",
               "description": "string",
-              "scheme": "string"
+              "scheme": "string",
+              "uri": "string"
             },
             "locality": {
               "id": "string",
               "description": "string",
-              "scheme": "string"
+              "scheme": "string",
+              "uri": "string"
             }
           }
         },
@@ -52,6 +55,7 @@
         },
         "persones": [
           {
+            "id": "string",
             "title": "Mr.",
             "name": "string",
             "identifier": {
@@ -65,7 +69,7 @@
                 "type": "authority",
                 "jobTitle": "string",
                 "period": {
-                  "startDate": "2020-05-21T13:35:49.725Z"
+                  "startDate": "2020-05-28T12:49:49.730Z"
                 },
                 "documents": [
                   {
