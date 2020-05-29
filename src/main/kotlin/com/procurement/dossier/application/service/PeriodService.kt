@@ -37,7 +37,7 @@ class PeriodService(
                 message = "No period duration rule found for country '${context.country}' and pmd '${context.pmd}'."
             )
 
-        val actualDuration = ChronoUnit.SECONDS.between(period.startDate, period.endDate)
+        val actualDuration = ChronoUnit.DAYS.between(period.startDate, period.endDate)
 
         if (actualDuration < expectedDuration)
             throw ErrorException(ErrorType.INVALID_PERIOD_DURATION)
