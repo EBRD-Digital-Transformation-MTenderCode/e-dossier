@@ -3,6 +3,7 @@ package com.procurement.dossier.application.model.data.submission.organization
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.dossier.domain.model.enums.BusinessFunctionType
+import com.procurement.dossier.domain.model.enums.DocumentType
 import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SupplierType
@@ -119,7 +120,7 @@ data class GetOrganizationsResult(
 
             data class Document(
                 @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-                @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: String,
+                @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: DocumentType,
                 @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
 
                 @JsonInclude(JsonInclude.Include.NON_NULL)
