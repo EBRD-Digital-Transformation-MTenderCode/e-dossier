@@ -48,6 +48,7 @@
       },
       "persones": [
         {
+          "id": "string",
           "title": "Mr.",
           "name": "string",
           "identifier": {
@@ -61,7 +62,7 @@
               "type": "authority",
               "jobTitle": "string",
               "period": {
-                "startDate": "2020-05-19T10:16:01.377Z"
+                "startDate": "2020-05-28T12:32:18.165Z"
               },
               "documents": [
                 {
