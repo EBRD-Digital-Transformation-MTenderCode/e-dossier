@@ -89,6 +89,16 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                   AND $columnOcid=?
                   AND $columnId=?;
             """
+
+        private const val FIND_SUBMISSIONS_CQL = """
+               SELECT $columnStatus,
+                      $columnToken,
+                      $columnOwner,
+                      $columnJsonData
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?                
+            """
     }
 
     private val preparedSaveSubmissionCQL = session.prepare(SAVE_SUBMISSION_CQL)
@@ -96,6 +106,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     private val preparedSetSubmissionStatusCQL = session.prepare(SET_SUBMISSION_STATUS)
     private val preparedGetSubmissionCredentialsCQL = session.prepare(GET_SUBMISSION_CREDENTIALS_CQL)
     private val preparedFindSubmissionCQL = session.prepare(FIND_SUBMISSION_CQL)
+    private val preparedFindSubmissionsCQL = session.prepare(FIND_SUBMISSIONS_CQL)
 
     override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): MaybeFail<Fail.Incident> {
         val entity = submission.convert()
@@ -632,4 +643,15 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             )
         }
     )
+
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<Submission>, Fail.Incident> {
+        val query = preparedFindSubmissionsCQL.bind()
+            .setString(columnCpid, cpid.toString())
+            .setString(columnOcid, ocid.toString())
+
+        return query.tryExecute(session)
+            .orForwardFail { fail -> return fail }
+            .map { row -> convertToSubmission(row = row).orForwardFail { fail -> return fail } }
+            .asSuccess()
+    }
 }
