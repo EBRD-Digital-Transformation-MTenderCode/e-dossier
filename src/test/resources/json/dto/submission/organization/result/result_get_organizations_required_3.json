@@ -1,0 +1,40 @@
+{
+  "id": "string",
+  "name": "string",
+  "identifier": {
+    "id": "string",
+    "legalName": "string",
+    "scheme": "string"
+  },
+  "address": {
+    "streetAddress": "string",
+    "addressDetails": {
+      "country": {
+        "id": "string",
+        "description": "string",
+        "scheme": "string",
+        "uri": "string"
+      },
+      "region": {
+        "id": "string",
+        "description": "string",
+        "scheme": "string",
+        "uri": "string"
+      },
+      "locality": {
+        "id": "string",
+        "description": "string",
+        "scheme": "string",
+        "uri": "string"
+      }
+    }
+  },
+  "contactPoint": {
+    "name": "string",
+    "email": "string",
+    "telephone": "string"
+  },
+  "details": {
+    "scale": "micro"
+  }
+}
