@@ -26,6 +26,7 @@ import com.procurement.dossier.domain.model.tryToken
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.tryParseLocalDateTime
+import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import java.time.LocalDateTime
 
 fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
@@ -49,6 +50,28 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
                 actualValue = value
             )
         )
+
+fun parsePmd(
+    value: String,
+    allowedValues: Collection<ProcurementMethod>
+): Result<ProcurementMethod, DataErrors.Validation.UnknownValue> =
+    try {
+        ProcurementMethod.valueOf(value)
+            .takeIf { it in allowedValues }
+            ?.asSuccess()
+            ?: getPmdDataErrorFailure(value, allowedValues)
+    } catch (ignored: Exception) {
+        getPmdDataErrorFailure(value, allowedValues)
+    }
+
+private fun getPmdDataErrorFailure(value: String, allowedValues: Collection<ProcurementMethod>) =
+    Result.failure(
+        DataErrors.Validation.UnknownValue(
+            name = "pmd",
+            expectedValues = allowedValues.map { it.name },
+            actualValue = value
+        )
+    )
 
 fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMismatch> =
     value.tryOwner()
