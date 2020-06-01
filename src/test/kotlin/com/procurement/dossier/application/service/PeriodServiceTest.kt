@@ -9,6 +9,8 @@ import com.procurement.dossier.application.model.data.period.check.CheckPeriodCo
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodResult
 import com.procurement.dossier.application.model.data.period.check.params.CheckPeriod2Params
+import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateParams
+import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateResult
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
 import com.procurement.dossier.application.model.data.period.save.SavePeriodData
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
@@ -22,8 +24,8 @@ import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -49,7 +51,6 @@ internal class PeriodServiceTest {
         private val periodRulesRepository: PeriodRulesRepository = mock()
         private val periodRepository: PeriodRepository = mock()
         private val periodService: PeriodService = PeriodService(periodRulesRepository, periodRepository)
-
     }
 
     @Nested
@@ -252,7 +253,6 @@ internal class PeriodServiceTest {
         private fun createCheckPeriodData(startDate: LocalDateTime, endDate: LocalDateTime) =
             CheckPeriodData(period = CheckPeriodData.Period(startDate = startDate, endDate = endDate))
 
-
         private fun stubPeriodEntity() =
             PeriodEntity(
                 startDate = ENTITY_START_DATE,
@@ -295,7 +295,6 @@ internal class PeriodServiceTest {
             periodService.savePeriod(data = data, context = context)
         }
 
-
         private fun createSavePeriodData(startDate: LocalDateTime, endDate: LocalDateTime) =
             SavePeriodData(
                 period = SavePeriodData.Period(
@@ -337,7 +336,7 @@ internal class PeriodServiceTest {
 
             val actual = periodService.checkPeriod2(params = params).error
 
-            Assertions.assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithStartDate)
+            assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithStartDate)
         }
 
         @Test
@@ -354,7 +353,7 @@ internal class PeriodServiceTest {
 
             val actual = periodService.checkPeriod2(params = params).error
 
-            Assertions.assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithStartDate)
+            assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithStartDate)
         }
 
         @Test
@@ -371,7 +370,7 @@ internal class PeriodServiceTest {
 
             val actual = periodService.checkPeriod2(params = params).error
 
-            Assertions.assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithEndDate)
+            assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithEndDate)
         }
 
         @Test
@@ -385,7 +384,7 @@ internal class PeriodServiceTest {
 
             val actual = periodService.checkPeriod2(params = params).error
 
-            Assertions.assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithEndDate)
+            assertTrue(actual is ValidationErrors.InvalidPeriodDateComparedWithEndDate)
         }
 
         private fun createParams(date: LocalDateTime): CheckPeriod2Params {
@@ -403,5 +402,42 @@ internal class PeriodServiceTest {
                 ocid = OCID,
                 cpid = CPID
             )
+    }
+
+    @Nested
+    inner class GetSubmissionPeriodEndDate {
+        @Test
+        fun success() {
+            val params = getParams()
+            val periodEntity = PeriodEntity(
+                startDate = DATE,
+                endDate = DATE.plusDays(2),
+                ocid = OCID,
+                cpid = CPID
+            )
+            whenever(periodRepository.tryFindBy(params.cpid, params.ocid)).thenReturn(periodEntity.asSuccess())
+
+            val actual = periodService.getSubmissionPeriodEndDate(params).get
+
+            val expected = GetSubmissionPeriodEndDateResult(endDate = periodEntity.endDate)
+
+            assertEquals(expected, actual)
+        }
+
+        @Test
+        fun periodNotFound_fail() {
+            val params = getParams()
+
+            whenever(periodRepository.tryFindBy(params.cpid, params.ocid)).thenReturn(null.asSuccess())
+
+            val actual = periodService.getSubmissionPeriodEndDate(params).error
+
+            assertTrue(actual is ValidationErrors.PeriodEndDateNodFound)
+        }
+
+        private fun getParams() = GetSubmissionPeriodEndDateParams.tryCreate(
+            cpid = CPID.toString(),
+            ocid = OCID.toString()
+        ).get
     }
 }
