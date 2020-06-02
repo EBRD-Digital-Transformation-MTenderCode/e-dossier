@@ -48,4 +48,14 @@ CREATE TABLE IF NOT EXISTS dossier.submission
     primary key (cpid, ocid, id)
 );
 
+CREATE TABLE IF NOT EXISTS dossier.submission_quantity
+(
+    country text,
+    pmd text,
+    min_submissions bigint,
+    primary key (country, pmd)
+);
+
 INSERT INTO dossier.period_rules (country, pmd, value)  VALUES ('MD', 'GPA', 10);
+
+INSERT INTO dossier.submission_quantity (country, pmd, value)  VALUES ('MD', 'GPA', 3);
