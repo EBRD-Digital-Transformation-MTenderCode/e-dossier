@@ -33,10 +33,7 @@ class FindSubmissionsForOpeningParams private constructor(
             }
 
         fun tryCreate(
-            cpid: String,
-            ocid: String,
-            pmd: String,
-            country: String
+            cpid: String, ocid: String, pmd: String, country: String
         ): Result<FindSubmissionsForOpeningParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .orForwardFail { fail -> return fail }
