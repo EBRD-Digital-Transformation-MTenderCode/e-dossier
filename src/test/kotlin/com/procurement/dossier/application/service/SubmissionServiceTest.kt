@@ -10,6 +10,7 @@ import com.procurement.dossier.application.model.data.submission.state.get.GetSu
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
+import com.procurement.dossier.application.repository.SubmissionQuantityRepository
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
@@ -46,8 +47,13 @@ internal class SubmissionServiceTest {
         private val SUBMISSION_ID_2 = UUID.randomUUID()
 
         private val submissionRepository: SubmissionRepository = mock()
+        private val submissionQuantityRepository: SubmissionQuantityRepository = mock()
         private val generable: Generable = mock()
-        private val submissionService: SubmissionService = SubmissionService(submissionRepository, generable)
+        private val submissionService: SubmissionService = SubmissionService(
+            submissionRepository = submissionRepository,
+            submissionQuantityRepository = submissionQuantityRepository,
+            generable = generable
+        )
     }
 
     @Nested
@@ -192,7 +198,11 @@ internal class SubmissionServiceTest {
         @Test
         fun success() {
             val params = getParams()
-            val credentials = SubmissionCredentials(id = params.submissionId, token = params.token, owner = params.owner)
+            val credentials = SubmissionCredentials(
+                id = params.submissionId,
+                token = params.token,
+                owner = params.owner
+            )
             whenever(
                 submissionRepository.getSubmissionCredentials(
                     cpid = params.cpid, ocid = params.ocid, id = params.submissionId
@@ -221,7 +231,11 @@ internal class SubmissionServiceTest {
         @Test
         fun tokenNotMatch_fail() {
             val params = getParams()
-            val credentials = SubmissionCredentials(id = params.submissionId, token = UUID.randomUUID(), owner = params.owner)
+            val credentials = SubmissionCredentials(
+                id = params.submissionId,
+                token = UUID.randomUUID(),
+                owner = params.owner
+            )
             whenever(
                 submissionRepository.getSubmissionCredentials(
                     cpid = params.cpid, ocid = params.ocid, id = params.submissionId
@@ -236,7 +250,11 @@ internal class SubmissionServiceTest {
         @Test
         fun ownerNotMatch_fail() {
             val params = getParams()
-            val credentials = SubmissionCredentials(id = params.submissionId, token = params.token, owner = UUID.randomUUID())
+            val credentials = SubmissionCredentials(
+                id = params.submissionId,
+                token = params.token,
+                owner = UUID.randomUUID()
+            )
             whenever(
                 submissionRepository.getSubmissionCredentials(
                     cpid = params.cpid, ocid = params.ocid, id = params.submissionId
@@ -314,7 +332,7 @@ internal class SubmissionServiceTest {
             )
             val actualError = submissionService.getOrganizations(params).error
 
-            assertTrue(actualError is ValidationErrors.RecordNotFound)
+            assertTrue(actualError is ValidationErrors.RecordNotFoundFor.GetOrganizations)
         }
 
         private fun getParams() = GetOrganizationsParams.tryCreate(
