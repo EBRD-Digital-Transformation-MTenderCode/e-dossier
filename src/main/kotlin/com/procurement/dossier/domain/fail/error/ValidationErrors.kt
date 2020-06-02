@@ -69,17 +69,20 @@ sealed class ValidationErrors(
         description = "Received owner does not match submission owner."
     )
 
-    class RecordNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
-        numberError = "5.12.1",
+    sealed class RecordNotFoundFor(cpid: Cpid, ocid: Ocid, numberError: String) : ValidationErrors(
+        numberError = numberError,
         description = "No record found by cpid '$cpid' and ocid '$ocid'."
-    )
+    ) {
+        class GetOrganizations(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.12.1")
+        class FindSubmissionForOpening(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.13.1")       
+    }
 
     class OrganizationsNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
         numberError = "5.12.2",
         description = "No organization found by cpid '$cpid' and ocid '$ocid'."
     )
 
-    class PeriodEndDateNodFound(cpid: Cpid, ocid: Ocid): ValidationErrors(
+    class PeriodEndDateNodFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
         numberError = "5.14.1",
         description = "No period end date found by cpid '$cpid' and ocid '$ocid'."
     )
