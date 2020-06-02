@@ -74,7 +74,7 @@ sealed class ValidationErrors(
         description = "No record found by cpid '$cpid' and ocid '$ocid'."
     ) {
         class GetOrganizations(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.12.1")
-        class FindSubmissionForOpening(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.13.1")       
+        class FindSubmissionForOpening(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.13.1")
     }
 
     class OrganizationsNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
@@ -85,5 +85,10 @@ sealed class ValidationErrors(
     class PeriodEndDateNodFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
         numberError = "5.14.1",
         description = "No period end date found by cpid '$cpid' and ocid '$ocid'."
+    )
+
+    class InvalidSubmissionQuantity(actualQuantity: String, minimumQuantity: String) : ValidationErrors(
+        numberError = "5.13.2",
+        description = "Submission quantity must be greater or equal to '$minimumQuantity'. Actual quantity: '$actualQuantity'."
     )
 }
