@@ -3,6 +3,8 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsResult
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
@@ -299,7 +301,8 @@ class SubmissionService(
         val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
         if (submissions.isEmpty())
-            return ValidationErrors.RecordNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
+            return ValidationErrors.RecordNotFoundFor.GetOrganizations(cpid = params.cpid, ocid = params.ocid)
+                .asFailure()
 
         val organizations = submissions
             .flatMap { submission -> submission.candidates }
@@ -487,4 +490,13 @@ class SubmissionService(
                 )
             }
         )
+
+    fun findSubmissionsForOpening(params: FindSubmissionsForOpeningParams): Result<List<FindSubmissionsForOpeningResult>, Fail> {
+        val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { fail -> return fail }
+        if (submissions.isEmpty())
+            return ValidationErrors.RecordNotFoundFor.FindSubmissionForOpening(cpid = params.cpid, ocid = params.ocid)
+                .asFailure()
+
+    }
 }
