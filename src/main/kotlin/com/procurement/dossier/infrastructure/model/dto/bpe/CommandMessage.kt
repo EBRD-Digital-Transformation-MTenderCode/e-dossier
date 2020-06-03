@@ -172,7 +172,7 @@ fun errorResponse(exception: Exception, id: String, version: ApiVersion): ApiErr
             code = exception.code,
             message = exception.message!!
         )
-        else -> getApiErrorResponse(id = id, version = version, code = "00.00", message = exception.message!!)
+        else -> getApiErrorResponse(id = id, version = version, code = "00.00", message = exception.message ?: "N/A")
     }
 
 private fun getApiErrorResponse(id: String, version: ApiVersion, code: String, message: String): ApiErrorResponse {
