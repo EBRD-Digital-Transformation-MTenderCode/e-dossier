@@ -58,4 +58,4 @@ CREATE TABLE IF NOT EXISTS dossier.submission_quantity
 
 INSERT INTO dossier.period_rules (country, pmd, value)  VALUES ('MD', 'GPA', 10);
 
-INSERT INTO dossier.submission_quantity (country, pmd, value)  VALUES ('MD', 'GPA', 3);
+INSERT INTO dossier.submission_quantity (country, pmd, min_submissions)  VALUES ('MD', 'GPA', 3);
