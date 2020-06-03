@@ -19,6 +19,7 @@ import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.Result.Companion.failure
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
@@ -504,6 +505,7 @@ class SubmissionService(
         val pendingSubmissions = submissions.filter { submission -> submission.status == SubmissionStatus.PENDING }
 
         checkSubmissionQuantity(quantity = pendingSubmissions.size, pmd = params.pmd, country = params.country)
+            .doOnError { error -> return failure(error) }
 
         return pendingSubmissions.map { submission -> submission.toFindSubmissionsForOpeningResult() }.asSuccess()
     }
