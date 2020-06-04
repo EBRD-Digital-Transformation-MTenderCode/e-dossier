@@ -24,6 +24,8 @@ data class FindSubmissionsForOpeningResult(
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @param:JsonProperty("requirementResponses") @field:JsonProperty("requirementResponses") val requirementResponses: List<RequirementResponse>?,
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @param:JsonProperty("candidates") @field:JsonProperty("candidates") val candidates: List<Candidate>,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -135,6 +137,8 @@ data class FindSubmissionsForOpeningResult(
             @param:JsonProperty("title") @field:JsonProperty("title") val title: PersonTitle,
             @param:JsonProperty("name") @field:JsonProperty("name") val name: String,
             @param:JsonProperty("identifier") @field:JsonProperty("identifier") val identifier: Identifier,
+
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
             @param:JsonProperty("businessFunctions") @field:JsonProperty("businessFunctions") val businessFunctions: List<BusinessFunction>
         ) {
             data class Identifier(
