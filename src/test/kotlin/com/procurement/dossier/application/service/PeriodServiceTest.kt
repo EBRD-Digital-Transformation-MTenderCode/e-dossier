@@ -432,7 +432,7 @@ internal class PeriodServiceTest {
 
             val actual = periodService.getSubmissionPeriodEndDate(params).error
 
-            assertTrue(actual is ValidationErrors.PeriodEndDateNodFound)
+            assertTrue(actual is ValidationErrors.PeriodEndDateNotFound)
         }
 
         private fun getParams() = GetSubmissionPeriodEndDateParams.tryCreate(

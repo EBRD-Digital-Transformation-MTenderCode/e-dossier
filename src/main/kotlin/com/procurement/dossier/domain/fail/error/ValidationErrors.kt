@@ -82,7 +82,7 @@ sealed class ValidationErrors(
         description = "No organization found by cpid '$cpid' and ocid '$ocid'."
     )
 
-    class PeriodEndDateNodFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+    class PeriodEndDateNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
         numberError = "5.14.1",
         description = "No period end date found by cpid '$cpid' and ocid '$ocid'."
     )

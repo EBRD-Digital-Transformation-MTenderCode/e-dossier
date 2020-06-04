@@ -115,7 +115,7 @@ class PeriodService(
     fun getSubmissionPeriodEndDate(params: GetSubmissionPeriodEndDateParams): Result<GetSubmissionPeriodEndDateResult, Fail> {
         val storedPeriod = periodRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
-            ?: return ValidationErrors.PeriodEndDateNodFound(cpid = params.cpid, ocid = params.ocid).asFailure()
+            ?: return ValidationErrors.PeriodEndDateNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
 
         return GetSubmissionPeriodEndDateResult(endDate = storedPeriod.endDate).asSuccess()
     }
