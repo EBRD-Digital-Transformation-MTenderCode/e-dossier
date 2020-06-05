@@ -23,6 +23,7 @@ import com.procurement.dossier.infrastructure.model.dto.bpe.CommandType
 import com.procurement.dossier.infrastructure.model.dto.bpe.country
 import com.procurement.dossier.infrastructure.model.dto.bpe.cpid
 import com.procurement.dossier.infrastructure.model.dto.bpe.cpidParsed
+import com.procurement.dossier.infrastructure.model.dto.bpe.ocidCnParsed
 import com.procurement.dossier.infrastructure.model.dto.bpe.ocidParsed
 import com.procurement.dossier.infrastructure.model.dto.bpe.owner
 import com.procurement.dossier.infrastructure.model.dto.bpe.pmd
@@ -220,7 +221,7 @@ class CommandService(
                         val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
                         if (historyEntity != null) Unit
                         else {
-                            val context = SavePeriodContext(cpid = cm.cpidParsed(), ocid = cm.ocidParsed())
+                            val context = SavePeriodContext(cpid = cm.cpidParsed(), ocid = cm.ocidCnParsed())
                             val data = toObject(SavePeriodRequest::class.java, cm.data).convert()
                             periodService.savePeriod(data = data, context = context)
                                 .also {

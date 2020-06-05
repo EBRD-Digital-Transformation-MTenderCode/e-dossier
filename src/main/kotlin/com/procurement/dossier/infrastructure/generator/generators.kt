@@ -62,6 +62,7 @@ object ContextGenerator {
             requestId = requestId,
             cpid = cpid,
             ocid = ocid,
+            ocidCn = ocid,
             stage = stage,
             prevStage = prevStage,
             processType = processType,

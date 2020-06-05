@@ -50,10 +50,23 @@ val CommandMessage.ocid: String
             message = "Missing the 'ocid' attribute in context."
         )
 
+val CommandMessage.ocidCn: String
+    get() = this.context.ocidCn
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'ocidCn' attribute in context."
+        )
+
 fun CommandMessage.ocidParsed() = Ocid.tryCreateOrNull(ocid)
     ?: throw ErrorException(
         error = ErrorType.CONTEXT,
         message = "Parameter 'ocid' mismatch. Expected pattern: '${Ocid.pattern}'. Actual value: '$ocid'."
+    )
+
+fun CommandMessage.ocidCnParsed() = Ocid.tryCreateOrNull(ocidCn)
+    ?: throw ErrorException(
+        error = ErrorType.CONTEXT,
+        message = "Parameter 'ocidCn' mismatch. Expected pattern: '${Ocid.pattern}'. Actual value: '$ocidCn'."
     )
 
 val CommandMessage.token: UUID
@@ -122,6 +135,7 @@ data class Context @JsonCreator constructor(
     val requestId: String?,
     val cpid: String?,
     val ocid: String?,
+    val ocidCn: String?,
     val stage: String?,
     val prevStage: String?,
     val processType: String?,
