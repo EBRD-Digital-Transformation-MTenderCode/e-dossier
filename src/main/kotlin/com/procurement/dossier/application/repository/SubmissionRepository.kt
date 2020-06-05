@@ -3,7 +3,6 @@ package com.procurement.dossier.application.repository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
-import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionId
@@ -20,12 +19,7 @@ interface SubmissionRepository {
         submissionIds: List<SubmissionId>
     ): Result<List<SubmissionState>, Fail.Incident>
 
-    fun setSubmissionStatus(
-        cpid: Cpid,
-        ocid: Ocid,
-        id: SubmissionId,
-        status: SubmissionStatus
-    ): Result<Boolean, Fail.Incident>
+    fun updateSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): Result<Boolean, Fail.Incident>
 
     fun getSubmissionCredentials(
         cpid: Cpid,
