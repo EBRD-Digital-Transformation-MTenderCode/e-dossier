@@ -204,30 +204,37 @@ class SubmissionRepositoryIT {
     }
 
     @Test
-    fun setSubmissionStatus_success() {
-        val submission = stubSubmission().copy(status = SubmissionStatus.WITHDRAWN)
-        insertSubmission(cpid = CPID, ocid = OCID, submission = submission)
+    fun updateSubmission_success() {
+        val initialSubmission = stubSubmission()
+        insertSubmission(cpid = CPID, ocid = OCID, submission = initialSubmission)
+        val submissionExpected = initialSubmission.copy(
+            status = SubmissionStatus.DISQUALIFIED,
+            owner = UUID.randomUUID(),
+            documents = listOf(
+                Submission.Document(
+                    documentType = DocumentType.ILLUSTRATION,
+                    id = "newId",
+                    title = "newTitle",
+                    description = null
+                )
+            )
+        )
+        submissionRepository.updateSubmission(cpid = CPID, ocid = OCID, submission = submissionExpected).get
 
-        val expectedStatus = SubmissionStatus.VALID
-        val isStatusSet = submissionRepository.setSubmissionStatus(
-            cpid = CPID, ocid = OCID, id = submission.id, status = expectedStatus
-        ).get
+        val actual = submissionRepository.findSubmission(cpid = CPID, ocid = OCID, id = initialSubmission.id).get
 
-        val actualStatus = submissionRepository.findSubmission(
-            cpid = CPID, ocid = OCID, id = submission.id
-        ).get!!.status
-
-        assertTrue(isStatusSet)
-        assertEquals(expectedStatus, actualStatus)
+        assertEquals(submissionExpected, actual)
     }
 
     @Test
-    fun setSubmissionStatus_submissionNotFound_fail() {
-        val isStatusSet = submissionRepository.setSubmissionStatus(
-            cpid = CPID, ocid = OCID, id = UUID.randomUUID(), status = SubmissionStatus.VALID
+    fun updateSubmission_SubmissionNotFound() {
+        val isUpdated = submissionRepository.updateSubmission(
+            cpid = CPID,
+            ocid = OCID,
+            submission = stubSubmission()
         ).get
 
-        assertFalse(isStatusSet)
+        assertFalse(isUpdated)
     }
 
     private fun createKeyspace() {
@@ -275,6 +282,9 @@ class SubmissionRepositoryIT {
         SubmissionDataEntity(
             id = id,
             date = date,
+            status = status,
+            token = token,
+            owner = owner,
             requirementResponses = requirementResponses.map { requirementResponse ->
                 SubmissionDataEntity.RequirementResponse(
                     id = requirementResponse.id,
