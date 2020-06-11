@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.dossier.application.exception.EnumException
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.domain.model.Cpid
+import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.infrastructure.bind.apiversion.ApiVersionDeserializer
 import com.procurement.dossier.infrastructure.bind.apiversion.ApiVersionSerializer
 import com.procurement.dossier.infrastructure.config.properties.GlobalProperties
@@ -34,6 +36,38 @@ val CommandMessage.cpid: String
             error = ErrorType.CONTEXT,
             message = "Missing the 'cpid' attribute in context."
         )
+
+fun CommandMessage.cpidParsed() = Cpid.tryCreateOrNull(cpid)
+    ?: throw ErrorException(
+        error = ErrorType.CONTEXT,
+        message = "Parameter 'cpid' mismatch. Expected pattern: '${Cpid.pattern}'. Actual value: '$cpid'."
+    )
+
+val CommandMessage.ocid: String
+    get() = this.context.ocid
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'ocid' attribute in context."
+        )
+
+val CommandMessage.ocidCn: String
+    get() = this.context.ocidCn
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'ocidCn' attribute in context."
+        )
+
+fun CommandMessage.ocidParsed() = Ocid.tryCreateOrNull(ocid)
+    ?: throw ErrorException(
+        error = ErrorType.CONTEXT,
+        message = "Parameter 'ocid' mismatch. Expected pattern: '${Ocid.pattern}'. Actual value: '$ocid'."
+    )
+
+fun CommandMessage.ocidCnParsed() = Ocid.tryCreateOrNull(ocidCn)
+    ?: throw ErrorException(
+        error = ErrorType.CONTEXT,
+        message = "Parameter 'ocidCn' mismatch. Expected pattern: '${Ocid.pattern}'. Actual value: '$ocidCn'."
+    )
 
 val CommandMessage.token: UUID
     get() = this.context.token
@@ -101,6 +135,7 @@ data class Context @JsonCreator constructor(
     val requestId: String?,
     val cpid: String?,
     val ocid: String?,
+    val ocidCn: String?,
     val stage: String?,
     val prevStage: String?,
     val processType: String?,
@@ -122,7 +157,10 @@ enum class CommandType(private val value: String) {
     CREATE_CRITERIA("createCriteria"),
     CHECK_RESPONSES("checkResponses"),
     GET_CRITERIA("getCriteria"),
-    CREATE_REQUESTS_FOR_EV_PANELS("createRequestsForEvPanels");
+    CREATE_REQUESTS_FOR_EV_PANELS("createRequestsForEvPanels"),
+    VALIDATE_PERIOD("validatePeriod"),
+    CHECK_PERIOD("checkPeriod"),
+    SAVE_PERIOD("savePeriod");
 
     @JsonValue
     fun value(): String {
@@ -148,7 +186,7 @@ fun errorResponse(exception: Exception, id: String, version: ApiVersion): ApiErr
             code = exception.code,
             message = exception.message!!
         )
-        else -> getApiErrorResponse(id = id, version = version, code = "00.00", message = exception.message!!)
+        else -> getApiErrorResponse(id = id, version = version, code = "00.00", message = exception.message ?: "N/A")
     }
 
 private fun getApiErrorResponse(id: String, version: ApiVersion, code: String, message: String): ApiErrorResponse {

@@ -1,5 +1,6 @@
 package com.procurement.dossier.application.service
 
+import com.procurement.dossier.domain.model.Token
 import java.util.*
 
 interface Generable {
@@ -13,4 +14,6 @@ interface Generable {
     fun generatePermanentConversionId(): UUID
 
     fun generatePermanentCoefficientId(): UUID
+
+    fun generateToken(): Token
 }

@@ -1,42 +1,62 @@
 package com.procurement.dossier.application.model
 
+import com.procurement.dossier.domain.EnumElementProvider
+import com.procurement.dossier.domain.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.model.Owner
+import com.procurement.dossier.domain.model.document.DocumentId
+import com.procurement.dossier.domain.model.document.tryDocumentId
+import com.procurement.dossier.domain.model.enums.BusinessFunctionType
+import com.procurement.dossier.domain.model.enums.DocumentType
+import com.procurement.dossier.domain.model.enums.PersonTitle
+import com.procurement.dossier.domain.model.enums.Scale
+import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.requirement.response.tryRequirementResponseId
 import com.procurement.dossier.domain.model.requirement.tryRequirementId
+import com.procurement.dossier.domain.model.submission.SubmissionId
+import com.procurement.dossier.domain.model.submission.trySubmissionId
+import com.procurement.dossier.domain.model.tryOwner
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.extension.tryParseLocalDateTime
+import java.time.LocalDateTime
 
 fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
-    Cpid.tryCreate(value = value)
-        .doOnError { expectedPattern ->
-            return Result.failure(
-                DataErrors.Validation.DataMismatchToPattern(
-                    name = "cpid",
-                    pattern = expectedPattern,
-                    actualValue = value
-                )
+    Cpid.tryCreateOrNull(value = value)
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.DataMismatchToPattern(
+                name = "cpid",
+                pattern = Cpid.pattern,
+                actualValue = value
             )
-        }
-        .get
-        .asSuccess()
+        )
 
 fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToPattern> =
-    Ocid.tryCreate(value = value)
-        .doOnError { expectedPattern ->
+    Ocid.tryCreateOrNull(value = value)
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.DataMismatchToPattern(
+                name = "ocid",
+                pattern = Ocid.pattern,
+                actualValue = value
+            )
+        )
+fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMismatch> =
+    value.tryOwner()
+        .doReturn {
             return Result.failure(
-                DataErrors.Validation.DataMismatchToPattern(
-                    name = "ocid",
-                    pattern = expectedPattern,
+                DataErrors.Validation.DataFormatMismatch(
+                    name = "owner",
+                    expectedFormat = "uuid",
                     actualValue = value
                 )
             )
-        }
-        .get
-        .asSuccess()
+        }.asSuccess()
 
 fun parseRequirementId(id: String): Result<RequirementId, DataErrors> =
     id.tryRequirementId()
@@ -62,3 +82,86 @@ fun parseRequirementResponseId(id: String): Result<RequirementResponseId, DataEr
             )
         }.asSuccess()
 
+fun parseDocumentId(
+    value: String,
+    attributeName: String
+): Result<DocumentId, DataErrors.Validation.DataFormatMismatch> =
+    value.tryDocumentId()
+        .doReturn {
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = attributeName,
+                    expectedFormat = "string",
+                    actualValue = value
+                )
+            )
+        }.asSuccess()
+
+fun parseSubmissionId(
+    value: String, attributeName: String
+): Result<SubmissionId, DataErrors.Validation.DataFormatMismatch> =
+    value.trySubmissionId()
+        .doReturn {
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = attributeName,
+                    expectedFormat = "uuid",
+                    actualValue = value
+                )
+            )
+        }.asSuccess()
+
+fun parsePersonTitle(
+    value: String, allowedEnums: List<PersonTitle>, attributeName: String
+): Result<PersonTitle, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = PersonTitle)
+
+fun parseBusinessFunctionType(
+    value: String, allowedEnums: List<BusinessFunctionType>, attributeName: String
+): Result<BusinessFunctionType, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = BusinessFunctionType)
+
+fun parseDocumentType(
+    value: String, allowedEnums: List<DocumentType>, attributeName: String
+): Result<DocumentType, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = DocumentType)
+
+fun parseSupplierType(
+    value: String, allowedEnums: List<SupplierType>, attributeName: String
+): Result<SupplierType, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SupplierType)
+
+fun parseScale(
+    value: String, allowedEnums: List<Scale>, attributeName: String
+): Result<Scale, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Scale)
+
+private fun <T> parseEnum(
+    value: String, allowedEnums: List<T>, attributeName: String, target: EnumElementProvider<T>
+): Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,
+                                                       T : EnumElementProvider.Key =
+    target.orNull(value)
+        ?.takeIf { it in allowedEnums }
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.UnknownValue(
+                name = attributeName,
+                expectedValues = allowedEnums.toSet().keysAsStrings(),
+                actualValue = value
+            )
+        )
+
+fun parseDate(
+    value: String,
+    attributeName: String
+): Result<LocalDateTime, DataErrors.Validation.DataFormatMismatch> =
+    value.tryParseLocalDateTime()
+        .doReturn { pattern ->
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = attributeName,
+                    actualValue = value,
+                    expectedFormat = pattern
+                )
+            )
+        }.asSuccess()

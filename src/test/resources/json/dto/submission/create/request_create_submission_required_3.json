@@ -1,0 +1,51 @@
+{
+  "cpid": "ocds-b3wdp1-MD-1580458690892",
+  "ocid": "ocds-b3wdp1-MD-1580458690892-EV-1580458791896",
+  "date": "2020-05-21T13:35:49.725Z",
+  "owner": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "submission": {
+    "candidates": [
+      {
+        "id": "string",
+        "name": "string",
+        "identifier": {
+          "id": "string",
+          "legalName": "string",
+          "scheme": "string",
+          "uri": "string"
+        },
+        "address": {
+          "streetAddress": "string",
+          "addressDetails": {
+            "country": {
+              "id": "string",
+              "description": "string",
+              "scheme": "string",
+              "uri": "string"
+            },
+            "region": {
+              "id": "string",
+              "description": "string",
+              "scheme": "string",
+              "uri": "string"
+            },
+            "locality": {
+              "id": "string",
+              "description": "string",
+              "scheme": "string"
+            }
+          }
+        },
+        "contactPoint": {
+          "name": "string",
+          "email": "string",
+          "telephone": "string"
+        },
+        "details": {
+          "scale": "micro"
+        }
+      }
+    ],
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  }
+}

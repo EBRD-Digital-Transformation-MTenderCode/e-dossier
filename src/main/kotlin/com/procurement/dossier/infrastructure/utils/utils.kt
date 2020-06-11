@@ -9,16 +9,15 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.bind.databinding.IntDeserializer
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
-import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.dossier.infrastructure.bind.databinding.StringsDeserializer
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.util.*
 
 private object JsonMapper {
 
@@ -50,14 +49,6 @@ private object JsonMapper {
 }
 
 /*Date utils*/
-fun String.toLocal(): LocalDateTime {
-    return LocalDateTime.parse(this, JsonDateTimeFormatter.formatter)
-}
-
-fun LocalDateTime.toDate(): Date {
-    return Date.from(this.toInstant(ZoneOffset.UTC))
-}
-
 fun localNowUTC(): LocalDateTime {
     return LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
 }
@@ -78,6 +69,13 @@ fun <Any> toJson(obj: Any): String {
     }
 }
 
+fun <Any> tryToJson(obj: Any): Result<String, Fail.Incident.Transform.Parsing>  =
+    try {
+        JsonMapper.mapper.writeValueAsString(obj).asSuccess()
+    } catch (expected: JsonProcessingException) {
+        Result.failure(Fail.Incident.Transform.Parsing(className = String::class.java.canonicalName, exception = expected))
+    }
+
 fun <T> toObject(clazz: Class<T>, json: String): T {
     try {
         return JsonMapper.mapper.readValue(json, clazz)
@@ -94,20 +92,20 @@ fun <T> toObject(clazz: Class<T>, json: JsonNode): T {
     }
 }
 
-fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
+fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.treeToValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Parsing(className = target.canonicalName, exception = expected))
+    Result.failure(Fail.Incident.Transform.Parsing(className = target.canonicalName, exception = expected))
 }
 
-fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.readValue(this, target))
 } catch (expected: Exception) {
-    Result.failure(Fail.Incident.Parsing(className = target.canonicalName, exception = expected))
+    Result.failure(Fail.Incident.Transform.Parsing(className = target.canonicalName, exception = expected))
 }
 
-fun String.toNode(): Result<JsonNode, Fail.Incident.Transforming> = try {
+fun String.toNode(): Result<JsonNode, Fail.Incident.Transform.Parsing> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(Fail.Incident.Transforming(exception = exception))
+    Result.failure(Fail.Incident.Transform.Parsing(className = JsonNode::class.java.canonicalName, exception = exception))
 }

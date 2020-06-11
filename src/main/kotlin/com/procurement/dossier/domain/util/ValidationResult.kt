@@ -11,6 +11,10 @@ sealed class ValidationResult<out E> {
     abstract val isOk: Boolean
     abstract val isError: Boolean
 
+    inline fun doOnError(block: (E) -> Unit) {
+        if (this.isError) block(this.error)
+    }
+
     val asOption: Option<E>
         get() = when (this) {
             is Fail -> Option.pure(error)
