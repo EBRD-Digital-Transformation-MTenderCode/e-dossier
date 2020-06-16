@@ -284,7 +284,7 @@ class SubmissionService(
                 return Fail.Incident.Database.Consistency("Could not update submission '${updatedSubmission.id}'")
                     .asFailure()
             }
-        return SetStateForSubmissionResult(id = requestSubmission.id, status = requestSubmission.status).asSuccess()
+        return SetStateForSubmissionResult(id = updatedSubmission.id, status = updatedSubmission.status).asSuccess()
     }
 
     fun checkAccessToSubmission(params: CheckAccessToSubmissionParams): ValidationResult<Fail> {
