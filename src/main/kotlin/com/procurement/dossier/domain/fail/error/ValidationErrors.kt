@@ -3,6 +3,7 @@ package com.procurement.dossier.domain.fail.error
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.requirement.RequirementId
+import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.extension.format
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
@@ -49,13 +50,13 @@ sealed class ValidationErrors(
         description = "Period date '${requestDate.format()}' must precede stored period end date '${endDate.format()}'."
     )
 
-    sealed class SubmissionNotFoundFor(id: String, numberError: String) : ValidationErrors(
+    sealed class SubmissionNotFoundFor(id: SubmissionId, numberError: String) : ValidationErrors(
         numberError = numberError,
         description = "Submission id(s) '$id' not found."
     ) {
-        class GetSubmissionStateByIds(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.10.1")
-        class SetStateForSubmission(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.11.1")
-        class CheckAccessToSubmission(id: String) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
+        class GetSubmissionStateByIds(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.10.1")
+        class SetStateForSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.11.1")
+        class CheckAccessToSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
     }
 
     class InvalidToken(): ValidationErrors(

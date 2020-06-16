@@ -261,7 +261,7 @@ class SubmissionService(
     ): ValidationResult<ValidationErrors.SubmissionNotFoundFor> {
         val unknownElements = known.getUnknownElements(received = received)
         return if (unknownElements.isNotEmpty())
-            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.joinToString()))
+            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.first()))
         else ValidationResult.ok()
     }
 
@@ -272,7 +272,7 @@ class SubmissionService(
             cpid = params.cpid, ocid = params.ocid, id = requestSubmission.id
         )
             .orForwardFail { fail -> return fail }
-            ?: return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id.toString())
+            ?: return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id)
                 .asFailure()
 
         val updatedSubmission = storedSubmission.copy(status = requestSubmission.status)
@@ -291,7 +291,7 @@ class SubmissionService(
         val credentials = submissionRepository.getSubmissionCredentials(
             cpid = params.cpid, ocid = params.ocid, id = params.submissionId
         ).doReturn { incident -> return ValidationResult.error(incident) }
-            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId.toString()))
+            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId))
 
         if (params.token != credentials.token)
             return ValidationResult.error(ValidationErrors.InvalidToken())
