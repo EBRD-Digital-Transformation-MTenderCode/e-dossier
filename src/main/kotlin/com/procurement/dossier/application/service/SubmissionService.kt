@@ -1,14 +1,24 @@
 package com.procurement.dossier.application.service
 
+import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
+import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
+import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
+import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
+import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
+import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.extension.doOnFalse
+import com.procurement.dossier.domain.util.extension.getUnknownElements
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
 import org.springframework.stereotype.Service
 
@@ -234,4 +244,61 @@ class SubmissionService(
                 )
             }
         )
+
+    fun getSubmissionStateByIds(params: GetSubmissionStateByIdsParams): Result<List<GetSubmissionStateByIdsResult>, Fail> {
+        val states = submissionRepository.getSubmissionsStates(
+            cpid = params.cpid, ocid = params.ocid, submissionIds = params.submissionIds
+        ).orForwardFail { fail -> return fail }
+
+        checkForUnknownElements(received = params.submissionIds, known = states.map { it.id })
+            .doOnError { error -> return error.asFailure() }
+
+        return states.map { state -> GetSubmissionStateByIdsResult(id = state.id, status = state.status) }.asSuccess()
+    }
+
+    private fun checkForUnknownElements(
+        received: List<SubmissionId>, known: List<SubmissionId>
+    ): ValidationResult<ValidationErrors.SubmissionNotFoundFor> {
+        val unknownElements = known.getUnknownElements(received = received)
+        return if (unknownElements.isNotEmpty())
+            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.first()))
+        else ValidationResult.ok()
+    }
+
+    fun setStateForSubmission(params: SetStateForSubmissionParams): Result<SetStateForSubmissionResult, Fail> {
+        val requestSubmission = params.submission
+
+        val storedSubmission = submissionRepository.findSubmission(
+            cpid = params.cpid, ocid = params.ocid, id = requestSubmission.id
+        )
+            .orForwardFail { fail -> return fail }
+            ?: return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id)
+                .asFailure()
+
+        val updatedSubmission = storedSubmission.copy(status = requestSubmission.status)
+
+        submissionRepository.updateSubmission(
+            cpid = params.cpid, ocid = params.ocid, submission = updatedSubmission
+        ).orForwardFail { fail -> return fail }
+            .doOnFalse {
+                return Fail.Incident.Database.Consistency("Could not update submission '${updatedSubmission.id}'")
+                    .asFailure()
+            }
+        return SetStateForSubmissionResult(id = updatedSubmission.id, status = updatedSubmission.status).asSuccess()
+    }
+
+    fun checkAccessToSubmission(params: CheckAccessToSubmissionParams): ValidationResult<Fail> {
+        val credentials = submissionRepository.getSubmissionCredentials(
+            cpid = params.cpid, ocid = params.ocid, id = params.submissionId
+        ).doReturn { incident -> return ValidationResult.error(incident) }
+            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId))
+
+        if (params.token != credentials.token)
+            return ValidationResult.error(ValidationErrors.InvalidToken())
+
+        if (params.owner != credentials.owner)
+            return ValidationResult.error(ValidationErrors.InvalidOwner())
+
+        return ValidationResult.ok()
+    }
 }

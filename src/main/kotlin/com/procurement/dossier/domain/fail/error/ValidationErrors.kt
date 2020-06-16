@@ -3,6 +3,7 @@ package com.procurement.dossier.domain.fail.error
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.requirement.RequirementId
+import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.extension.format
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
@@ -38,13 +39,33 @@ sealed class ValidationErrors(
         description = "Unexpected criteria.source value. Expected: '${expected}', actual: '${actual}'."
     )
 
-    class InvalidPeriodDateComparedWithStartDate(requestDate: LocalDateTime, startDate: LocalDateTime) : ValidationErrors(
-        numberError = "5.6.3",
-        description = "Period date '${requestDate.format()}' must be after stored period start date '${startDate.format()}'."
-    )
+    class InvalidPeriodDateComparedWithStartDate(requestDate: LocalDateTime, startDate: LocalDateTime) :
+        ValidationErrors(
+            numberError = "5.6.3",
+            description = "Period date '${requestDate.format()}' must be after stored period start date '${startDate.format()}'."
+        )
 
     class InvalidPeriodDateComparedWithEndDate(requestDate: LocalDateTime, endDate: LocalDateTime) : ValidationErrors(
         numberError = "5.6.4",
         description = "Period date '${requestDate.format()}' must precede stored period end date '${endDate.format()}'."
+    )
+
+    sealed class SubmissionNotFoundFor(id: SubmissionId, numberError: String) : ValidationErrors(
+        numberError = numberError,
+        description = "Submission id(s) '$id' not found."
+    ) {
+        class GetSubmissionStateByIds(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.10.1")
+        class SetStateForSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.11.1")
+        class CheckAccessToSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
+    }
+
+    class InvalidToken(): ValidationErrors(
+        numberError = "5.9.1",
+        description = "Received token does not match submission token."
+    )
+
+    class InvalidOwner(): ValidationErrors(
+        numberError = "5.9.2",
+        description = "Received owner does not match submission owner."
     )
 }

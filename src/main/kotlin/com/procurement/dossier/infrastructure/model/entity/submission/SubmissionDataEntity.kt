@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.dossier.application.model.data.RequirementRsValue
+import com.procurement.dossier.domain.model.Owner
+import com.procurement.dossier.domain.model.Token
 import com.procurement.dossier.domain.model.document.DocumentId
 import com.procurement.dossier.domain.model.enums.BusinessFunctionType
 import com.procurement.dossier.domain.model.enums.DocumentType
 import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
+import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.submission.SubmissionId
@@ -21,6 +24,9 @@ data class SubmissionDataEntity(
     @param:JsonProperty("id") @field:JsonProperty("id") val id: SubmissionId,
     @param:JsonProperty("date") @field:JsonProperty("date") val date: LocalDateTime,
     @param:JsonProperty("candidates") @field:JsonProperty("candidates") val candidates: List<Candidate>,
+    @param:JsonProperty("status") @field:JsonProperty("status") val status: SubmissionStatus,
+    @param:JsonProperty("token") @field:JsonProperty("token") val token: Token,
+    @param:JsonProperty("owner") @field:JsonProperty("owner") val owner: Owner,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @param:JsonProperty("requirementResponses") @field:JsonProperty("requirementResponses") val requirementResponses: List<RequirementResponse>?,
