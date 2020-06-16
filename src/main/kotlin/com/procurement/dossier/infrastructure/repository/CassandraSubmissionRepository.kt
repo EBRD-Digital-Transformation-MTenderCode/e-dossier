@@ -61,8 +61,6 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         private const val UPDATE_SUBMISSION_CQL = """
                UPDATE $keySpace.$tableName
                   SET $columnStatus=?,
-                      $columnToken =?,
-                      $columnOwner =?,
                       $columnJsonData =?
                 WHERE $columnCpid=? 
                   AND $columnOcid=?
@@ -359,8 +357,6 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                 setString(columnOcid, ocid.toString())
                 setUUID(columnId, submission.id)
                 setString(columnStatus, submission.status.key)
-                setUUID(columnToken, submission.token)
-                setUUID(columnOwner, submission.owner)
                 setString(columnJsonData, jsonData)
             }
 
