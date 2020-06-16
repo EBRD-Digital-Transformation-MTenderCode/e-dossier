@@ -129,7 +129,7 @@ internal class SubmissionServiceTest {
         fun success() {
             val params = getParams()
             val requestSubmission = params.submission
-            val storedSubmission = stubSubmission().copy(status = SubmissionStatus.WITHDRAWN)
+            val storedSubmission = stubSubmission().copy(id = requestSubmission.id, status = SubmissionStatus.WITHDRAWN)
 
             whenever(
                 submissionRepository.findSubmission(
@@ -208,7 +208,11 @@ internal class SubmissionServiceTest {
         @Test
         fun success() {
             val params = getParams()
-            val credentials = SubmissionCredentials(id = params.submissionId, token = params.token, owner = params.owner)
+            val credentials = SubmissionCredentials(
+                id = params.submissionId,
+                token = params.token,
+                owner = params.owner
+            )
             whenever(
                 submissionRepository.getSubmissionCredentials(
                     cpid = params.cpid, ocid = params.ocid, id = params.submissionId
@@ -237,7 +241,11 @@ internal class SubmissionServiceTest {
         @Test
         fun tokenNotMatch_fail() {
             val params = getParams()
-            val credentials = SubmissionCredentials(id = params.submissionId, token = UUID.randomUUID(), owner = params.owner)
+            val credentials = SubmissionCredentials(
+                id = params.submissionId,
+                token = UUID.randomUUID(),
+                owner = params.owner
+            )
             whenever(
                 submissionRepository.getSubmissionCredentials(
                     cpid = params.cpid, ocid = params.ocid, id = params.submissionId
@@ -252,7 +260,11 @@ internal class SubmissionServiceTest {
         @Test
         fun ownerNotMatch_fail() {
             val params = getParams()
-            val credentials = SubmissionCredentials(id = params.submissionId, token = params.token, owner = UUID.randomUUID())
+            val credentials = SubmissionCredentials(
+                id = params.submissionId,
+                token = params.token,
+                owner = UUID.randomUUID()
+            )
             whenever(
                 submissionRepository.getSubmissionCredentials(
                     cpid = params.cpid, ocid = params.ocid, id = params.submissionId
