@@ -2,6 +2,7 @@ package com.procurement.dossier.domain.fail.error
 
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
+import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.extension.format
@@ -59,13 +60,18 @@ sealed class ValidationErrors(
         class CheckAccessToSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
     }
 
-    class InvalidToken(): ValidationErrors(
+    class InvalidToken() : ValidationErrors(
         numberError = "5.9.1",
         description = "Received token does not match submission token."
     )
 
-    class InvalidOwner(): ValidationErrors(
+    class InvalidOwner() : ValidationErrors(
         numberError = "5.9.2",
         description = "Received owner does not match submission owner."
+    )
+
+    class PeriodEndDateNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+        numberError = "5.15.1",
+        description = "Period not found by cpid=$cpid and ocid=$ocid."
     )
 }
