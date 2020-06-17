@@ -128,9 +128,7 @@ class PeriodService(
 
         val date = params.date
         val periodEndDate = period.endDate
-        val submissionPeriodExpired =
-            date.isAfter(periodEndDate)
-                || date.plusSeconds(ERROR).isAfter(periodEndDate)
+        val submissionPeriodExpired = date.plusSeconds(ERROR).isAfter(periodEndDate)
 
         return VerifySubmissionPeriodEndResult(submissionPeriodExpired = submissionPeriodExpired)
             .asSuccess()
