@@ -6,12 +6,14 @@ import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.Owner
+import com.procurement.dossier.domain.model.Token
 import com.procurement.dossier.domain.model.document.DocumentId
 import com.procurement.dossier.domain.model.document.tryDocumentId
 import com.procurement.dossier.domain.model.enums.BusinessFunctionType
 import com.procurement.dossier.domain.model.enums.DocumentType
 import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
+import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
@@ -20,6 +22,7 @@ import com.procurement.dossier.domain.model.requirement.tryRequirementId
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.trySubmissionId
 import com.procurement.dossier.domain.model.tryOwner
+import com.procurement.dossier.domain.model.tryToken
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.tryParseLocalDateTime
@@ -46,12 +49,25 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
                 actualValue = value
             )
         )
+
 fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMismatch> =
     value.tryOwner()
         .doReturn {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = "owner",
+                    expectedFormat = "uuid",
+                    actualValue = value
+                )
+            )
+        }.asSuccess()
+
+fun parseToken(value: String): Result<Token, DataErrors.Validation.DataFormatMismatch> =
+    value.tryToken()
+        .doReturn {
+            return Result.failure(
+                DataErrors.Validation.DataFormatMismatch(
+                    name = "token",
                     expectedFormat = "uuid",
                     actualValue = value
                 )
@@ -136,20 +152,27 @@ fun parseScale(
 ): Result<Scale, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Scale)
 
+fun parseSubmissionStatus(
+    value: String, allowedEnums: List<SubmissionStatus>, attributeName: String
+): Result<SubmissionStatus, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SubmissionStatus)
+
 private fun <T> parseEnum(
-    value: String, allowedEnums: List<T>, attributeName: String, target: EnumElementProvider<T>
+    value: String, allowedEnums: Collection<T>, attributeName: String, target: EnumElementProvider<T>
 ): Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,
-                                                       T : EnumElementProvider.Key =
-    target.orNull(value)
-        ?.takeIf { it in allowedEnums }
+                                                       T : EnumElementProvider.Key {
+    val allowed = allowedEnums.toSet()
+    return target.orNull(value)
+        ?.takeIf { it in allowed }
         ?.asSuccess()
         ?: Result.failure(
             DataErrors.Validation.UnknownValue(
                 name = attributeName,
-                expectedValues = allowedEnums.toSet().keysAsStrings(),
+                expectedValues = allowed.keysAsStrings(),
                 actualValue = value
             )
         )
+}
 
 fun parseDate(
     value: String,
