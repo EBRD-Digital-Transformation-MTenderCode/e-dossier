@@ -35,8 +35,6 @@ import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
-import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
-import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
