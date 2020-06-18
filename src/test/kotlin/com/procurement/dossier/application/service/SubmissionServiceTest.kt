@@ -1,5 +1,7 @@
 package com.procurement.dossier.application.service
 
+import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.dossier.application.model.data.RequirementRsValue
@@ -33,6 +35,8 @@ import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
+import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -141,15 +145,27 @@ internal class SubmissionServiceTest {
         @Test
         fun success() {
             val params = getParams()
-            val submission = params.submission
+            val requestSubmission = params.submission
+            val storedSubmission = stubSubmission().copy(id = requestSubmission.id, status = SubmissionStatus.WITHDRAWN)
+
             whenever(
-                submissionRepository.setSubmissionStatus(
-                    cpid = params.cpid, ocid = params.ocid, status = submission.status, id = submission.id
+                submissionRepository.findSubmission(
+                    cpid = params.cpid,
+                    ocid = params.ocid,
+                    id = requestSubmission.id
+                )
+            ).thenReturn(storedSubmission.asSuccess())
+
+            whenever(
+                submissionRepository.updateSubmission(
+                    cpid = eq(params.cpid),
+                    ocid = eq(params.ocid),
+                    submission = any()
                 )
             ).thenReturn(true.asSuccess())
 
             val actual = submissionService.setStateForSubmission(params = params).get
-            val expected = SetStateForSubmissionResult(id = submission.id, status = submission.status)
+            val expected = SetStateForSubmissionResult(id = requestSubmission.id, status = requestSubmission.status)
 
             assertEquals(actual, expected)
         }
@@ -157,12 +173,14 @@ internal class SubmissionServiceTest {
         @Test
         fun submissionNotFound_fail() {
             val params = getParams()
-            val submission = params.submission
+            val requestSubmission = params.submission
             whenever(
-                submissionRepository.setSubmissionStatus(
-                    cpid = params.cpid, ocid = params.ocid, status = submission.status, id = submission.id
+                submissionRepository.findSubmission(
+                    cpid = params.cpid,
+                    ocid = params.ocid,
+                    id = requestSubmission.id
                 )
-            ).thenReturn(false.asSuccess())
+            ).thenReturn(null.asSuccess())
 
             val actual = submissionService.setStateForSubmission(params = params).error
 
@@ -172,15 +190,17 @@ internal class SubmissionServiceTest {
         @Test
         fun databaseIncident_fail() {
             val params = getParams()
-            val submission = params.submission
+            val requestSubmission = params.submission
             val expected = Result.failure(
                 Fail.Incident.Database.Interaction(
                     exception = RuntimeException("")
                 )
             )
             whenever(
-                submissionRepository.setSubmissionStatus(
-                    cpid = params.cpid, ocid = params.ocid, status = submission.status, id = submission.id
+                submissionRepository.findSubmission(
+                    cpid = params.cpid,
+                    ocid = params.ocid,
+                    id = requestSubmission.id
                 )
             ).thenReturn(expected)
 

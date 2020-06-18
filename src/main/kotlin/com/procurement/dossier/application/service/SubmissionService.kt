@@ -269,28 +269,37 @@ class SubmissionService(
     ): ValidationResult<ValidationErrors.SubmissionNotFoundFor> {
         val unknownElements = known.getUnknownElements(received = received)
         return if (unknownElements.isNotEmpty())
-            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.joinToString()))
+            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.first()))
         else ValidationResult.ok()
     }
 
     fun setStateForSubmission(params: SetStateForSubmissionParams): Result<SetStateForSubmissionResult, Fail> {
-        val submission = params.submission
+        val requestSubmission = params.submission
 
-        submissionRepository.setSubmissionStatus(
-            cpid = params.cpid, ocid = params.ocid, id = submission.id, status = submission.status
+        val storedSubmission = submissionRepository.findSubmission(
+            cpid = params.cpid, ocid = params.ocid, id = requestSubmission.id
+        )
+            .orForwardFail { fail -> return fail }
+            ?: return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id)
+                .asFailure()
+
+        val updatedSubmission = storedSubmission.copy(status = requestSubmission.status)
+
+        submissionRepository.updateSubmission(
+            cpid = params.cpid, ocid = params.ocid, submission = updatedSubmission
         ).orForwardFail { fail -> return fail }
             .doOnFalse {
-                return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = submission.id.toString())
+                return Fail.Incident.Database.Consistency("Could not update submission '${updatedSubmission.id}'")
                     .asFailure()
             }
-        return SetStateForSubmissionResult(id = submission.id, status = submission.status).asSuccess()
+        return SetStateForSubmissionResult(id = updatedSubmission.id, status = updatedSubmission.status).asSuccess()
     }
 
     fun checkAccessToSubmission(params: CheckAccessToSubmissionParams): ValidationResult<Fail> {
         val credentials = submissionRepository.getSubmissionCredentials(
             cpid = params.cpid, ocid = params.ocid, id = params.submissionId
         ).doReturn { incident -> return ValidationResult.error(incident) }
-            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId.toString()))
+            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId))
 
         if (params.token != credentials.token)
             return ValidationResult.error(ValidationErrors.InvalidToken())

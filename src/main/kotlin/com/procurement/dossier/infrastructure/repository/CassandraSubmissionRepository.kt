@@ -6,8 +6,6 @@ import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
-import com.procurement.dossier.domain.model.Owner
-import com.procurement.dossier.domain.model.Token
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
@@ -60,9 +58,10 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                   AND $columnId IN :$idValues;
             """
 
-        private const val SET_SUBMISSION_STATUS = """
+        private const val UPDATE_SUBMISSION_CQL = """
                UPDATE $keySpace.$tableName
-                  SET $columnStatus=?
+                  SET $columnStatus=?,
+                      $columnJsonData =?
                 WHERE $columnCpid=? 
                   AND $columnOcid=?
                   AND $columnId=?               
@@ -103,7 +102,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
 
     private val preparedSaveSubmissionCQL = session.prepare(SAVE_SUBMISSION_CQL)
     private val preparedGetSubmissionStatusCQL = session.prepare(GET_SUBMISSION_STATUS_CQL)
-    private val preparedSetSubmissionStatusCQL = session.prepare(SET_SUBMISSION_STATUS)
+    private val preparedUpdateSubmissionCQL = session.prepare(UPDATE_SUBMISSION_CQL)
     private val preparedGetSubmissionCredentialsCQL = session.prepare(GET_SUBMISSION_CREDENTIALS_CQL)
     private val preparedFindSubmissionCQL = session.prepare(FIND_SUBMISSION_CQL)
     private val preparedFindSubmissionsCQL = session.prepare(FIND_SUBMISSIONS_CQL)
@@ -130,6 +129,9 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         SubmissionDataEntity(
             id = id,
             date = date,
+            status = status,
+            token = token,
+            owner = owner,
             requirementResponses = requirementResponses.map { requirementResponse ->
                 SubmissionDataEntity.RequirementResponse(
                     id = requirementResponse.id,
@@ -356,19 +358,20 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         return SubmissionState(id = id, status = statusParsed).asSuccess()
     }
 
-    override fun setSubmissionStatus(
-        cpid: Cpid, ocid: Ocid, id: SubmissionId,
-        status: SubmissionStatus
-    ): Result<Boolean, Fail.Incident> {
-        val statements = preparedSetSubmissionStatusCQL.bind()
+    override fun updateSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): Result<Boolean, Fail.Incident> {
+        val entity = submission.convert()
+        val jsonData = tryToJson(entity).orForwardFail { fail -> return fail }
+
+        val statement = preparedUpdateSubmissionCQL.bind()
             .apply {
                 setString(columnCpid, cpid.toString())
                 setString(columnOcid, ocid.toString())
-                setUUID(columnId, id)
-                setString(columnStatus, status.key)
+                setUUID(columnId, submission.id)
+                setString(columnStatus, submission.status.key)
+                setString(columnJsonData, jsonData)
             }
 
-        return statements.tryExecute(session).bind { resultSet ->
+        return statement.tryExecute(session).bind { resultSet ->
             resultSet.wasApplied().asSuccess<Boolean, Fail.Incident>()
         }
     }
@@ -412,34 +415,20 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     }
 
     private fun convertToSubmission(row: Row): Result<Submission, Fail.Incident> {
-        val status = row.getString(columnStatus)
-        val statusParsed = SubmissionStatus.orNull(row.getString(columnStatus))
-            ?: return Fail.Incident.Database.Parsing(column = columnStatus, value = status).asFailure()
-
-        val token = row.getUUID(columnToken)
-        val owner = row.getUUID(columnOwner)
         val submissionEntity = row.getString(columnJsonData).tryToObject(SubmissionDataEntity::class.java)
             .orForwardFail { fail -> return fail }
 
-        return createSubmission(
-            status = statusParsed,
-            token = token,
-            owner = owner,
-            submissionEntity = submissionEntity
-        ).asSuccess()
+        return createSubmission(submissionEntity = submissionEntity).asSuccess()
     }
 
     private fun createSubmission(
-        status: SubmissionStatus,
-        token: Token,
-        owner: Owner,
         submissionEntity: SubmissionDataEntity
     ) = Submission(
         id = submissionEntity.id,
         date = submissionEntity.date,
-        status = status,
-        token = token,
-        owner = owner,
+        status = submissionEntity.status,
+        token = submissionEntity.token,
+        owner = submissionEntity.owner,
         requirementResponses = submissionEntity.requirementResponses?.map { requirementResponse ->
             Submission.RequirementResponse(
                 id = requirementResponse.id,

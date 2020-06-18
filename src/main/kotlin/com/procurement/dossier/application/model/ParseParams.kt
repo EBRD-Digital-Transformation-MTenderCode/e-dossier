@@ -181,19 +181,21 @@ fun parseSubmissionStatus(
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SubmissionStatus)
 
 private fun <T> parseEnum(
-    value: String, allowedEnums: List<T>, attributeName: String, target: EnumElementProvider<T>
+    value: String, allowedEnums: Collection<T>, attributeName: String, target: EnumElementProvider<T>
 ): Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,
-                                                       T : EnumElementProvider.Key =
-    target.orNull(value)
-        ?.takeIf { it in allowedEnums }
+                                                       T : EnumElementProvider.Key {
+    val allowed = allowedEnums.toSet()
+    return target.orNull(value)
+        ?.takeIf { it in allowed }
         ?.asSuccess()
         ?: Result.failure(
             DataErrors.Validation.UnknownValue(
                 name = attributeName,
-                expectedValues = allowedEnums.toSet().keysAsStrings(),
+                expectedValues = allowed.keysAsStrings(),
                 actualValue = value
             )
         )
+}
 
 fun parseDate(
     value: String,
