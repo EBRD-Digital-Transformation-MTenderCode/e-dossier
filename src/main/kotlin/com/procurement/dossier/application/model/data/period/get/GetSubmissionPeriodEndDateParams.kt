@@ -16,8 +16,8 @@ class GetSubmissionPeriodEndDateParams private constructor(
         fun tryCreate(
             cpid: String, ocid: String
         ): Result<GetSubmissionPeriodEndDateParams, DataErrors> {
-            val cpidParsed = parseCpid(cpid).doReturn { error -> return Result.failure(error = error) }
-            val ocidParsed = parseOcid(ocid).doReturn { error -> return Result.failure(error = error) }
+            val cpidParsed = parseCpid(cpid).orForwardFail { fail -> return fail }
+            val ocidParsed = parseOcid(ocid).orForwardFail { fail -> return fail }
 
             return GetSubmissionPeriodEndDateParams(
                 cpid = cpidParsed,
