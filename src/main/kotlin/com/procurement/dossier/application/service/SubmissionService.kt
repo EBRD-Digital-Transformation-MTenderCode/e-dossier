@@ -318,8 +318,10 @@ class SubmissionService(
                 .asFailure()
 
         val organizations = submissions
-            .flatMap { submission -> submission.candidates }
+            .asSequence()
+            .flatMap { submission -> submission.candidates.asSequence() }
             .map { candidate -> candidate.toGetOrganizationsResult() }
+            .toList()
 
         if (organizations.isEmpty())
             return ValidationErrors.OrganizationsNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
