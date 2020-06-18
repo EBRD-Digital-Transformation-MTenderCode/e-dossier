@@ -24,9 +24,9 @@ class VerifySubmissionPeriodEndParams private constructor(
 
             val parsedCpid = parseCpid(value = cpid)
                 .orForwardFail { fail -> return fail }
-            val parsedOcid = parseOcid(value = cpid)
+            val parsedOcid = parseOcid(value = ocid)
                 .orForwardFail { fail -> return fail }
-            val parsedDate = parseDate(value = cpid, attributeName = "date")
+            val parsedDate = parseDate(value = date, attributeName = "date")
                 .orForwardFail { fail -> return fail }
 
             return VerifySubmissionPeriodEndParams(cpid = parsedCpid,ocid = parsedOcid,date = parsedDate)
