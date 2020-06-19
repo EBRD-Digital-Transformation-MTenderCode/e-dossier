@@ -508,12 +508,11 @@ internal class SubmissionServiceTest {
         private fun createValidateSubmissionParams(
             documents: List<ValidateSubmissionParams.Document>,
             candidates: List<ValidateSubmissionParams.Candidate>
-        ) = ValidateSubmissionParams
-            .tryCreate(
-                id = UUID.randomUUID().toString(),
-                documents = documents,
-                candidates = candidates
-            ).get
+        ) = ValidateSubmissionParams.tryCreate(
+            id = UUID.randomUUID().toString(),
+            documents = documents,
+            candidates = candidates
+        ).get
 
         private fun createCandidate(
             id: UUID,
@@ -625,17 +624,18 @@ internal class SubmissionServiceTest {
             ).get
         ).get
 
-        private fun createPerson(businessFunctions: List<ValidateSubmissionParams.Candidate.Person.BusinessFunction>) = ValidateSubmissionParams.Candidate.Person.tryCreate(
-            id = "person.id",
-            title = PersonTitle.MR.key,
-            identifier = ValidateSubmissionParams.Candidate.Person.Identifier(
-                id = "persones.identifier.id",
-                scheme = "persones.identifier.scheme",
-                uri = "persones.identifier.uri"
-            ),
-            name = "persones.name",
-            businessFunctions = businessFunctions
-        ).get
+        private fun createPerson(businessFunctions: List<ValidateSubmissionParams.Candidate.Person.BusinessFunction>) =
+            ValidateSubmissionParams.Candidate.Person.tryCreate(
+                id = "person.id",
+                title = PersonTitle.MR.key,
+                identifier = ValidateSubmissionParams.Candidate.Person.Identifier(
+                    id = "persones.identifier.id",
+                    scheme = "persones.identifier.scheme",
+                    uri = "persones.identifier.uri"
+                ),
+                name = "persones.name",
+                businessFunctions = businessFunctions
+            ).get
 
         private fun createBusinessFunction(
             id: String,
@@ -650,12 +650,13 @@ internal class SubmissionServiceTest {
             ).get
         ).get
 
-        private fun createBusinessFunctionDocument(id: DocumentId) = ValidateSubmissionParams.Candidate.Person.BusinessFunction.Document.tryCreate(
-            documentType = DocumentType.REGULATORY_DOCUMENT.key,
-            id = id,
-            description = "businessFunctions.document.description",
-            title = "businessFunctions.document.title"
-        ).get
+        private fun createBusinessFunctionDocument(id: DocumentId) =
+            ValidateSubmissionParams.Candidate.Person.BusinessFunction.Document.tryCreate(
+                documentType = DocumentType.REGULATORY_DOCUMENT.key,
+                id = id,
+                description = "businessFunctions.document.description",
+                title = "businessFunctions.document.title"
+            ).get
 
         private fun createDocument(id: DocumentId) = ValidateSubmissionParams.Document.tryCreate(
             documentType = DocumentType.X_TECHNICAL_DOCUMENTS.key,
