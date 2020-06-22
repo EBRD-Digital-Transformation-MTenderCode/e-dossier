@@ -128,9 +128,12 @@ class PeriodService(
 
         val date = params.date
         val periodEndDate = period.endDate
-        val submissionPeriodExpired = date.plusSeconds(ERROR).isAfter(periodEndDate)
+        val isSubmissionPeriodExpired = calculateSubmissionPeriodEnd(periodEndDate, date)
 
-        return VerifySubmissionPeriodEndResult(submissionPeriodExpired = submissionPeriodExpired)
+        return VerifySubmissionPeriodEndResult(submissionPeriodExpired = isSubmissionPeriodExpired)
             .asSuccess()
     }
+
+    fun calculateSubmissionPeriodEnd(periodEndDate: LocalDateTime, rqDate: LocalDateTime) =
+        rqDate.plusSeconds(ERROR).isAfter(periodEndDate)
 }
