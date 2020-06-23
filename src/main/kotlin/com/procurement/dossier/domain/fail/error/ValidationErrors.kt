@@ -70,6 +70,11 @@ sealed class ValidationErrors(
         description = "Received owner does not match submission owner."
     )
 
+    class PeriodEndDateNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+        numberError = "5.15.1",
+        description = "Period not found by cpid=$cpid and ocid=$ocid."
+    )
+
     sealed class RecordNotFoundFor(cpid: Cpid, ocid: Ocid, numberError: String) : ValidationErrors(
         numberError = numberError,
         description = "No record found by cpid '$cpid' and ocid '$ocid'."

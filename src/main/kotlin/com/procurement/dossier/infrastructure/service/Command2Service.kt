@@ -13,6 +13,7 @@ import com.procurement.dossier.infrastructure.handler.validate.period.CheckPerio
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
 import com.procurement.dossier.infrastructure.handler.validate.submission.CheckAccessToSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.validate.submission.ValidateSubmissionHandler
+import com.procurement.dossier.infrastructure.handler.verify.submissionperiodend.VerifySubmissionPeriodEndHandler
 import com.procurement.dossier.infrastructure.model.dto.bpe.Command2Type
 import com.procurement.dossier.infrastructure.model.dto.bpe.errorResponse
 import com.procurement.dossier.infrastructure.model.dto.bpe.getAction
@@ -29,6 +30,8 @@ class Command2Service(
     private val checkPeriod2Handler: CheckPeriod2Handler,
     private val getSubmissionStateByIdsHandler: GetSubmissionStateByIdsHandler,
     private val setStateForSubmissionHandler: SetStateForSubmissionHandler,
+    private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler,
+    private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler,
     private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler,
     private val getOrganizationsHandler: GetOrganizationsHandler,
     private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
@@ -62,6 +65,7 @@ class Command2Service(
             Command2Type.GET_SUBMISSION_STATE_BY_IDS -> getSubmissionStateByIdsHandler.handle(node = request)
             Command2Type.SET_STATE_FOR_SUBMISSION -> setStateForSubmissionHandler.handle(node = request)
             Command2Type.CHECK_ACCESS_TO_SUBMISSION -> checkAccessToSubmissionHandler.handle(node = request)
+            Command2Type.VERIFY_SUBMISSION_PERIOD_END -> verifySubmissionPeriodEndHandler.handle(node = request)
             Command2Type.GET_ORGANIZATIONS -> getOrganizationsHandler.handle(node = request)
             Command2Type.GET_SUBMISSION_PERIOD_END_DATE -> getSubmissionPeriodEndDateHandler.handle(node = request)
             Command2Type.FIND_SUBMISSIONS_FOR_OPENING -> findSubmissionsForOpeningHandler.handle(node = request)
