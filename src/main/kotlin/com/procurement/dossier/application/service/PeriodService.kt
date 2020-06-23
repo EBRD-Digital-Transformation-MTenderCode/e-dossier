@@ -21,6 +21,7 @@ import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.handler.verify.submissionperiodend.VerifySubmissionPeriodEndResult
 import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -30,7 +31,7 @@ class PeriodService(
 ) {
 
     companion object {
-        private const val DURATION_IN_SECONDS = 1L
+        private val DEVIATION_IN_SECONDS = Duration.ofSeconds(1).toSeconds()
     }
 
     fun validatePeriod(data: ValidatePeriodData, context: ValidatePeriodContext) {
@@ -135,5 +136,5 @@ class PeriodService(
     }
 
     fun isSubmissionPeriodEndExpired(periodEndDate: LocalDateTime, rqDate: LocalDateTime) =
-        rqDate.plusSeconds(DURATION_IN_SECONDS).isAfter(periodEndDate)
+        rqDate.plusSeconds(DEVIATION_IN_SECONDS).isAfter(periodEndDate)
 }
