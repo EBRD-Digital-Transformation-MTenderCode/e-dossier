@@ -313,32 +313,37 @@ class SubmissionService(
         if (duplicateDocument != null)
             return ValidationResult.error(ValidationErrors.Duplicate.OrganizationDocument(id = duplicateDocument.id))
 
-        val duplicateBusinessFunction = getDuplicateBusinessFunctionWithinPerson(params)
+        checkDuplicatesWithinPerson(params)
+            .doOnError { return ValidationResult.error(it) }
+
+        return ValidationResult.ok()
+    }
+
+    private fun checkDuplicatesWithinPerson(params: ValidateSubmissionParams) : ValidationResult<Fail>{
+        val persons = params.candidates
+            .asSequence()
+            .flatMap { candidate -> candidate.persones.asSequence() }
+
+        val duplicateBusinessFunction = getDuplicateBusinessFunctionWithinPerson(persons)
         if (duplicateBusinessFunction != null)
             return ValidationResult.error(ValidationErrors.Duplicate.PersonBusinessFunction(id = duplicateBusinessFunction.id))
 
-        val duplicatePersonDocument = getDuplicateDocumentWithinPerson(params)
+        val duplicatePersonDocument = getDuplicateDocumentWithinPerson(persons)
         if (duplicatePersonDocument != null)
             return ValidationResult.error(ValidationErrors.Duplicate.PersonDocument(id = duplicatePersonDocument.id))
 
         return ValidationResult.ok()
     }
 
-    private fun getDuplicateBusinessFunctionWithinPerson(params: ValidateSubmissionParams) =
-        params.candidates
-            .asSequence()
-            .flatMap { candidate -> candidate.persones.asSequence() }
-            .map { person -> person.businessFunctions.getDuplicate { it.id } }
+    private fun getDuplicateBusinessFunctionWithinPerson(persons: Sequence<ValidateSubmissionParams.Candidate.Person>) =
+        persons.map { person -> person.businessFunctions.getDuplicate { it.id } }
             .firstOrNull { duplicate -> duplicate != null }
 
-    private fun getDuplicateDocumentWithinPerson(params: ValidateSubmissionParams) =
-        params.candidates
-            .asSequence()
-            .flatMap { candidate -> candidate.persones.asSequence() }
-            .map { person ->
-                person.businessFunctions
-                    .flatMap { businessFunction -> businessFunction.documents }
-                    .getDuplicate { document -> document.id }
-            }
+    private fun getDuplicateDocumentWithinPerson(persons: Sequence<ValidateSubmissionParams.Candidate.Person>) =
+        persons.map { person ->
+            person.businessFunctions
+                .flatMap { businessFunction -> businessFunction.documents }
+                .getDuplicate { document -> document.id }
+        }
             .firstOrNull { duplicate -> duplicate != null }
 }
