@@ -31,7 +31,7 @@ class PeriodService(
 ) {
 
     companion object {
-        private val DEVIATION_IN_SECONDS = Duration.ofSeconds(1).toSeconds()
+        private val DEVIATION = Duration.ofSeconds(1)
     }
 
     fun validatePeriod(data: ValidatePeriodData, context: ValidatePeriodContext) {
@@ -136,5 +136,5 @@ class PeriodService(
     }
 
     fun isSubmissionPeriodEndExpired(periodEndDate: LocalDateTime, rqDate: LocalDateTime) =
-        rqDate.plusSeconds(DEVIATION_IN_SECONDS).isAfter(periodEndDate)
+        rqDate.plus(DEVIATION).isAfter(periodEndDate)
 }
