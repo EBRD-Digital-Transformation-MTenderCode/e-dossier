@@ -70,11 +70,6 @@ sealed class ValidationErrors(
         description = "Received owner does not match submission owner."
     )
 
-    class PeriodEndDateNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
-        numberError = "5.15.1",
-        description = "Period not found by cpid=$cpid and ocid=$ocid."
-    )
-
     sealed class RecordNotFoundFor(cpid: Cpid, ocid: Ocid, numberError: String) : ValidationErrors(
         numberError = numberError,
         description = "No record found by cpid '$cpid' and ocid '$ocid'."
@@ -88,10 +83,16 @@ sealed class ValidationErrors(
         description = "No organization found by cpid '$cpid' and ocid '$ocid'."
     )
 
-    class PeriodEndDateNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
-        numberError = "5.14.1",
+    sealed class PeriodEndDateNotFoundFor(cpid: Cpid, ocid: Ocid, numberError: String) : ValidationErrors(
+        numberError = numberError,
         description = "No period end date found by cpid '$cpid' and ocid '$ocid'."
-    )
+    ) {
+        class VerifySubmissionPeriodEnd(cpid: Cpid, ocid: Ocid) :
+            PeriodEndDateNotFoundFor(cpid, ocid, numberError = "5.15.1")
+
+        class GetSubmissionPeriodEndDate(cpid: Cpid, ocid: Ocid) :
+            PeriodEndDateNotFoundFor(cpid, ocid, numberError = "5.14.1")
+    }
 
     class InvalidSubmissionQuantity(actualQuantity: String, minimumQuantity: String) : ValidationErrors(
         numberError = "5.13.2",

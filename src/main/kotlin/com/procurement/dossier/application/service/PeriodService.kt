@@ -22,8 +22,6 @@ import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.handler.verify.submissionperiodend.VerifySubmissionPeriodEndResult
-import com.procurement.dossier.domain.util.asFailure
-import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
 import java.time.Duration
 import java.time.LocalDateTime
@@ -128,7 +126,7 @@ class PeriodService(
 
         val period = periodRepository.tryFindBy(cpid = cpid, ocid = ocid)
             .orForwardFail { fail -> return fail }
-            ?: return ValidationErrors.PeriodEndDateNotFound(cpid = cpid, ocid = ocid)
+            ?: return ValidationErrors.PeriodEndDateNotFoundFor.VerifySubmissionPeriodEnd(cpid = cpid, ocid = ocid)
                 .asFailure()
 
         val date = params.date
@@ -145,7 +143,9 @@ class PeriodService(
     fun getSubmissionPeriodEndDate(params: GetSubmissionPeriodEndDateParams): Result<GetSubmissionPeriodEndDateResult, Fail> {
         val storedPeriod = periodRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
-            ?: return ValidationErrors.PeriodEndDateNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
+            ?: return ValidationErrors.PeriodEndDateNotFoundFor.GetSubmissionPeriodEndDate(
+                cpid = params.cpid, ocid = params.ocid
+            ).asFailure()
 
         return GetSubmissionPeriodEndDateResult(endDate = storedPeriod.endDate).asSuccess()
     }
