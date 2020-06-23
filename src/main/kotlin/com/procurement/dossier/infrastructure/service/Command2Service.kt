@@ -32,7 +32,6 @@ class Command2Service(
     private val setStateForSubmissionHandler: SetStateForSubmissionHandler,
     private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler,
     private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler,
-    private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler,
     private val getOrganizationsHandler: GetOrganizationsHandler,
     private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
     private val findSubmissionsForOpeningHandler: FindSubmissionsForOpeningHandler
