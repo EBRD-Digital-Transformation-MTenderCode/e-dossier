@@ -12,10 +12,16 @@ import com.procurement.dossier.application.model.data.period.validate.ValidatePe
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodData
 import com.procurement.dossier.application.repository.PeriodRepository
 import com.procurement.dossier.application.repository.PeriodRulesRepository
+import com.procurement.dossier.application.service.params.VerifySubmissionPeriodEndParams
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
+import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
+import com.procurement.dossier.domain.util.asFailure
+import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.infrastructure.handler.verify.submissionperiodend.VerifySubmissionPeriodEndResult
 import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -23,6 +29,11 @@ class PeriodService(
     private val periodRulesRepository: PeriodRulesRepository,
     private val periodRepository: PeriodRepository
 ) {
+
+    companion object {
+        private val DEVIATION = Duration.ofSeconds(1)
+    }
+
     fun validatePeriod(data: ValidatePeriodData, context: ValidatePeriodContext) {
         val period = data.period
         checkPeriodDates(startDate = period.startDate, endDate = period.endDate)
@@ -106,4 +117,24 @@ class PeriodService(
 
         return ValidationResult.ok()
     }
+
+    fun verifySubmissionPeriodEnd(params: VerifySubmissionPeriodEndParams): Result<VerifySubmissionPeriodEndResult, Fail> {
+        val cpid = params.cpid
+        val ocid = params.ocid
+
+        val period = periodRepository.tryFindBy(cpid = cpid, ocid = ocid)
+            .orForwardFail { fail -> return fail }
+            ?: return ValidationErrors.PeriodEndDateNotFound(cpid = cpid, ocid = ocid)
+                .asFailure()
+
+        val date = params.date
+        val periodEndDate = period.endDate
+        val isSubmissionPeriodExpired = isSubmissionPeriodEndExpired(periodEndDate, date)
+
+        return VerifySubmissionPeriodEndResult(submissionPeriodExpired = isSubmissionPeriodExpired)
+            .asSuccess()
+    }
+
+    fun isSubmissionPeriodEndExpired(periodEndDate: LocalDateTime, rqDate: LocalDateTime) =
+        rqDate.plus(DEVIATION).isAfter(periodEndDate)
 }
