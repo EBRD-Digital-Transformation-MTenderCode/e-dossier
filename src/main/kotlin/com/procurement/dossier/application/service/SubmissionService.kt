@@ -3,10 +3,15 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
+import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
+import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsResult
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
+import com.procurement.dossier.application.repository.SubmissionQuantityRepository
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
@@ -14,17 +19,20 @@ import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.Result.Companion.failure
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.doOnFalse
 import com.procurement.dossier.domain.util.extension.getUnknownElements
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
+import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.springframework.stereotype.Service
 
 @Service
 class SubmissionService(
     private val submissionRepository: SubmissionRepository,
+    private val submissionQuantityRepository: SubmissionQuantityRepository,
     private val generable: Generable
 ) {
     fun createSubmission(params: CreateSubmissionParams): Result<CreateSubmissionResult, Fail.Incident> {
@@ -301,4 +309,439 @@ class SubmissionService(
 
         return ValidationResult.ok()
     }
+
+    fun getOrganizations(params: GetOrganizationsParams): Result<List<GetOrganizationsResult>, Fail> {
+        val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { fail -> return fail }
+        if (submissions.isEmpty())
+            return ValidationErrors.RecordNotFoundFor.GetOrganizations(cpid = params.cpid, ocid = params.ocid)
+                .asFailure()
+
+        val organizations = submissions
+            .asSequence()
+            .flatMap { submission -> submission.candidates.asSequence() }
+            .map { candidate -> candidate.toGetOrganizationsResult() }
+            .toList()
+
+        if (organizations.isEmpty())
+            return ValidationErrors.OrganizationsNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
+
+        return organizations.asSuccess()
+    }
+
+    private fun Submission.Candidate.toGetOrganizationsResult() =
+        GetOrganizationsResult(
+            id = id,
+            name = name,
+            additionalIdentifiers = additionalIdentifiers.map { additionalIdentifier ->
+                GetOrganizationsResult.AdditionalIdentifier(
+                    id = additionalIdentifier.id,
+                    legalName = additionalIdentifier.legalName,
+                    scheme = additionalIdentifier.scheme,
+                    uri = additionalIdentifier.uri
+                )
+            },
+            address = address.let { address ->
+                GetOrganizationsResult.Address(
+                    streetAddress = address.streetAddress,
+                    postalCode = address.postalCode,
+                    addressDetails = address.addressDetails.let { addressDetails ->
+                        GetOrganizationsResult.Address.AddressDetails(
+                            country = addressDetails.country.let { country ->
+                                GetOrganizationsResult.Address.AddressDetails.Country(
+                                    id = country.id,
+                                    scheme = country.scheme,
+                                    description = country.description,
+                                    uri = country.uri
+                                )
+                            },
+                            locality = addressDetails.locality.let { locality ->
+                                GetOrganizationsResult.Address.AddressDetails.Locality(
+                                    id = locality.id,
+                                    scheme = locality.scheme,
+                                    description = locality.description,
+                                    uri = locality.uri
+                                )
+                            },
+                            region = addressDetails.region.let { region ->
+                                GetOrganizationsResult.Address.AddressDetails.Region(
+                                    id = region.id,
+                                    scheme = region.scheme,
+                                    description = region.description,
+                                    uri = region.uri
+                                )
+                            }
+                        )
+                    }
+                )
+
+            },
+            contactPoint = contactPoint.let { contactPoint ->
+                GetOrganizationsResult.ContactPoint(
+                    name = contactPoint.name,
+                    email = contactPoint.email,
+                    faxNumber = contactPoint.faxNumber,
+                    telephone = contactPoint.telephone,
+                    url = contactPoint.url
+                )
+            },
+            details = details.let { details ->
+                GetOrganizationsResult.Details(
+                    typeOfSupplier = details.typeOfSupplier,
+                    bankAccounts = details.bankAccounts.map { bankAccount ->
+                        GetOrganizationsResult.Details.BankAccount(
+                            description = bankAccount.description,
+                            address = bankAccount.address.let { address ->
+                                GetOrganizationsResult.Details.BankAccount.Address(
+                                    streetAddress = address.streetAddress,
+                                    postalCode = address.postalCode,
+                                    addressDetails = address.addressDetails.let { addressDetails ->
+                                        GetOrganizationsResult.Details.BankAccount.Address.AddressDetails(
+                                            country = addressDetails.country.let { country ->
+                                                GetOrganizationsResult.Details.BankAccount.Address.AddressDetails.Country(
+                                                    id = country.id,
+                                                    scheme = country.scheme,
+                                                    description = country.description
+                                                )
+                                            },
+                                            locality = addressDetails.locality.let { locality ->
+                                                GetOrganizationsResult.Details.BankAccount.Address.AddressDetails.Locality(
+                                                    id = locality.id,
+                                                    scheme = locality.scheme,
+                                                    description = locality.description
+                                                )
+                                            },
+                                            region = addressDetails.region.let { region ->
+                                                GetOrganizationsResult.Details.BankAccount.Address.AddressDetails.Region(
+                                                    id = region.id,
+                                                    scheme = region.scheme,
+                                                    description = region.description
+                                                )
+                                            }
+                                        )
+                                    }
+                                )
+                            },
+                            accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
+                                GetOrganizationsResult.Details.BankAccount.AccountIdentification(
+                                    id = accountIdentification.id,
+                                    scheme = accountIdentification.scheme
+                                )
+                            },
+                            additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
+                                GetOrganizationsResult.Details.BankAccount.AdditionalAccountIdentifier(
+                                    id = additionalAccountIdentifier.id,
+                                    scheme = additionalAccountIdentifier.scheme
+                                )
+                            },
+                            bankName = bankAccount.bankName,
+                            identifier = bankAccount.identifier.let { identifier ->
+                                GetOrganizationsResult.Details.BankAccount.Identifier(
+                                    id = identifier.id,
+                                    scheme = identifier.scheme
+                                )
+                            }
+                        )
+                    },
+                    legalForm = details.legalForm?.let { legalForm ->
+                        GetOrganizationsResult.Details.LegalForm(
+                            id = legalForm.id,
+                            scheme = legalForm.scheme,
+                            description = legalForm.description,
+                            uri = legalForm.uri
+                        )
+                    },
+                    mainEconomicActivities = details.mainEconomicActivities.map { mainEconomicActivity ->
+                        GetOrganizationsResult.Details.MainEconomicActivity(
+                            id = mainEconomicActivity.id,
+                            uri = mainEconomicActivity.uri,
+                            description = mainEconomicActivity.description,
+                            scheme = mainEconomicActivity.scheme
+                        )
+                    },
+                    scale = details.scale
+                )
+            },
+            identifier = identifier.let { identifier ->
+                GetOrganizationsResult.Identifier(
+                    id = identifier.id,
+                    scheme = identifier.scheme,
+                    uri = identifier.uri,
+                    legalName = identifier.legalName
+                )
+            },
+            persones = persones.map { person ->
+                GetOrganizationsResult.Person(
+                    id = person.id,
+                    title = person.title,
+                    identifier = person.identifier.let { identifier ->
+                        GetOrganizationsResult.Person.Identifier(
+                            id = identifier.id,
+                            uri = identifier.uri,
+                            scheme = identifier.scheme
+                        )
+                    },
+                    name = person.name,
+                    businessFunctions = person.businessFunctions.map { businessFunction ->
+                        GetOrganizationsResult.Person.BusinessFunction(
+                            id = businessFunction.id,
+                            documents = businessFunction.documents.map { document ->
+                                GetOrganizationsResult.Person.BusinessFunction.Document(
+                                    id = document.id,
+                                    title = document.title,
+                                    description = document.description,
+                                    documentType = document.documentType
+                                )
+                            },
+                            jobTitle = businessFunction.jobTitle,
+                            period = businessFunction.period.let { period ->
+                                GetOrganizationsResult.Person.BusinessFunction.Period(
+                                    startDate = period.startDate
+                                )
+                            },
+                            type = businessFunction.type
+                        )
+                    }
+                )
+            }
+        )
+
+    fun findSubmissionsForOpening(params: FindSubmissionsForOpeningParams): Result<List<FindSubmissionsForOpeningResult>, Fail> {
+        val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { fail -> return fail }
+        if (submissions.isEmpty())
+            return ValidationErrors.RecordNotFoundFor.FindSubmissionForOpening(cpid = params.cpid, ocid = params.ocid)
+                .asFailure()
+
+        val pendingSubmissions = submissions.filter { submission -> submission.status == SubmissionStatus.PENDING }
+
+        checkSubmissionQuantity(quantity = pendingSubmissions.size, pmd = params.pmd, country = params.country)
+            .doOnError { error -> return failure(error) }
+
+        return pendingSubmissions.map { submission -> submission.toFindSubmissionsForOpeningResult() }.asSuccess()
+    }
+
+    private fun checkSubmissionQuantity(
+        quantity: Int, country: String, pmd: ProcurementMethod
+    ): ValidationResult<Fail> {
+        val minimumQuantity = submissionQuantityRepository.findMinimum(country, pmd)
+            .doReturn { error -> return ValidationResult.error(error) }
+
+        if (quantity < minimumQuantity!!)
+            return ValidationResult.error(
+                ValidationErrors.InvalidSubmissionQuantity(
+                    actualQuantity = quantity.toString(), minimumQuantity = minimumQuantity.toString()
+                )
+            )
+
+        return ValidationResult.ok()
+    }
+
+    private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsForOpeningResult(
+        id = id,
+        date = date,
+        status = status,
+        requirementResponses = requirementResponses.map { requirementResponse ->
+            FindSubmissionsForOpeningResult.RequirementResponse(
+                id = requirementResponse.id,
+                relatedCandidate = requirementResponse.relatedCandidate.let { relatedCandidate ->
+                    FindSubmissionsForOpeningResult.RequirementResponse.RelatedCandidate(
+                        id = relatedCandidate.id,
+                        name = relatedCandidate.name
+                    )
+                },
+                requirement = requirementResponse.requirement.let { requirement ->
+                    FindSubmissionsForOpeningResult.RequirementResponse.Requirement(
+                        id = requirement.id
+                    )
+                },
+                value = requirementResponse.value
+            )
+        },
+        documents = documents.map { document ->
+            FindSubmissionsForOpeningResult.Document(
+                id = document.id,
+                description = document.description,
+                documentType = document.documentType,
+                title = document.title
+            )
+        },
+        candidates = candidates.map { candidate ->
+            FindSubmissionsForOpeningResult.Candidate(
+                id = candidate.id,
+                name = candidate.name,
+                additionalIdentifiers = candidate.additionalIdentifiers.map { additionalIdentifier ->
+                    FindSubmissionsForOpeningResult.Candidate.AdditionalIdentifier(
+                        id = additionalIdentifier.id,
+                        legalName = additionalIdentifier.legalName,
+                        scheme = additionalIdentifier.scheme,
+                        uri = additionalIdentifier.uri
+                    )
+                },
+                address = candidate.address.let { address ->
+                    FindSubmissionsForOpeningResult.Candidate.Address(
+                        streetAddress = address.streetAddress,
+                        postalCode = address.postalCode,
+                        addressDetails = address.addressDetails.let { addressDetails ->
+                            FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails(
+                                country = addressDetails.country.let { country ->
+                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Country(
+                                        id = country.id,
+                                        scheme = country.scheme,
+                                        description = country.description,
+                                        uri = country.uri
+                                    )
+                                },
+                                locality = addressDetails.locality.let { locality ->
+                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Locality(
+                                        id = locality.id,
+                                        scheme = locality.scheme,
+                                        description = locality.description,
+                                        uri = locality.uri
+                                    )
+                                },
+                                region = addressDetails.region.let { region ->
+                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Region(
+                                        id = region.id,
+                                        scheme = region.scheme,
+                                        description = region.description,
+                                        uri = region.uri
+                                    )
+                                }
+                            )
+                        }
+                    )
+
+                },
+                contactPoint = candidate.contactPoint.let { contactPoint ->
+                    FindSubmissionsForOpeningResult.Candidate.ContactPoint(
+                        name = contactPoint.name,
+                        email = contactPoint.email,
+                        faxNumber = contactPoint.faxNumber,
+                        telephone = contactPoint.telephone,
+                        url = contactPoint.url
+                    )
+                },
+                details = candidate.details.let { details ->
+                    FindSubmissionsForOpeningResult.Candidate.Details(
+                        typeOfSupplier = details.typeOfSupplier,
+                        bankAccounts = details.bankAccounts.map { bankAccount ->
+                            FindSubmissionsForOpeningResult.Candidate.Details.BankAccount(
+                                description = bankAccount.description,
+                                address = bankAccount.address.let { address ->
+                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address(
+                                        streetAddress = address.streetAddress,
+                                        postalCode = address.postalCode,
+                                        addressDetails = address.addressDetails.let { addressDetails ->
+                                            FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails(
+                                                country = addressDetails.country.let { country ->
+                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Country(
+                                                        id = country.id,
+                                                        scheme = country.scheme,
+                                                        description = country.description
+                                                    )
+                                                },
+                                                locality = addressDetails.locality.let { locality ->
+                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
+                                                        id = locality.id,
+                                                        scheme = locality.scheme,
+                                                        description = locality.description
+                                                    )
+                                                },
+                                                region = addressDetails.region.let { region ->
+                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Region(
+                                                        id = region.id,
+                                                        scheme = region.scheme,
+                                                        description = region.description
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    )
+                                },
+                                accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
+                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AccountIdentification(
+                                        id = accountIdentification.id,
+                                        scheme = accountIdentification.scheme
+                                    )
+                                },
+                                additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
+                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
+                                        id = additionalAccountIdentifier.id,
+                                        scheme = additionalAccountIdentifier.scheme
+                                    )
+                                },
+                                bankName = bankAccount.bankName,
+                                identifier = bankAccount.identifier.let { identifier ->
+                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Identifier(
+                                        id = identifier.id,
+                                        scheme = identifier.scheme
+                                    )
+                                }
+                            )
+                        },
+                        legalForm = details.legalForm?.let { legalForm ->
+                            FindSubmissionsForOpeningResult.Candidate.Details.LegalForm(
+                                id = legalForm.id,
+                                scheme = legalForm.scheme,
+                                description = legalForm.description,
+                                uri = legalForm.uri
+                            )
+                        },
+                        mainEconomicActivities = details.mainEconomicActivities.map { mainEconomicActivity ->
+                            FindSubmissionsForOpeningResult.Candidate.Details.MainEconomicActivity(
+                                id = mainEconomicActivity.id,
+                                uri = mainEconomicActivity.uri,
+                                description = mainEconomicActivity.description,
+                                scheme = mainEconomicActivity.scheme
+                            )
+                        },
+                        scale = details.scale
+                    )
+                },
+                identifier = candidate.identifier.let { identifier ->
+                    FindSubmissionsForOpeningResult.Candidate.Identifier(
+                        id = identifier.id,
+                        scheme = identifier.scheme,
+                        uri = identifier.uri,
+                        legalName = identifier.legalName
+                    )
+                },
+                persones = candidate.persones.map { person ->
+                    FindSubmissionsForOpeningResult.Candidate.Person(
+                        id = person.id,
+                        title = person.title,
+                        identifier = person.identifier.let { identifier ->
+                            FindSubmissionsForOpeningResult.Candidate.Person.Identifier(
+                                id = identifier.id,
+                                uri = identifier.uri,
+                                scheme = identifier.scheme
+                            )
+                        },
+                        name = person.name,
+                        businessFunctions = person.businessFunctions.map { businessFunction ->
+                            FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction(
+                                id = businessFunction.id,
+                                documents = businessFunction.documents.map { document ->
+                                    FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Document(
+                                        id = document.id,
+                                        title = document.title,
+                                        description = document.description,
+                                        documentType = document.documentType
+                                    )
+                                },
+                                jobTitle = businessFunction.jobTitle,
+                                period = businessFunction.period.let { period ->
+                                    FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Period(
+                                        startDate = period.startDate
+                                    )
+                                },
+                                type = businessFunction.type
+                            )
+                        }
+                    )
+                }
+            )
+        }
+    )
 }

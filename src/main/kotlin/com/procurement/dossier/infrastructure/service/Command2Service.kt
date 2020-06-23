@@ -5,6 +5,9 @@ import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.handler.historical.submission.CreateSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.historical.submission.SetStateForSubmissionHandler
+import com.procurement.dossier.infrastructure.handler.query.FindSubmissionsForOpeningHandler
+import com.procurement.dossier.infrastructure.handler.query.GetOrganizationsHandler
+import com.procurement.dossier.infrastructure.handler.query.GetSubmissionPeriodEndDateHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionStateByIdsHandler
 import com.procurement.dossier.infrastructure.handler.validate.period.CheckPeriod2Handler
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
@@ -28,7 +31,10 @@ class Command2Service(
     private val getSubmissionStateByIdsHandler: GetSubmissionStateByIdsHandler,
     private val setStateForSubmissionHandler: SetStateForSubmissionHandler,
     private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler,
-    private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler
+    private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler,
+    private val getOrganizationsHandler: GetOrganizationsHandler,
+    private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
+    private val findSubmissionsForOpeningHandler: FindSubmissionsForOpeningHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -59,6 +65,9 @@ class Command2Service(
             Command2Type.SET_STATE_FOR_SUBMISSION -> setStateForSubmissionHandler.handle(node = request)
             Command2Type.CHECK_ACCESS_TO_SUBMISSION -> checkAccessToSubmissionHandler.handle(node = request)
             Command2Type.VERIFY_SUBMISSION_PERIOD_END -> verifySubmissionPeriodEndHandler.handle(node = request)
+            Command2Type.GET_ORGANIZATIONS -> getOrganizationsHandler.handle(node = request)
+            Command2Type.GET_SUBMISSION_PERIOD_END_DATE -> getSubmissionPeriodEndDateHandler.handle(node = request)
+            Command2Type.FIND_SUBMISSIONS_FOR_OPENING -> findSubmissionsForOpeningHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
