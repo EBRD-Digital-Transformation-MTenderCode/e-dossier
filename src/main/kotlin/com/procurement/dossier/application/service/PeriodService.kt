@@ -30,7 +30,7 @@ class PeriodService(
 ) {
 
     companion object {
-        private const val ERROR = 1L
+        private const val DURATION_IN_SECONDS = 1L
     }
 
     fun validatePeriod(data: ValidatePeriodData, context: ValidatePeriodContext) {
@@ -128,12 +128,12 @@ class PeriodService(
 
         val date = params.date
         val periodEndDate = period.endDate
-        val isSubmissionPeriodExpired = calculateSubmissionPeriodEnd(periodEndDate, date)
+        val isSubmissionPeriodExpired = isSubmissionPeriodEndExpired(periodEndDate, date)
 
         return VerifySubmissionPeriodEndResult(submissionPeriodExpired = isSubmissionPeriodExpired)
             .asSuccess()
     }
 
-    fun calculateSubmissionPeriodEnd(periodEndDate: LocalDateTime, rqDate: LocalDateTime) =
-        rqDate.plusSeconds(ERROR).isAfter(periodEndDate)
+    fun isSubmissionPeriodEndExpired(periodEndDate: LocalDateTime, rqDate: LocalDateTime) =
+        rqDate.plusSeconds(DURATION_IN_SECONDS).isAfter(periodEndDate)
 }

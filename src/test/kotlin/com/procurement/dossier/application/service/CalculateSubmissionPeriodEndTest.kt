@@ -22,7 +22,7 @@ class CalculateSubmissionPeriodEndTest {
         val rqDate = createLTD(1, 2)
         val periodEndDate = createLTD(1, 1)
 
-        val isExpired = periodService.calculateSubmissionPeriodEnd(periodEndDate = periodEndDate, rqDate = rqDate)
+        val isExpired = periodService.isSubmissionPeriodEndExpired(periodEndDate = periodEndDate, rqDate = rqDate)
 
         assertTrue(isExpired)
     }
@@ -33,7 +33,7 @@ class CalculateSubmissionPeriodEndTest {
         val rqDate = createLTD(0, 2)
         val periodEndDate = createLTD(1, 1)
 
-        val isExpired = periodService.calculateSubmissionPeriodEnd(periodEndDate = periodEndDate, rqDate = rqDate)
+        val isExpired = periodService.isSubmissionPeriodEndExpired(periodEndDate = periodEndDate, rqDate = rqDate)
 
         assertTrue(isExpired)
     }
@@ -44,7 +44,7 @@ class CalculateSubmissionPeriodEndTest {
         val rqDate = createLTD(0, 0)
         val periodEndDate = createLTD(1, 1)
 
-        val isExpired = periodService.calculateSubmissionPeriodEnd(periodEndDate = periodEndDate, rqDate = rqDate)
+        val isExpired = periodService.isSubmissionPeriodEndExpired(periodEndDate = periodEndDate, rqDate = rqDate)
 
         assertFalse(isExpired)
     }
@@ -55,7 +55,7 @@ class CalculateSubmissionPeriodEndTest {
         val rqDate = createLTD(1, 1)
         val periodEndDate = createLTD(1, 1)
 
-        val isExpired = periodService.calculateSubmissionPeriodEnd(periodEndDate = periodEndDate, rqDate = rqDate)
+        val isExpired = periodService.isSubmissionPeriodEndExpired(periodEndDate = periodEndDate, rqDate = rqDate)
 
         assertTrue(isExpired)
     }
@@ -66,7 +66,7 @@ class CalculateSubmissionPeriodEndTest {
         val rqDate = createLTD(0, 1)
         val periodEndDate = createLTD(1, 1)
 
-        val isExpired = periodService.calculateSubmissionPeriodEnd(periodEndDate = periodEndDate, rqDate = rqDate)
+        val isExpired = periodService.isSubmissionPeriodEndExpired(periodEndDate = periodEndDate, rqDate = rqDate)
 
         assertFalse(isExpired)
     }
