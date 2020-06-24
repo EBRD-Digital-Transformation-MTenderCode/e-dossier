@@ -48,9 +48,9 @@ internal class PeriodServiceTest {
         private val ENTITY_START_DATE = LocalDateTime.parse("2020-02-12T08:49:55Z", FORMATTER)
         private val ENTITY_END_DATE = ENTITY_START_DATE.plusDays(10)
 
-        private val RULES_REPOSITORY: RulesRepository = mock()
+        private val rulesRepository: RulesRepository = mock()
         private val periodRepository: PeriodRepository = mock()
-        private val periodService: PeriodService = PeriodService(RULES_REPOSITORY, periodRepository)
+        private val periodService: PeriodService = PeriodService(rulesRepository, periodRepository)
     }
 
     @Nested
@@ -58,7 +58,7 @@ internal class PeriodServiceTest {
 
         @Test
         fun periodDurationEqualsAllowedTerm_success() {
-            whenever(RULES_REPOSITORY.findPeriodDuration(pmd = PMD, country = COUNTRY))
+            whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
                 .thenReturn(ALLOWED_TERM)
 
             val endDate = DATE.plusDays(ALLOWED_TERM)
@@ -71,7 +71,7 @@ internal class PeriodServiceTest {
 
         @Test
         fun periodDurationGreaterThanAllowedTerm_success() {
-            whenever(RULES_REPOSITORY.findPeriodDuration(pmd = PMD, country = COUNTRY))
+            whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
                 .thenReturn(ALLOWED_TERM)
 
             val endDate = DATE.plusDays(ALLOWED_TERM).plusSeconds(1)
@@ -84,7 +84,7 @@ internal class PeriodServiceTest {
 
         @Test
         fun startAndEndDateEqual_exception() {
-            whenever(RULES_REPOSITORY.findPeriodDuration(pmd = PMD, country = COUNTRY))
+            whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
                 .thenReturn(ALLOWED_TERM)
 
             val data = createValidatePeriodData(startDate = DATE, endDate = DATE)
@@ -100,7 +100,7 @@ internal class PeriodServiceTest {
 
         @Test
         fun endDatePrecedesStartDate_exception() {
-            whenever(RULES_REPOSITORY.findPeriodDuration(pmd = PMD, country = COUNTRY))
+            whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
                 .thenReturn(ALLOWED_TERM)
 
             val startDate = DATE.plusDays(ALLOWED_TERM).plusSeconds(1)
@@ -119,7 +119,7 @@ internal class PeriodServiceTest {
 
         @Test
         fun periodDurationLessThanTenDaysByOneSecond_exception() {
-            whenever(RULES_REPOSITORY.findPeriodDuration(pmd = PMD, country = COUNTRY))
+            whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
                 .thenReturn(ALLOWED_TERM)
 
             val endDate = DATE.plusDays(ALLOWED_TERM).minusSeconds(1)
@@ -137,7 +137,7 @@ internal class PeriodServiceTest {
 
         @Test
         fun periodDurationRuleNotFound_exception() {
-            whenever(RULES_REPOSITORY.findPeriodDuration(pmd = PMD, country = COUNTRY))
+            whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
                 .thenReturn(null)
 
             val endDate = DATE.plusDays(ALLOWED_TERM)
