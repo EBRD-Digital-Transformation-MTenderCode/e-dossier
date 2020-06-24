@@ -3,7 +3,11 @@ package com.procurement.dossier.infrastructure.repository
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.Session
 import com.procurement.dossier.application.repository.RulesRepository
+import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.extension.cassandra.executeRead
+import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.springframework.stereotype.Repository
 
@@ -40,6 +44,19 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             }
         return executeRead(query).one()
             ?.getLong(columnValue)
+    }
+
+    override fun findMinimum(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident> {
+        val query = preparedFindPeriodRuleCQL.bind()
+            .apply {
+                setString(columnCountry, country)
+                setString(columnPmd, pmd.name)
+                setString(columnParameter, MINIMAL_SUBMISSIONS_PARAMETER)
+            }
+        return query.tryExecute(session).orForwardFail { fail -> return fail }
+            .one()
+            ?.getLong(columnValue)
+            .asSuccess()
     }
 
     private fun executeRead(query: BoundStatement) = query.executeRead(
