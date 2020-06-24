@@ -75,7 +75,6 @@ sealed class ValidationErrors(
         description = "No record found by cpid '$cpid' and ocid '$ocid'."
     ) {
         class GetOrganizations(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.12.1")
-        class FindSubmissionForOpening(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.13.1")
     }
 
     class OrganizationsNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
