@@ -5,7 +5,9 @@ import com.datastax.driver.core.Session
 import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.extension.tryToLong
 import com.procurement.dossier.infrastructure.extension.cassandra.executeRead
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
@@ -43,7 +45,8 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
                 setString(columnParameter, PERIOD_DURATION_PARAMETER)
             }
         return executeRead(query).one()
-            ?.getLong(columnValue)
+            ?.getString(columnValue)
+            ?.toLong()
     }
 
     override fun findSubmissionsMinimumQuantity(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident> {
@@ -53,9 +56,21 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
                 setString(columnPmd, pmd.name)
                 setString(columnParameter, SUBMISSIONS_MINIMUM_PARAMETER)
             }
-        return query.tryExecute(session).orForwardFail { fail -> return fail }
+
+        val minimumQuantity = query.tryExecute(session)
+            .orForwardFail { fail -> return fail }
             .one()
-            ?.getLong(columnValue)
+            ?.getString(columnValue)
+
+        return minimumQuantity
+            ?.tryToLong()
+            ?.doReturn { incident ->
+                return Fail.Incident.Database.Parsing(
+                    column = columnValue,
+                    value = minimumQuantity,
+                    exception = incident.exception
+                ).asFailure()
+            }
             .asSuccess()
     }
 
