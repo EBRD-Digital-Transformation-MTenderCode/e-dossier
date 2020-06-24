@@ -510,8 +510,7 @@ class SubmissionService(
         val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
         if (submissions.isEmpty())
-            return ValidationErrors.RecordNotFoundFor.FindSubmissionForOpening(cpid = params.cpid, ocid = params.ocid)
-                .asFailure()
+            return emptyList<FindSubmissionsForOpeningResult>().asSuccess()
 
         val pendingSubmissions = submissions.filter { submission -> submission.status == SubmissionStatus.PENDING }
 
