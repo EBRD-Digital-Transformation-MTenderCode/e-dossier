@@ -48,7 +48,7 @@ class PeriodService(
     }
 
     private fun checkPeriodDuration(period: ValidatePeriodData.Period, context: ValidatePeriodContext) {
-        val expectedDuration = rulesRepository.findDurationBy(country = context.country, pmd = context.pmd)
+        val expectedDuration = rulesRepository.findPeriodDurationBy(country = context.country, pmd = context.pmd)
             ?: throw ErrorException(
                 error = ErrorType.PERIOD_RULE_NOT_FOUND,
                 message = "No period duration rule found for country '${context.country}' and pmd '${context.pmd}'."

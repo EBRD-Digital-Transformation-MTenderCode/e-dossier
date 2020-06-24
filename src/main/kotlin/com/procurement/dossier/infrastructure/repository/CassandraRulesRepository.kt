@@ -35,7 +35,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
 
     private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)
 
-    override fun findDurationBy(country: String, pmd: ProcurementMethod): Long? {
+    override fun findPeriodDurationBy(country: String, pmd: ProcurementMethod): Long? {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
