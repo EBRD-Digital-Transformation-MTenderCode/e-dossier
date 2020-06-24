@@ -12,6 +12,7 @@ import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.dossier.application.repository.RulesRepository
+import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.dossier.infrastructure.exception.io.ReadEntityException
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -31,14 +33,18 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 class RulesRepositoryIT {
     companion object {
         private const val KEYSPACE = "dossier"
-        private const val TABLE_NAME = "period_rules"
+        private const val TABLE_NAME = "rules"
         private const val COLUMN_COUNTRY = "country"
         private const val COLUMN_PMD = "pmd"
         private const val COLUMN_VALUE = "value"
+        private const val COLUMN_PARAMETER = "parameter"
 
+        private const val PERIOD_DURATION_PARAMETER = "period_duration"
+        private const val SUBMISSIONS_MINIMUM_PARAMETER = "submissions_minimum"
         private val PMD = ProcurementMethod.GPA
         private val COUNTRY = "country"
-        private val VALUE: Long = 1
+        private val PERIOD_VALUE: Long = 1
+        private val SUBMISSION_MINIMUM_VALUE: Long = 1
     }
 
     @Autowired
@@ -72,30 +78,82 @@ class RulesRepositoryIT {
         dropKeyspace()
     }
 
-    @Test
-    fun findBy() {
-        insertPeriodRule(pmd = PMD, country = COUNTRY, value = VALUE)
+    @Nested
+    inner class FindPeriodDuration {
 
-        val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
+        @Test
+        fun success() {
+            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_VALUE)
 
-        assertEquals(actualValue, VALUE)
+            val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
+
+            assertEquals(actualValue, PERIOD_VALUE)
+        }
+
+        @Test
+        fun ruleNotFound() {
+            val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
+
+            assertTrue(actualValue == null)
+        }
+
+        @Test
+        fun `error while finding`() {
+            doThrow(RuntimeException())
+                .whenever(session)
+                .execute(any<BoundStatement>())
+
+            assertThrows<ReadEntityException> {
+                rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
+            }
+        }
+
+        private fun insertPeriodRule(pmd: ProcurementMethod, country: String, value: Long) {
+            val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
+                .value(COLUMN_COUNTRY, country)
+                .value(COLUMN_PMD, pmd.name)
+                .value(COLUMN_PARAMETER, PERIOD_DURATION_PARAMETER)
+                .value(COLUMN_VALUE, value.toString())
+            session.execute(record)
+        }
     }
 
-    @Test
-    fun ruleNotFound() {
-        val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
+    @Nested
+    inner class FindSubmissionsMinimumQuantity {
 
-        assertTrue(actualValue == null)
-    }
+        @Test
+        fun success() {
+            insertSubmissionMinimumRule(pmd = PMD, country = COUNTRY, value = SUBMISSION_MINIMUM_VALUE)
 
-    @Test
-    fun `error while finding`() {
-        doThrow(RuntimeException())
-            .whenever(session)
-            .execute(any<BoundStatement>())
+            val actualValue = rulesRepository.findSubmissionsMinimumQuantity(pmd = PMD, country = COUNTRY).get
 
-        assertThrows<ReadEntityException> {
-            rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
+            assertEquals(actualValue, SUBMISSION_MINIMUM_VALUE)
+        }
+
+        @Test
+        fun ruleNotFound() {
+            val actualValue = rulesRepository.findSubmissionsMinimumQuantity(pmd = PMD, country = COUNTRY).get
+
+            assertTrue(actualValue == null)
+        }
+
+        @Test
+        fun `error while finding`() {
+            doThrow(RuntimeException())
+                .whenever(session)
+                .execute(any<BoundStatement>())
+
+            val result = rulesRepository.findSubmissionsMinimumQuantity(pmd = PMD, country = COUNTRY).error
+            assertTrue(result is Fail.Incident.Database.Interaction)
+        }
+
+        private fun insertSubmissionMinimumRule(pmd: ProcurementMethod, country: String, value: Long) {
+            val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
+                .value(COLUMN_COUNTRY, country)
+                .value(COLUMN_PMD, pmd.name)
+                .value(COLUMN_PARAMETER, SUBMISSIONS_MINIMUM_PARAMETER)
+                .value(COLUMN_VALUE, value.toString())
+            session.execute(record)
         }
     }
 
@@ -116,18 +174,11 @@ class RulesRepositoryIT {
                 CREATE TABLE IF NOT EXISTS  $KEYSPACE.$TABLE_NAME (
                     $COLUMN_COUNTRY text,
                     $COLUMN_PMD text,
-                    $COLUMN_VALUE bigint,
-                    primary key($COLUMN_COUNTRY, $COLUMN_PMD)
+                    $COLUMN_VALUE text,
+                    $COLUMN_PARAMETER text,
+                    primary key($COLUMN_COUNTRY, $COLUMN_PMD, $COLUMN_PARAMETER)
                 );
             """
         )
-    }
-
-    private fun insertPeriodRule(pmd: ProcurementMethod, country: String, value: Long) {
-        val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
-            .value(COLUMN_COUNTRY, country)
-            .value(COLUMN_PMD, pmd.name)
-            .value(COLUMN_VALUE, value)
-        session.execute(record)
     }
 }
