@@ -30,7 +30,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             """
 
         private const val PERIOD_DURATION_PARAMETER = "period_duration"
-        private const val MINIMUM_SUBMISSIONS_PARAMETER = "minimum_submissions"
+        private const val SUBMISSIONS_MINIMUM_PARAMETER = "submissions_minimum"
     }
 
     private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)
@@ -51,7 +51,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             .apply {
                 setString(columnCountry, country)
                 setString(columnPmd, pmd.name)
-                setString(columnParameter, MINIMUM_SUBMISSIONS_PARAMETER)
+                setString(columnParameter, SUBMISSIONS_MINIMUM_PARAMETER)
             }
         return query.tryExecute(session).orForwardFail { fail -> return fail }
             .one()
