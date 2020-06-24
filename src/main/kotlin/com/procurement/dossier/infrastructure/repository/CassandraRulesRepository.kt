@@ -30,12 +30,12 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             """
 
         private const val PERIOD_DURATION_PARAMETER = "period_duration"
-        private const val MINIMAL_SUBMISSIONS_PARAMETER = "minimal_submissions"
+        private const val MINIMUM_SUBMISSIONS_PARAMETER = "minimum_submissions"
     }
 
     private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)
 
-    override fun findPeriodDurationBy(country: String, pmd: ProcurementMethod): Long? {
+    override fun findPeriodDuration(country: String, pmd: ProcurementMethod): Long? {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
@@ -46,12 +46,12 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             ?.getLong(columnValue)
     }
 
-    override fun findMinimum(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident> {
+    override fun findSubmissionsMinimumQuantity(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident> {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
                 setString(columnPmd, pmd.name)
-                setString(columnParameter, MINIMAL_SUBMISSIONS_PARAMETER)
+                setString(columnParameter, MINIMUM_SUBMISSIONS_PARAMETER)
             }
         return query.tryExecute(session).orForwardFail { fail -> return fail }
             .one()

@@ -76,14 +76,14 @@ class RulesRepositoryIT {
     fun findBy() {
         insertPeriodRule(pmd = PMD, country = COUNTRY, value = VALUE)
 
-        val actualValue = rulesRepository.findPeriodDurationBy(pmd = PMD, country = COUNTRY)
+        val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
 
         assertEquals(actualValue, VALUE)
     }
 
     @Test
     fun ruleNotFound() {
-        val actualValue = rulesRepository.findPeriodDurationBy(pmd = PMD, country = COUNTRY)
+        val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
 
         assertTrue(actualValue == null)
     }
@@ -95,7 +95,7 @@ class RulesRepositoryIT {
             .execute(any<BoundStatement>())
 
         assertThrows<ReadEntityException> {
-            rulesRepository.findPeriodDurationBy(pmd = PMD, country = COUNTRY)
+            rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
         }
     }
 
