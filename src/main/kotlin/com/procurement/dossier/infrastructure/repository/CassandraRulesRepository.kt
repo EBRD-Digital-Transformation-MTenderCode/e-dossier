@@ -11,26 +11,32 @@ import org.springframework.stereotype.Repository
 class CassandraRulesRepository(private val session: Session) : RulesRepository {
     companion object {
         private const val keySpace = "dossier"
-        private const val tableName = "period_rules"
+        private const val tableName = "rules"
         private const val columnCountry = "country"
         private const val columnPmd = "pmd"
+        private const val columnParameter = "parameter"
         private const val columnValue = "value"
 
-        private const val FIND_BY_COUNTRY_AND_PMD_CQL = """
+        private const val FIND_BY_CQL = """
                SELECT $columnValue
                  FROM $keySpace.$tableName
                 WHERE $columnCountry=? 
                   AND $columnPmd=?
+                  AND $columnParameter=?
             """
+
+        private const val PERIOD_DURATION_PARAMETER = "period_duration"
+        private const val MINIMAL_SUBMISSIONS_PARAMETER = "minimal_submissions"
     }
 
-    private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_COUNTRY_AND_PMD_CQL)
+    private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)
 
     override fun findDurationBy(country: String, pmd: ProcurementMethod): Long? {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
                 setString(columnPmd, pmd.name)
+                setString(columnParameter, PERIOD_DURATION_PARAMETER)
             }
         return executeRead(query).one()
             ?.getLong(columnValue)
