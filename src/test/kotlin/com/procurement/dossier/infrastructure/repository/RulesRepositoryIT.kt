@@ -11,7 +11,7 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.dossier.application.repository.PeriodRulesRepository
+import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.dossier.infrastructure.exception.io.ReadEntityException
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
@@ -28,7 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
-class PeriodRulesRepositoryIT {
+class RulesRepositoryIT {
     companion object {
         private const val KEYSPACE = "dossier"
         private const val TABLE_NAME = "period_rules"
@@ -45,7 +45,7 @@ class PeriodRulesRepositoryIT {
     private lateinit var container: CassandraTestContainer
 
     private lateinit var session: Session
-    private lateinit var periodRulesRepository: PeriodRulesRepository
+    private lateinit var rulesRepository: RulesRepository
 
     @BeforeEach
     fun init() {
@@ -64,7 +64,7 @@ class PeriodRulesRepositoryIT {
         createKeyspace()
         createTable()
 
-        periodRulesRepository = CassandraPeriodRulesRepository(session)
+        rulesRepository = CassandraRulesRepository(session)
     }
 
     @AfterEach
@@ -76,14 +76,14 @@ class PeriodRulesRepositoryIT {
     fun findBy() {
         insertPeriodRule(pmd = PMD, country = COUNTRY, value = VALUE)
 
-        val actualValue = periodRulesRepository.findDurationBy(pmd = PMD, country = COUNTRY)
+        val actualValue = rulesRepository.findDurationBy(pmd = PMD, country = COUNTRY)
 
         assertEquals(actualValue, VALUE)
     }
 
     @Test
     fun ruleNotFound() {
-        val actualValue = periodRulesRepository.findDurationBy(pmd = PMD, country = COUNTRY)
+        val actualValue = rulesRepository.findDurationBy(pmd = PMD, country = COUNTRY)
 
         assertTrue(actualValue == null)
     }
@@ -95,7 +95,7 @@ class PeriodRulesRepositoryIT {
             .execute(any<BoundStatement>())
 
         assertThrows<ReadEntityException> {
-            periodRulesRepository.findDurationBy(pmd = PMD, country = COUNTRY)
+            rulesRepository.findDurationBy(pmd = PMD, country = COUNTRY)
         }
     }
 

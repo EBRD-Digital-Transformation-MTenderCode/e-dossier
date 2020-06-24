@@ -3,7 +3,7 @@ package com.procurement.dossier.infrastructure.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.dossier.application.repository.CriteriaRepository
 import com.procurement.dossier.application.repository.PeriodRepository
-import com.procurement.dossier.application.repository.PeriodRulesRepository
+import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.service.CriteriaService
 import com.procurement.dossier.application.service.PeriodService
 import com.procurement.dossier.infrastructure.service.GenerationService
@@ -33,7 +33,7 @@ class ServiceConfig {
     private lateinit var periodRepository: PeriodRepository
 
     @Autowired
-    private lateinit var periodRulesRepository: PeriodRulesRepository
+    private lateinit var rulesRepository: RulesRepository
 
     @Bean
     fun jsonValidator(): MedeiaValidationService {
@@ -55,6 +55,6 @@ class ServiceConfig {
     }
 
     @Bean
-    fun periodService(): PeriodService = PeriodService(periodRulesRepository, periodRepository)
+    fun periodService(): PeriodService = PeriodService(rulesRepository, periodRepository)
 
 }

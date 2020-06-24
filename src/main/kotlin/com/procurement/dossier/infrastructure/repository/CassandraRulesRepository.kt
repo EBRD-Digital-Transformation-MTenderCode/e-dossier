@@ -2,13 +2,13 @@ package com.procurement.dossier.infrastructure.repository
 
 import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.Session
-import com.procurement.dossier.application.repository.PeriodRulesRepository
+import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.infrastructure.extension.cassandra.executeRead
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.springframework.stereotype.Repository
 
 @Repository
-class CassandraPeriodRulesRepository(private val session: Session) : PeriodRulesRepository {
+class CassandraRulesRepository(private val session: Session) : RulesRepository {
     companion object {
         private const val keySpace = "dossier"
         private const val tableName = "period_rules"
