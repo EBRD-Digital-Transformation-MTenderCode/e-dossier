@@ -19,14 +19,12 @@ import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
-import com.procurement.dossier.domain.util.Result.Companion.failure
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.doOnFalse
 import com.procurement.dossier.domain.util.extension.getUnknownElements
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
-import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.springframework.stereotype.Service
 
 @Service
@@ -514,26 +512,15 @@ class SubmissionService(
 
         val pendingSubmissions = submissions.filter { submission -> submission.status == SubmissionStatus.PENDING }
 
-        checkSubmissionQuantity(quantity = pendingSubmissions.size, pmd = params.pmd, country = params.country)
-            .doOnError { error -> return failure(error) }
+        val minimumQuantity = submissionQuantityRepository.findMinimum(country = params.country, pmd = params.pmd)
+            .orForwardFail { return it }
 
-        return pendingSubmissions.map { submission -> submission.toFindSubmissionsForOpeningResult() }.asSuccess()
-    }
-
-    private fun checkSubmissionQuantity(
-        quantity: Int, country: String, pmd: ProcurementMethod
-    ): ValidationResult<Fail> {
-        val minimumQuantity = submissionQuantityRepository.findMinimum(country, pmd)
-            .doReturn { error -> return ValidationResult.error(error) }
-
-        if (quantity < minimumQuantity!!)
-            return ValidationResult.error(
-                ValidationErrors.InvalidSubmissionQuantity(
-                    actualQuantity = quantity.toString(), minimumQuantity = minimumQuantity.toString()
-                )
-            )
-
-        return ValidationResult.ok()
+        return if (pendingSubmissions.size >= minimumQuantity!!)
+            pendingSubmissions
+                .map { submission -> submission.toFindSubmissionsForOpeningResult() }
+                .asSuccess()
+        else
+            emptyList<FindSubmissionsForOpeningResult>().asSuccess()
     }
 
     private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsForOpeningResult(
