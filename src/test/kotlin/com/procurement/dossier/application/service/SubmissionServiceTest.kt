@@ -594,19 +594,6 @@ internal class SubmissionServiceTest {
             assertTrue(actualError is ValidationErrors.InvalidSubmissionQuantity)
         }
 
-        @Test
-        fun noSubmissionFound_fail() {
-            val params = getParams()
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
-                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
-            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
-                .thenReturn(emptyList<Submission>().asSuccess())
-
-            val actualError = submissionService.findSubmissionsForOpening(params).error
-
-            assertTrue(actualError is ValidationErrors.RecordNotFoundFor.FindSubmissionForOpening)
-        }
-
         private fun getParams() = FindSubmissionsForOpeningParams.tryCreate(
             cpid = CPID.toString(),
             ocid = OCID.toString(),
