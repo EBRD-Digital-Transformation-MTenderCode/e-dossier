@@ -155,6 +155,8 @@ enum class ProcurementMethod(@JsonValue val value: String) {
         } catch (exception: Exception) {
             throw block(exception)
         }
+
+        val allowedElements: List<ProcurementMethod> = enumValues<ProcurementMethod>().toList()
     }
 }
 
