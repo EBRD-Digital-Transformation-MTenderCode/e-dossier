@@ -563,37 +563,6 @@ internal class SubmissionServiceTest {
             assertEquals(expected, actual)
         }
 
-        @Test
-        fun submissionsFoundLessThanQuantity_fail() {
-            val params = getParams()
-            val firstSubmission = stubSubmission()
-            val submissions = listOf(firstSubmission)
-            whenever(submissionQuantityRepository.findMinimum(country = params.country, pmd = params.pmd))
-                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
-            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
-                .thenReturn(submissions.asSuccess())
-
-            val actualError = submissionService.findSubmissionsForOpening(params).error
-
-            assertTrue(actualError is ValidationErrors.InvalidSubmissionQuantity)
-        }
-
-        @Test
-        fun pendingSubmissionsFoundLessThanQuantity_fail() {
-            val params = getParams()
-            val firstSubmission = stubSubmission()
-            val secondSubmission = stubSubmission().copy(status = SubmissionStatus.WITHDRAWN)
-            val submissions = listOf(firstSubmission, secondSubmission)
-            whenever(submissionQuantityRepository.findMinimum(country = params.country, pmd = params.pmd))
-                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
-            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
-                .thenReturn(submissions.asSuccess())
-
-            val actualError = submissionService.findSubmissionsForOpening(params).error
-
-            assertTrue(actualError is ValidationErrors.InvalidSubmissionQuantity)
-        }
-
         private fun getParams() = FindSubmissionsForOpeningParams.tryCreate(
             cpid = CPID.toString(),
             ocid = OCID.toString(),
