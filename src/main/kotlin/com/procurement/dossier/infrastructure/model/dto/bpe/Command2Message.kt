@@ -34,7 +34,11 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
     CHECK_PERIOD_2("checkPeriod"),
     GET_SUBMISSION_STATE_BY_IDS("getSubmissionStateByIds"),
     SET_STATE_FOR_SUBMISSION("setStateForSubmission"),
-    CHECK_ACCESS_TO_SUBMISSION("checkAccessToSubmission");
+    CHECK_ACCESS_TO_SUBMISSION("checkAccessToSubmission"),
+    VERIFY_SUBMISSION_PERIOD_END("verifySubmissionPeriodEnd"),
+    GET_ORGANIZATIONS("getOrganizations"),
+    GET_SUBMISSION_PERIOD_END_DATE("getSubmissionPeriodEndDate"),
+    FIND_SUBMISSIONS_FOR_OPENING("findSubmissionsForOpening");
 
     override fun toString(): String = key
 

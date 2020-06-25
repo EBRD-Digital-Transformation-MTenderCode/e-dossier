@@ -2,6 +2,7 @@ package com.procurement.dossier.domain.fail.error
 
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
+import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.extension.format
@@ -59,13 +60,41 @@ sealed class ValidationErrors(
         class CheckAccessToSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
     }
 
-    class InvalidToken(): ValidationErrors(
+    class InvalidToken() : ValidationErrors(
         numberError = "5.9.1",
         description = "Received token does not match submission token."
     )
 
-    class InvalidOwner(): ValidationErrors(
+    class InvalidOwner() : ValidationErrors(
         numberError = "5.9.2",
         description = "Received owner does not match submission owner."
+    )
+
+    sealed class RecordNotFoundFor(cpid: Cpid, ocid: Ocid, numberError: String) : ValidationErrors(
+        numberError = numberError,
+        description = "No record found by cpid '$cpid' and ocid '$ocid'."
+    ) {
+        class GetOrganizations(cpid: Cpid, ocid: Ocid) : RecordNotFoundFor(cpid, ocid, numberError = "5.12.1")
+    }
+
+    class OrganizationsNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+        numberError = "5.12.2",
+        description = "No organization found by cpid '$cpid' and ocid '$ocid'."
+    )
+
+    sealed class PeriodEndDateNotFoundFor(cpid: Cpid, ocid: Ocid, numberError: String) : ValidationErrors(
+        numberError = numberError,
+        description = "No period end date found by cpid '$cpid' and ocid '$ocid'."
+    ) {
+        class VerifySubmissionPeriodEnd(cpid: Cpid, ocid: Ocid) :
+            PeriodEndDateNotFoundFor(cpid, ocid, numberError = "5.15.1")
+
+        class GetSubmissionPeriodEndDate(cpid: Cpid, ocid: Ocid) :
+            PeriodEndDateNotFoundFor(cpid, ocid, numberError = "5.14.1")
+    }
+
+    class InvalidSubmissionQuantity(actualQuantity: String, minimumQuantity: String) : ValidationErrors(
+        numberError = "5.13.2",
+        description = "Submission quantity must be greater or equal to '$minimumQuantity'. Actual quantity: '$actualQuantity'."
     )
 }

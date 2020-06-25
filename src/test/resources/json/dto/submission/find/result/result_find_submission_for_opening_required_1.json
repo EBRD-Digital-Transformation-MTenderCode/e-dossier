@@ -1,0 +1,134 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "candidates": [
+    {
+      "id": "string",
+      "name": "string",
+      "identifier": {
+        "id": "string",
+        "legalName": "string",
+        "scheme": "string"
+      },
+      "additionalIdentifiers": [
+        {
+          "id": "string",
+          "legalName": "string",
+          "scheme": "string"
+        }
+      ],
+      "address": {
+        "streetAddress": "string",
+        "addressDetails": {
+          "country": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string",
+            "uri": "string"
+          },
+          "region": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string",
+            "uri": "string"
+          },
+          "locality": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string"
+          }
+        }
+      },
+      "contactPoint": {
+        "name": "string",
+        "email": "string",
+        "telephone": "string"
+      },
+      "persones": [
+        {
+          "id": "string",
+          "title": "Mr.",
+          "name": "string",
+          "identifier": {
+            "scheme": "string",
+            "id": "string"
+          },
+          "businessFunctions": [
+            {
+              "id": "string",
+              "type": "authority",
+              "jobTitle": "string",
+              "period": {
+                "startDate": "2020-06-02T09:26:27Z"
+              },
+              "documents": [
+                {
+                  "id": "string",
+                  "documentType": "regulatoryDocument",
+                  "title": "string"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "details": {
+        "mainEconomicActivities": [
+          {
+            "scheme": "MD-CAEM",
+            "id": "string",
+            "description": "string"
+          }
+        ],
+        "scale": "micro",
+        "bankAccounts": [
+          {
+            "description": "string",
+            "bankName": "string",
+            "address": {
+              "streetAddress": "string",
+              "addressDetails": {
+                "country": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string"
+                },
+                "region": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string"
+                },
+                "locality": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string"
+                }
+              }
+            },
+            "identifier": {
+              "scheme": "UA-MFO",
+              "id": "string"
+            },
+            "accountIdentification": {
+              "scheme": "IBAN",
+              "id": "string"
+            }
+          }
+        ],
+        "legalForm": {
+          "scheme": "MD-CFOJ",
+          "id": "string",
+          "description": "string"
+        }
+      }
+    }
+  ],
+  "documents": [
+    {
+      "documentType": "illustration",
+      "id": "string",
+      "title": "string"
+    }
+  ],
+  "status": "pending",
+  "date": "2020-06-02T09:26:27Z"
+}

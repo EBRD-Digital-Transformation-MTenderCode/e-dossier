@@ -6,16 +6,24 @@ import com.procurement.dossier.application.model.data.period.check.CheckPeriodCo
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodResult
 import com.procurement.dossier.application.model.data.period.check.params.CheckPeriod2Params
+import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateParams
+import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateResult
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
 import com.procurement.dossier.application.model.data.period.save.SavePeriodData
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodData
 import com.procurement.dossier.application.repository.PeriodRepository
 import com.procurement.dossier.application.repository.PeriodRulesRepository
+import com.procurement.dossier.application.service.params.VerifySubmissionPeriodEndParams
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
+import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
+import com.procurement.dossier.domain.util.asFailure
+import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.infrastructure.handler.verify.submissionperiodend.VerifySubmissionPeriodEndResult
 import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -23,6 +31,11 @@ class PeriodService(
     private val periodRulesRepository: PeriodRulesRepository,
     private val periodRepository: PeriodRepository
 ) {
+
+    companion object {
+        private val DEVIATION = Duration.ofSeconds(1)
+    }
+
     fun validatePeriod(data: ValidatePeriodData, context: ValidatePeriodContext) {
         val period = data.period
         checkPeriodDates(startDate = period.startDate, endDate = period.endDate)
@@ -105,5 +118,35 @@ class PeriodService(
             )
 
         return ValidationResult.ok()
+    }
+
+    fun verifySubmissionPeriodEnd(params: VerifySubmissionPeriodEndParams): Result<VerifySubmissionPeriodEndResult, Fail> {
+        val cpid = params.cpid
+        val ocid = params.ocid
+
+        val period = periodRepository.tryFindBy(cpid = cpid, ocid = ocid)
+            .orForwardFail { fail -> return fail }
+            ?: return ValidationErrors.PeriodEndDateNotFoundFor.VerifySubmissionPeriodEnd(cpid = cpid, ocid = ocid)
+                .asFailure()
+
+        val date = params.date
+        val periodEndDate = period.endDate
+        val isSubmissionPeriodExpired = isSubmissionPeriodEndExpired(periodEndDate, date)
+
+        return VerifySubmissionPeriodEndResult(submissionPeriodExpired = isSubmissionPeriodExpired)
+            .asSuccess()
+    }
+
+    fun isSubmissionPeriodEndExpired(periodEndDate: LocalDateTime, rqDate: LocalDateTime) =
+        rqDate.plus(DEVIATION).isAfter(periodEndDate)
+
+    fun getSubmissionPeriodEndDate(params: GetSubmissionPeriodEndDateParams): Result<GetSubmissionPeriodEndDateResult, Fail> {
+        val storedPeriod = periodRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { fail -> return fail }
+            ?: return ValidationErrors.PeriodEndDateNotFoundFor.GetSubmissionPeriodEndDate(
+                cpid = params.cpid, ocid = params.ocid
+            ).asFailure()
+
+        return GetSubmissionPeriodEndDateResult(endDate = storedPeriod.endDate).asSuccess()
     }
 }
