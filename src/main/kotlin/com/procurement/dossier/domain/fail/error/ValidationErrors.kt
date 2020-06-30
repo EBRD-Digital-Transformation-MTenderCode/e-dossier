@@ -3,6 +3,7 @@ package com.procurement.dossier.domain.fail.error
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.model.document.DocumentId
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.extension.format
@@ -97,4 +98,33 @@ sealed class ValidationErrors(
         numberError = "5.13.2",
         description = "Submission quantity must be greater or equal to '$minimumQuantity'. Actual quantity: '$actualQuantity'."
     )
+
+    sealed class Duplicate(value: String, entityName: String, numberError: String) : ValidationErrors(
+        numberError = numberError,
+        description = "Value '$value' is not unique in '$entityName'."
+    ) {
+        class Candidate(id: String) : Duplicate(
+            value = id,
+            entityName = "candidates.id",
+            numberError = "5.7.1"
+        )
+
+        class OrganizationDocument(id: DocumentId) : Duplicate(
+            value = id,
+            entityName = "documents.id",
+            numberError = "5.7.2"
+        )
+
+        class PersonBusinessFunction(id: String) : Duplicate(
+            value = id,
+            entityName = "candidates.persons.businessFunctions.id",
+            numberError = "5.7.3"
+        )
+
+        class PersonDocument(id: DocumentId) : Duplicate(
+            value = id,
+            entityName = "candidates.persons.businessFunctions.documents.id",
+            numberError = "5.7.4"
+        )
+    }
 }

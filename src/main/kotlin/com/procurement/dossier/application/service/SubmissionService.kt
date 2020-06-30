@@ -12,6 +12,7 @@ import com.procurement.dossier.application.model.data.submission.state.get.GetSu
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
 import com.procurement.dossier.application.repository.SubmissionQuantityRepository
+import com.procurement.dossier.application.model.data.submission.validate.ValidateSubmissionParams
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
@@ -23,6 +24,7 @@ import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.doOnFalse
+import com.procurement.dossier.domain.util.extension.getDuplicate
 import com.procurement.dossier.domain.util.extension.getUnknownElements
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
 import org.springframework.stereotype.Service
@@ -730,4 +732,47 @@ class SubmissionService(
             )
         }
     )
+
+    fun validateSubmission(params: ValidateSubmissionParams): ValidationResult<Fail> {
+        val duplicateCandidate = params.candidates.getDuplicate { it.id }
+        if (duplicateCandidate != null)
+            return ValidationResult.error(ValidationErrors.Duplicate.Candidate(id = duplicateCandidate.id))
+
+        val duplicateDocument = params.documents.getDuplicate { it.id }
+        if (duplicateDocument != null)
+            return ValidationResult.error(ValidationErrors.Duplicate.OrganizationDocument(id = duplicateDocument.id))
+
+        checkDuplicatesWithinPerson(params)
+            .doOnError { return ValidationResult.error(it) }
+
+        return ValidationResult.ok()
+    }
+
+    private fun checkDuplicatesWithinPerson(params: ValidateSubmissionParams) : ValidationResult<Fail>{
+        val persons = params.candidates
+            .asSequence()
+            .flatMap { candidate -> candidate.persones.asSequence() }
+
+        val duplicateBusinessFunction = getDuplicateBusinessFunctionWithinPerson(persons)
+        if (duplicateBusinessFunction != null)
+            return ValidationResult.error(ValidationErrors.Duplicate.PersonBusinessFunction(id = duplicateBusinessFunction.id))
+
+        val duplicatePersonDocument = getDuplicateDocumentWithinPerson(persons)
+        if (duplicatePersonDocument != null)
+            return ValidationResult.error(ValidationErrors.Duplicate.PersonDocument(id = duplicatePersonDocument.id))
+
+        return ValidationResult.ok()
+    }
+
+    private fun getDuplicateBusinessFunctionWithinPerson(persons: Sequence<ValidateSubmissionParams.Candidate.Person>) =
+        persons.map { person -> person.businessFunctions.getDuplicate { it.id } }
+            .firstOrNull { duplicate -> duplicate != null }
+
+    private fun getDuplicateDocumentWithinPerson(persons: Sequence<ValidateSubmissionParams.Candidate.Person>) =
+        persons.map { person ->
+            person.businessFunctions
+                .flatMap { businessFunction -> businessFunction.documents }
+                .getDuplicate { document -> document.id }
+        }
+            .firstOrNull { duplicate -> duplicate != null }
 }

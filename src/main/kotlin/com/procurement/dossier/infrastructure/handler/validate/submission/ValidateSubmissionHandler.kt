@@ -2,6 +2,7 @@ package com.procurement.dossier.infrastructure.handler.validate.submission
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.dossier.application.service.Logger
+import com.procurement.dossier.application.service.SubmissionService
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.infrastructure.converter.submission.convert
@@ -13,16 +14,16 @@ import com.procurement.dossier.infrastructure.model.dto.request.submission.Valid
 import org.springframework.stereotype.Component
 
 @Component
-class ValidateSubmissionHandler(logger: Logger) : AbstractValidationHandler<Command2Type>(logger) {
+class ValidateSubmissionHandler(logger: Logger, private val submissionService: SubmissionService) : AbstractValidationHandler<Command2Type>(logger) {
 
     override val action: Command2Type = Command2Type.VALIDATE_SUBMISSION
 
     override fun execute(node: JsonNode): ValidationResult<Fail> {
-        node.tryGetParams(ValidateSubmissionRequest::class.java)
+        val params = node.tryGetParams(ValidateSubmissionRequest::class.java)
             .doReturn { error -> return ValidationResult.error(error) }
             .convert()
             .doReturn { error -> return ValidationResult.error(error) }
 
-        return ValidationResult.ok()
+        return submissionService.validateSubmission(params)
     }
 }
