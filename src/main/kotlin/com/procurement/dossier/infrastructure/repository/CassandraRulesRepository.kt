@@ -31,7 +31,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
                   AND $columnParameter=?
             """
 
-        private const val PERIOD_DURATION_PARAMETER = "period_duration"
+        private const val PERIOD_DURATION_PARAMETER = "minSubmissionPeriodDuration"
         private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForOpening"
     }
 

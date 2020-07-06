@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS  dossier.rules (
     Period duration
 */
 INSERT INTO dossier.rules (country, pmd, parameter, value)
-     VALUES ('MD', 'GPA', 'period_duration', '10');
+     VALUES ('MD', 'GPA', 'minSubmissionPeriodDuration', '10');
 
 /*
     Submissions minimum quantity
