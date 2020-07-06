@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.time.Duration
 
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
@@ -43,7 +44,7 @@ class RulesRepositoryIT {
         private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForOpening"
         private val PMD = ProcurementMethod.GPA
         private val COUNTRY = "country"
-        private val PERIOD_VALUE: Long = 1
+        private val PERIOD_DURATION_VALUE = Duration.ofDays(1)
         private val SUBMISSION_MINIMUM_VALUE: Long = 1
     }
 
@@ -83,11 +84,11 @@ class RulesRepositoryIT {
 
         @Test
         fun success() {
-            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_VALUE)
+            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_DURATION_VALUE.toDays())
 
             val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
 
-            assertEquals(actualValue, PERIOD_VALUE)
+            assertEquals(actualValue, PERIOD_DURATION_VALUE)
         }
 
         @Test

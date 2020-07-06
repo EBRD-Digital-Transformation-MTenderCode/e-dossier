@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.ResolverStyle
@@ -37,7 +38,7 @@ internal class PeriodServiceTest {
     companion object {
         private const val COUNTRY = "MD"
         private val PMD = ProcurementMethod.GPA
-        private val ALLOWED_TERM = 10L
+        private val ALLOWED_DURATION = Duration.ofDays(10)
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1565251033096")!!
         private val OCID = Ocid.tryCreateOrNull("ocds-b3wdp1-MD-1581509539187-EV-1581509653044")!!
 
@@ -59,9 +60,9 @@ internal class PeriodServiceTest {
         @Test
         fun periodDurationEqualsAllowedTerm_success() {
             whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
-                .thenReturn(ALLOWED_TERM)
+                .thenReturn(ALLOWED_DURATION)
 
-            val endDate = DATE.plusDays(ALLOWED_TERM)
+            val endDate = DATE.plusDays(ALLOWED_DURATION.toDays())
             val startDate = DATE
             val data = createValidatePeriodData(startDate = startDate, endDate = endDate)
             val context = stubContext()
@@ -72,9 +73,9 @@ internal class PeriodServiceTest {
         @Test
         fun periodDurationGreaterThanAllowedTerm_success() {
             whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
-                .thenReturn(ALLOWED_TERM)
+                .thenReturn(ALLOWED_DURATION)
 
-            val endDate = DATE.plusDays(ALLOWED_TERM).plusSeconds(1)
+            val endDate = DATE.plusDays(ALLOWED_DURATION.toDays()).plusSeconds(1)
             val startDate = DATE
             val data = createValidatePeriodData(startDate = startDate, endDate = endDate)
             val context = stubContext()
@@ -85,7 +86,7 @@ internal class PeriodServiceTest {
         @Test
         fun startAndEndDateEqual_exception() {
             whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
-                .thenReturn(ALLOWED_TERM)
+                .thenReturn(ALLOWED_DURATION)
 
             val data = createValidatePeriodData(startDate = DATE, endDate = DATE)
             val context = stubContext()
@@ -101,9 +102,9 @@ internal class PeriodServiceTest {
         @Test
         fun endDatePrecedesStartDate_exception() {
             whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
-                .thenReturn(ALLOWED_TERM)
+                .thenReturn(ALLOWED_DURATION)
 
-            val startDate = DATE.plusDays(ALLOWED_TERM).plusSeconds(1)
+            val startDate = DATE.plusDays(ALLOWED_DURATION.toDays()).plusSeconds(1)
             val endDate = DATE
 
             val data = createValidatePeriodData(startDate = startDate, endDate = endDate)
@@ -120,9 +121,9 @@ internal class PeriodServiceTest {
         @Test
         fun periodDurationLessThanTenDaysByOneSecond_exception() {
             whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
-                .thenReturn(ALLOWED_TERM)
+                .thenReturn(ALLOWED_DURATION)
 
-            val endDate = DATE.plusDays(ALLOWED_TERM).minusSeconds(1)
+            val endDate = DATE.plusDays(ALLOWED_DURATION.toDays()).minusSeconds(1)
             val startDate = DATE
             val data = createValidatePeriodData(startDate = startDate, endDate = endDate)
             val context = stubContext()
@@ -140,7 +141,7 @@ internal class PeriodServiceTest {
             whenever(rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY))
                 .thenReturn(null)
 
-            val endDate = DATE.plusDays(ALLOWED_TERM)
+            val endDate = DATE.plusDays(ALLOWED_DURATION.toDays())
             val startDate = DATE
             val data = createValidatePeriodData(startDate = startDate, endDate = endDate)
             val context = stubContext()
