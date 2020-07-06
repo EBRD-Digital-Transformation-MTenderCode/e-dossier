@@ -15,11 +15,13 @@ import com.procurement.dossier.application.model.data.submission.state.get.GetSu
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
 import com.procurement.dossier.application.repository.RulesRepository
+import com.procurement.dossier.application.model.data.submission.validate.ValidateSubmissionParams
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.model.document.DocumentId
 import com.procurement.dossier.domain.model.enums.BusinessFunctionType
 import com.procurement.dossier.domain.model.enums.DocumentType
 import com.procurement.dossier.domain.model.enums.PersonTitle
@@ -32,6 +34,7 @@ import com.procurement.dossier.domain.model.submission.SubmissionState
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.extension.format
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
@@ -563,37 +566,6 @@ internal class SubmissionServiceTest {
             assertEquals(expected, actual)
         }
 
-        @Test
-        fun submissionsFoundLessThanQuantity_fail() {
-            val params = getParams()
-            val firstSubmission = stubSubmission()
-            val submissions = listOf(firstSubmission)
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
-                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
-            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
-                .thenReturn(submissions.asSuccess())
-
-            val actualError = submissionService.findSubmissionsForOpening(params).error
-
-            assertTrue(actualError is ValidationErrors.InvalidSubmissionQuantity)
-        }
-
-        @Test
-        fun pendingSubmissionsFoundLessThanQuantity_fail() {
-            val params = getParams()
-            val firstSubmission = stubSubmission()
-            val secondSubmission = stubSubmission().copy(status = SubmissionStatus.WITHDRAWN)
-            val submissions = listOf(firstSubmission, secondSubmission)
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
-                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
-            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
-                .thenReturn(submissions.asSuccess())
-
-            val actualError = submissionService.findSubmissionsForOpening(params).error
-
-            assertTrue(actualError is ValidationErrors.InvalidSubmissionQuantity)
-        }
-
         private fun getParams() = FindSubmissionsForOpeningParams.tryCreate(
             cpid = CPID.toString(),
             ocid = OCID.toString(),
@@ -808,6 +780,383 @@ internal class SubmissionServiceTest {
                 )
             }
         )
+    }
+
+    @Nested
+    inner class ValidateSubmission {
+
+        @Test
+        fun success() {
+
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+            val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
+            val businessFunctionDocumentFourth = createBusinessFunctionDocument("bf_document_4")
+            val businessFunctionDocumentFifth = createBusinessFunctionDocument("bf_document_5")
+
+            val businessFunctionFirst = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+            val businessFunctionSecond = createBusinessFunction(
+                id = "bf2", documents = listOf(businessFunctionDocumentThird, businessFunctionDocumentFourth)
+            )
+            val businessFunctionThird = createBusinessFunction(
+                id = "bf3", documents = listOf(businessFunctionDocumentFifth)
+            )
+
+            val personFirst = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
+            val personSecond = createPerson(listOf(businessFunctionThird))
+
+            val candidateFirst = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst, personSecond))
+            val candidateSecond = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst))
+
+            val documentFirst = createDocument(id = "document_1")
+            val documentSecond = createDocument(id = "document_2")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidateFirst, candidateSecond),
+                documents = listOf(documentFirst, documentSecond)
+            )
+
+            val actual = submissionService.validateSubmission(params)
+
+            assertTrue(actual is ValidationResult.Ok)
+        }
+
+        @Test
+        fun duplicateBusinessFunctionInDifferentPersones_success() {
+
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+            val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
+            val businessFunctionDocumentFourth = createBusinessFunctionDocument("bf_document_4")
+
+            val businessFunctionFirst = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+            val businessFunctionSecond = createBusinessFunction(
+                id = "bf2", documents = listOf(businessFunctionDocumentThird, businessFunctionDocumentFourth)
+            )
+
+            val personFirst = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
+            val personSecond = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
+
+            val candidate = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst, personSecond))
+
+            val documentFirst = createDocument(id = "document_1")
+            val documentSecond = createDocument(id = "document_2")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidate),
+                documents = listOf(documentFirst, documentSecond)
+            )
+
+            val actual = submissionService.validateSubmission(params)
+
+            assertTrue(actual is ValidationResult.Ok)
+        }
+
+        @Test
+        fun duplicateCandidate_fail() {
+
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+            val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
+            val businessFunctionDocumentFourth = createBusinessFunctionDocument("bf_document_4")
+            val businessFunctionDocumentFifth = createBusinessFunctionDocument("bf_document_5")
+
+            val businessFunctionFirst = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+            val businessFunctionSecond = createBusinessFunction(
+                id = "bf2", documents = listOf(businessFunctionDocumentThird, businessFunctionDocumentFourth)
+            )
+            val businessFunctionThird = createBusinessFunction(
+                id = "bf3", documents = listOf(businessFunctionDocumentFifth)
+            )
+
+            val personFirst = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
+            val personSecond = createPerson(listOf(businessFunctionThird))
+
+            val candidateId = UUID.randomUUID()
+            val candidate = createCandidate(id = candidateId, persones = listOf(personFirst, personSecond))
+
+            val documentFirst = createDocument(id = "document_1")
+            val documentSecond = createDocument(id = "document_2")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidate, candidate),
+                documents = listOf(documentFirst, documentSecond)
+            )
+
+            val actual = submissionService.validateSubmission(params).error
+
+            assertTrue(actual is ValidationErrors.Duplicate.Candidate)
+            assertEquals("Value '$candidateId' is not unique in 'candidates.id'.", actual.description)
+        }
+
+        @Test
+        fun duplicateBusinessFunctionsWithinOnePerson_fail() {
+
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+
+            val businessFunction = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+
+            val person = createPerson(listOf(businessFunction, businessFunction))
+            val candidate = createCandidate(id = UUID.randomUUID(), persones = listOf(person))
+
+            val documentFirst = createDocument(id = "document_1")
+            val documentSecond = createDocument(id = "document_2")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidate),
+                documents = listOf(documentFirst, documentSecond)
+            )
+
+            val actual = submissionService.validateSubmission(params).error
+
+            assertTrue(actual is ValidationErrors.Duplicate.PersonBusinessFunction)
+            assertEquals(
+                "Value '${businessFunction.id}' is not unique in 'candidates.persons.businessFunctions.id'.",
+                actual.description
+            )
+        }
+
+        @Test
+        fun duplicateDocumentsWithinOnePerson_fail() {
+
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+            val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
+
+            val businessFunctionFirst = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+            val businessFunctionSecond = createBusinessFunction(
+                id = "bf2", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentThird)
+            )
+
+            val person = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
+
+            val candidate = createCandidate(id = UUID.randomUUID(), persones = listOf(person))
+
+            val documentFirst = createDocument(id = "document_1")
+            val documentSecond = createDocument(id = "document_2")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidate),
+                documents = listOf(documentFirst, documentSecond)
+            )
+
+            val actual = submissionService.validateSubmission(params).error
+
+            assertTrue(actual is ValidationErrors.Duplicate.PersonDocument)
+            assertEquals(
+                "Value '${businessFunctionDocumentFirst.id}' is not unique in 'candidates.persons.businessFunctions.documents.id'.",
+                actual.description
+            )
+        }
+
+        @Test
+        fun duplicateDocuments_fail() {
+
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+            val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
+            val businessFunctionDocumentFourth = createBusinessFunctionDocument("bf_document_4")
+            val businessFunctionDocumentFifth = createBusinessFunctionDocument("bf_document_5")
+
+            val businessFunctionFirst = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+            val businessFunctionSecond = createBusinessFunction(
+                id = "bf2", documents = listOf(businessFunctionDocumentThird, businessFunctionDocumentFourth)
+            )
+            val businessFunctionThird = createBusinessFunction(
+                id = "bf3", documents = listOf(businessFunctionDocumentFifth)
+            )
+
+            val personFirst = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
+            val personSecond = createPerson(listOf(businessFunctionThird))
+
+            val candidateFirst = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst, personSecond))
+            val candidateSecond = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst))
+
+            val document = createDocument(id = "document_1")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidateFirst, candidateSecond),
+                documents = listOf(document, document)
+            )
+
+            val actual = submissionService.validateSubmission(params).error
+
+            assertTrue(actual is ValidationErrors.Duplicate.OrganizationDocument)
+            assertEquals("Value '${document.id}' is not unique in 'documents.id'.", actual.description)
+        }
+
+        private fun createValidateSubmissionParams(
+            documents: List<ValidateSubmissionParams.Document>,
+            candidates: List<ValidateSubmissionParams.Candidate>
+        ) = ValidateSubmissionParams.tryCreate(
+            id = UUID.randomUUID().toString(),
+            documents = documents,
+            candidates = candidates
+        ).get
+
+        private fun createCandidate(
+            id: UUID,
+            persones: List<ValidateSubmissionParams.Candidate.Person>
+        ) = ValidateSubmissionParams.Candidate.tryCreate(
+            id = id.toString(),
+            name = "candidate.name",
+            identifier = ValidateSubmissionParams.Candidate.Identifier(
+                id = "identifier.id",
+                scheme = "identifier.scheme",
+                uri = "identifier.uri",
+                legalName = "identifier.legalName"
+            ),
+            additionalIdentifiers = listOf(
+                ValidateSubmissionParams.Candidate.AdditionalIdentifier(
+                    id = "additionalIdentifier.id",
+                    scheme = "additionalIdentifier.scheme",
+                    uri = "additionalIdentifier.uri",
+                    legalName = "additionalIdentifier.legalName"
+                )
+            ),
+            persones = persones,
+            address = ValidateSubmissionParams.Candidate.Address(
+                streetAddress = "streetAddress",
+                postalCode = "postalCode",
+                addressDetails = ValidateSubmissionParams.Candidate.Address.AddressDetails(
+                    country = ValidateSubmissionParams.Candidate.Address.AddressDetails.Country(
+                        id = "country.id",
+                        scheme = "country.scheme",
+                        description = "country.description"
+                    ),
+                    region = ValidateSubmissionParams.Candidate.Address.AddressDetails.Region(
+                        id = "region.id",
+                        scheme = "region.scheme",
+                        description = "region.description"
+                    ),
+                    locality = ValidateSubmissionParams.Candidate.Address.AddressDetails.Locality(
+                        id = "locality.id",
+                        scheme = "locality.scheme",
+                        description = "locality.description"
+                    )
+                )
+            ),
+            contactPoint = ValidateSubmissionParams.Candidate.ContactPoint(
+                name = "contactPoint.name",
+                url = "contactPoint.url",
+                telephone = "contactPoint.telephone",
+                faxNumber = "contactPoint.faxNumber",
+                email = "contactPoint.email"
+            ),
+            details = ValidateSubmissionParams.Candidate.Details.tryCreate(
+                typeOfSupplier = SupplierType.COMPANY.key,
+                scale = Scale.LARGE.key,
+                mainEconomicActivities = listOf(
+                    ValidateSubmissionParams.Candidate.Details.MainEconomicActivity(
+                        id = "mainEconomicActivities.id",
+                        scheme = "mainEconomicActivities.scheme",
+                        description = "mainEconomicActivities.description",
+                        uri = "mainEconomicActivities.uri"
+                    )
+                ),
+                legalForm = ValidateSubmissionParams.Candidate.Details.LegalForm(
+                    id = "legalForm.id",
+                    scheme = "legalForm.scheme",
+                    description = "legalForm.description",
+                    uri = "legalForm.uri"
+                ),
+                bankAccounts = listOf(
+                    ValidateSubmissionParams.Candidate.Details.BankAccount.tryCreate(
+                        description = "legalForm.bankAccounts",
+                        identifier = ValidateSubmissionParams.Candidate.Details.BankAccount.Identifier(
+                            id = "bankAccounts.identifier.id",
+                            scheme = "bankAccounts.identifier.scheme"
+                        ),
+                        bankName = "bankName",
+                        additionalAccountIdentifiers = listOf(
+                            ValidateSubmissionParams.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
+                                id = "bankAccounts.additionalAccountIdentifiers.id",
+                                scheme = "bankAccounts.additionalAccountIdentifiers.scheme"
+                            )
+                        ),
+                        accountIdentification = ValidateSubmissionParams.Candidate.Details.BankAccount.AccountIdentification(
+                            id = "bankAccounts.accountIdentification.id",
+                            scheme = "bankAccounts.accountIdentification.scheme"
+                        ),
+                        address = ValidateSubmissionParams.Candidate.Details.BankAccount.Address(
+                            streetAddress = "streetAddress",
+                            postalCode = "postalCode",
+                            addressDetails = ValidateSubmissionParams.Candidate.Details.BankAccount.Address.AddressDetails(
+                                country = ValidateSubmissionParams.Candidate.Details.BankAccount.Address.AddressDetails.Country(
+                                    id = "country.id",
+                                    scheme = "country.scheme",
+                                    description = "country.description"
+                                ),
+                                region = ValidateSubmissionParams.Candidate.Details.BankAccount.Address.AddressDetails.Region(
+                                    id = "region.id",
+                                    scheme = "region.scheme",
+                                    description = "region.description"
+                                ),
+                                locality = ValidateSubmissionParams.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
+                                    id = "locality.id",
+                                    scheme = "locality.scheme",
+                                    description = "locality.description"
+                                )
+                            )
+                        )
+                    ).get
+                )
+            ).get
+        ).get
+
+        private fun createPerson(businessFunctions: List<ValidateSubmissionParams.Candidate.Person.BusinessFunction>) =
+            ValidateSubmissionParams.Candidate.Person.tryCreate(
+                id = "person.id",
+                title = PersonTitle.MR.key,
+                identifier = ValidateSubmissionParams.Candidate.Person.Identifier(
+                    id = "persones.identifier.id",
+                    scheme = "persones.identifier.scheme",
+                    uri = "persones.identifier.uri"
+                ),
+                name = "persones.name",
+                businessFunctions = businessFunctions
+            ).get
+
+        private fun createBusinessFunction(
+            id: String,
+            documents: List<ValidateSubmissionParams.Candidate.Person.BusinessFunction.Document>
+        ) = ValidateSubmissionParams.Candidate.Person.BusinessFunction.tryCreate(
+            id = id,
+            type = BusinessFunctionType.CONTACT_POINT.key,
+            documents = documents,
+            jobTitle = "jobTitle",
+            period = ValidateSubmissionParams.Candidate.Person.BusinessFunction.Period.tryCreate(
+                startDate = LocalDateTime.now().format()
+            ).get
+        ).get
+
+        private fun createBusinessFunctionDocument(id: DocumentId) =
+            ValidateSubmissionParams.Candidate.Person.BusinessFunction.Document.tryCreate(
+                documentType = DocumentType.REGULATORY_DOCUMENT.key,
+                id = id,
+                description = "businessFunctions.document.description",
+                title = "businessFunctions.document.title"
+            ).get
+
+        private fun createDocument(id: DocumentId) = ValidateSubmissionParams.Document.tryCreate(
+            documentType = DocumentType.X_TECHNICAL_DOCUMENTS.key,
+            id = id,
+            description = "document.description",
+            title = "document.title"
+        ).get
     }
 
     private fun stubSubmission() =
