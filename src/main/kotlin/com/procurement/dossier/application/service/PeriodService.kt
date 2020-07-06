@@ -25,7 +25,6 @@ import com.procurement.dossier.infrastructure.handler.verify.submissionperiodend
 import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 class PeriodService(
     private val rulesRepository: RulesRepository,
@@ -54,7 +53,7 @@ class PeriodService(
                 message = "No period duration rule found for country '${context.country}' and pmd '${context.pmd}'."
             )
 
-        val actualDuration = ChronoUnit.DAYS.between(period.startDate, period.endDate)
+        val actualDuration = Duration.between(period.startDate, period.endDate)
 
         if (actualDuration < expectedDuration)
             throw ErrorException(ErrorType.INVALID_PERIOD_DURATION)
