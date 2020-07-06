@@ -48,7 +48,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
         return executeRead(query).one()
             ?.getString(columnValue)
             ?.toLong()
-            ?.let { Duration.ofDays(it) }
+            ?.let { Duration.ofSeconds(it) }
     }
 
     override fun findSubmissionsMinimumQuantity(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident> {

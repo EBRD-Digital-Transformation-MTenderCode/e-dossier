@@ -55,11 +55,9 @@ CREATE TABLE IF NOT EXISTS  dossier.rules (
 /*
     Period duration
 */
-INSERT INTO dossier.rules (country, pmd, parameter, value)
-     VALUES ('MD', 'GPA', 'minSubmissionPeriodDuration', '10');
+INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'minSubmissionPeriodDuration', '864000');
 
 /*
     Submissions minimum quantity
 */
-INSERT INTO dossier.rules (country, pmd, parameter, value)
-     VALUES ('MD', 'GPA', 'minQtySubmissionsForOpening', '3');
+INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'minQtySubmissionsForOpening', '3');
