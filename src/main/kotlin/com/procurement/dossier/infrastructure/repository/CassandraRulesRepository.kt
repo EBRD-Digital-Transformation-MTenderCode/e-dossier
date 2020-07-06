@@ -12,6 +12,7 @@ import com.procurement.dossier.infrastructure.extension.cassandra.executeRead
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.springframework.stereotype.Repository
+import java.time.Duration
 
 @Repository
 class CassandraRulesRepository(private val session: Session) : RulesRepository {
@@ -37,7 +38,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
 
     private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)
 
-    override fun findPeriodDuration(country: String, pmd: ProcurementMethod): Long? {
+    override fun findPeriodDuration(country: String, pmd: ProcurementMethod): Duration? {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
@@ -47,6 +48,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
         return executeRead(query).one()
             ?.getString(columnValue)
             ?.toLong()
+            ?.let { Duration.ofDays(it) }
     }
 
     override fun findSubmissionsMinimumQuantity(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident> {
