@@ -11,7 +11,7 @@ import com.procurement.dossier.application.model.data.submission.state.get.GetSu
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
-import com.procurement.dossier.application.repository.SubmissionQuantityRepository
+import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.model.data.submission.validate.ValidateSubmissionParams
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Service
 @Service
 class SubmissionService(
     private val submissionRepository: SubmissionRepository,
-    private val submissionQuantityRepository: SubmissionQuantityRepository,
+    private val rulesRepository: RulesRepository,
     private val generable: Generable
 ) {
     fun createSubmission(params: CreateSubmissionParams): Result<CreateSubmissionResult, Fail.Incident> {
@@ -514,7 +514,7 @@ class SubmissionService(
 
         val pendingSubmissions = submissions.filter { submission -> submission.status == SubmissionStatus.PENDING }
 
-        val minimumQuantity = submissionQuantityRepository.findMinimum(country = params.country, pmd = params.pmd)
+        val minimumQuantity = rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd)
             .orForwardFail { return it }
 
         return if (pendingSubmissions.size >= minimumQuantity!!)

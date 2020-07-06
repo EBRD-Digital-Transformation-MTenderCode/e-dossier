@@ -20,13 +20,6 @@ CREATE TABLE IF NOT EXISTS  dossier.period (
     primary key(cpid, ocid)
 );
 
-CREATE TABLE IF NOT EXISTS  dossier.period_rules (
-    country text,
-    pmd text,
-    value bigint,
-    primary key(country, pmd)
-);
-
 CREATE TABLE IF NOT EXISTS  dossier.history
 (
     command_id text,
@@ -48,14 +41,23 @@ CREATE TABLE IF NOT EXISTS dossier.submission
     primary key (cpid, ocid, id)
 );
 
-CREATE TABLE IF NOT EXISTS dossier.submission_quantity
-(
+DROP TABLE IF EXISTS dossier.period_rules;
+
+DROP TABLE IF EXISTS dossier.submission_quantity;
+
+CREATE TABLE IF NOT EXISTS  dossier.rules (
     country text,
     pmd text,
-    min_submissions bigint,
-    primary key (country, pmd)
+    parameter text,
+    value text,
+    primary key(country, pmd, parameter)
 );
+/*
+    Period duration
+*/
+INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'minSubmissionPeriodDuration', '864000');
 
-INSERT INTO dossier.period_rules (country, pmd, value)  VALUES ('MD', 'GPA', 10);
-
-INSERT INTO dossier.submission_quantity (country, pmd, min_submissions)  VALUES ('MD', 'GPA', 3);
+/*
+    Submissions minimum quantity
+*/
+INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'minQtySubmissionsForOpening', '3');
