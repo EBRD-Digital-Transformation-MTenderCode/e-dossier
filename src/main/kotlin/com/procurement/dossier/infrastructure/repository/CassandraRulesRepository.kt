@@ -34,6 +34,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
 
         private const val PERIOD_DURATION_PARAMETER = "minSubmissionPeriodDuration"
         private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForOpening"
+        private const val EXTENSION_PARAMETER = "extensionAfterUnsuspended"
     }
 
     private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)
@@ -76,8 +77,24 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             .asSuccess()
     }
 
+    override fun findExtensionAfterUnsuspended(
+        country: String,
+        pmd: ProcurementMethod
+    ): Duration? {
+        val query = preparedFindPeriodRuleCQL.bind()
+            .apply {
+                setString(columnCountry, country)
+                setString(columnPmd, pmd.name)
+                setString(columnParameter, EXTENSION_PARAMETER)
+            }
+        return executeRead(query).one()
+            ?.getString(columnValue)
+            ?.toLong()
+            ?.let { Duration.ofSeconds(it) }
+    }
+
     private fun executeRead(query: BoundStatement) = query.executeRead(
         session = session,
-        errorMessage = "Encountered error while reading period rules from database"
+        errorMessage = "Encountered error while reading rules from database"
     )
 }
