@@ -158,11 +158,11 @@ class PeriodService(
         )
 
         val extension = rulesRepository.findExtensionAfterUnsuspended(country = context.country, pmd = context.pmd)?: throw ErrorException(
-            error = ErrorType.PERIOD_NOT_FOUND,
+            error = ErrorType.EXTENSION_RULE_NOT_FOUND,
             message = "No extension rule found by country '${context.country}' and pmd '${context.pmd}'."
         )
 
-        val updatedEndDate = storedPeriod.endDate.plusDays(extension.toDays())
+        val updatedEndDate = storedPeriod.endDate.plusSeconds(extension.seconds)
         val updatedPeriod = storedPeriod.copy(endDate = updatedEndDate)
 
         periodRepository.saveOrUpdatePeriod(period = updatedPeriod)
