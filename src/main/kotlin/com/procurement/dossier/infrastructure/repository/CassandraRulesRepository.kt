@@ -32,7 +32,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             """
 
         private const val PERIOD_DURATION_PARAMETER = "period_duration"
-        private const val SUBMISSIONS_MINIMUM_PARAMETER = "submissions_minimum"
+        private const val SUBMISSIONS_MINIMUM_PARAMETER = "min_submissions"
     }
 
     private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)

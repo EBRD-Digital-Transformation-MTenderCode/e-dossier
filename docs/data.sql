@@ -62,4 +62,4 @@ INSERT INTO dossier.rules (country, pmd, parameter, value)
     Submissions minimum quantity
 */
 INSERT INTO dossier.rules (country, pmd, parameter, value)
-     VALUES ('MD', 'GPA', 'submissions_minimum', '3');
+     VALUES ('MD', 'GPA', 'min_submissions', '3');
