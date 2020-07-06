@@ -40,7 +40,7 @@ class RulesRepositoryIT {
         private const val COLUMN_PARAMETER = "parameter"
 
         private const val PERIOD_DURATION_PARAMETER = "period_duration"
-        private const val SUBMISSIONS_MINIMUM_PARAMETER = "min_submissions"
+        private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForOpening"
         private val PMD = ProcurementMethod.GPA
         private val COUNTRY = "country"
         private val PERIOD_VALUE: Long = 1
