@@ -254,13 +254,8 @@ class CommandService(
                         val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
                         if (historyEntity != null) historyEntity
                         else {
-                            val ocid = if (cm.operationType == "createCNonPN")
-                                cm.ocidCnParsed()
-                            else
-                                cm.ocidParsed()
-
                             val context = ExtendSubmissionPeriodContext(
-                                cpid = cm.cpidParsed(), ocid = ocid, pmd = cm.pmd, country = cm.country
+                                cpid = cm.cpidParsed(), ocid = cm.ocidParsed(), pmd = cm.pmd, country = cm.country
                             )
                             periodService.extendSubmissionPeriod(context = context)
                                 .also {
