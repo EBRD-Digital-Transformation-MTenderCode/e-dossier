@@ -13,7 +13,7 @@ import com.procurement.dossier.application.model.data.period.save.SavePeriodData
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodData
 import com.procurement.dossier.application.repository.PeriodRepository
-import com.procurement.dossier.application.repository.PeriodRulesRepository
+import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.service.params.VerifySubmissionPeriodEndParams
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
@@ -25,10 +25,9 @@ import com.procurement.dossier.infrastructure.handler.verify.submissionperiodend
 import com.procurement.dossier.infrastructure.model.entity.PeriodEntity
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 class PeriodService(
-    private val periodRulesRepository: PeriodRulesRepository,
+    private val rulesRepository: RulesRepository,
     private val periodRepository: PeriodRepository
 ) {
 
@@ -48,13 +47,13 @@ class PeriodService(
     }
 
     private fun checkPeriodDuration(period: ValidatePeriodData.Period, context: ValidatePeriodContext) {
-        val expectedDuration = periodRulesRepository.findDurationBy(country = context.country, pmd = context.pmd)
+        val expectedDuration = rulesRepository.findPeriodDuration(country = context.country, pmd = context.pmd)
             ?: throw ErrorException(
                 error = ErrorType.PERIOD_RULE_NOT_FOUND,
                 message = "No period duration rule found for country '${context.country}' and pmd '${context.pmd}'."
             )
 
-        val actualDuration = ChronoUnit.DAYS.between(period.startDate, period.endDate)
+        val actualDuration = Duration.between(period.startDate, period.endDate)
 
         if (actualDuration < expectedDuration)
             throw ErrorException(ErrorType.INVALID_PERIOD_DURATION)

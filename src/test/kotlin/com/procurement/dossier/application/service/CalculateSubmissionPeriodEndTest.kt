@@ -2,7 +2,7 @@ package com.procurement.dossier.application.service
 
 import com.nhaarman.mockito_kotlin.mock
 import com.procurement.dossier.application.repository.PeriodRepository
-import com.procurement.dossier.application.repository.PeriodRulesRepository
+import com.procurement.dossier.application.repository.RulesRepository
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -12,9 +12,9 @@ import java.time.LocalDateTime
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CalculateSubmissionPeriodEndTest {
 
-    private val periodRulesRepository: PeriodRulesRepository = mock()
+    private val rulesRepository: RulesRepository = mock()
     private val periodRepository: PeriodRepository = mock()
-    private val periodService: PeriodService = PeriodService(periodRulesRepository, periodRepository)
+    private val periodService: PeriodService = PeriodService(rulesRepository, periodRepository)
 
     @Test
     fun verifyThatSubmissionPeriodIsExpiredWithoutError() {

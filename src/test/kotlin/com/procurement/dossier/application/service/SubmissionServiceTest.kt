@@ -14,7 +14,7 @@ import com.procurement.dossier.application.model.data.submission.state.get.GetSu
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
-import com.procurement.dossier.application.repository.SubmissionQuantityRepository
+import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.model.data.submission.validate.ValidateSubmissionParams
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
@@ -58,12 +58,12 @@ internal class SubmissionServiceTest {
         private val SUBMISSION_ID_2 = UUID.randomUUID()
 
         private val submissionRepository: SubmissionRepository = mock()
-        private val submissionQuantityRepository: SubmissionQuantityRepository = mock()
+        private val rulesRepository: RulesRepository = mock()
         private val generable: Generable = mock()
 
         private val submissionService: SubmissionService = SubmissionService(
             submissionRepository = submissionRepository,
-            submissionQuantityRepository = submissionQuantityRepository,
+            rulesRepository = rulesRepository,
             generable = generable
         )
     }
@@ -555,7 +555,7 @@ internal class SubmissionServiceTest {
             val firstSubmission = stubSubmission()
             val secondSubmission = stubSubmission()
             val submissions = listOf(firstSubmission, secondSubmission)
-            whenever(submissionQuantityRepository.findMinimum(country = params.country, pmd = params.pmd))
+            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
                 .thenReturn(SUBMISSION_QUANTITY.asSuccess())
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(submissions.asSuccess())
