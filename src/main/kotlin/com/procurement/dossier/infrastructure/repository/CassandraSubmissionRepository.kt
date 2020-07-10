@@ -100,7 +100,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             """
 
         private const val FIND_SUBMISSIONS_BY_IDS_CQL = """
-               SELECT $columnJsonData,
+               SELECT $columnJsonData
                  FROM $keySpace.$tableName
                 WHERE $columnCpid=? 
                   AND $columnOcid=?
