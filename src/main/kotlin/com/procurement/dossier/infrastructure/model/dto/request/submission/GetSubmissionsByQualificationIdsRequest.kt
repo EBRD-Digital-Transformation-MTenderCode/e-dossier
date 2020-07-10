@@ -9,6 +9,7 @@ data class GetSubmissionsByQualificationIdsRequest(
     @param:JsonProperty("qualifications") @field:JsonProperty("qualifications") val qualifications: List<Qualification>
 ) {
     data class Qualification(
-        @param:JsonProperty("id") @field:JsonProperty("id") val id: String
+        @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+        @param:JsonProperty("relatedSubmission") @field:JsonProperty("relatedSubmission") val relatedSubmission: String
     )
 }
