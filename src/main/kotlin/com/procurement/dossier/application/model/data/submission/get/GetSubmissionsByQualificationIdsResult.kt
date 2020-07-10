@@ -7,11 +7,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.domain.model.document.DocumentId
+import com.procurement.dossier.domain.model.enums.BusinessFunctionType
 import com.procurement.dossier.domain.model.enums.DocumentType
+import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
-import com.procurement.dossier.domain.model.person.PersonId
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.submission.SubmissionId
@@ -65,7 +66,7 @@ data class GetSubmissionsByQualificationIdsResult(
                 @param:JsonProperty("contactPoint") @field:JsonProperty("contactPoint") val contactPoint: ContactPoint,
 
                 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-                @param:JsonProperty("persones") @field:JsonProperty("persones") val persones: List<Persone>?,
+                @param:JsonProperty("persones") @field:JsonProperty("persones") val persones: List<Person>?,
                 @param:JsonProperty("details") @field:JsonProperty("details") val details: Details
             ) {
                 data class Identifier(
@@ -135,9 +136,9 @@ data class GetSubmissionsByQualificationIdsResult(
                     @param:JsonProperty("url") @field:JsonProperty("url") val url: String?
                 )
 
-                data class Persone(
-                    @param:JsonProperty("id") @field:JsonProperty("id") val id: PersonId,
-                    @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+                data class Person(
+                    @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+                    @param:JsonProperty("title") @field:JsonProperty("title") val title: PersonTitle,
                     @param:JsonProperty("name") @field:JsonProperty("name") val name: String,
                     @param:JsonProperty("identifier") @field:JsonProperty("identifier") val identifier: Identifier,
                     @param:JsonProperty("businessFunctions") @field:JsonProperty("businessFunctions") val businessFunctions: List<BusinessFunction>
@@ -152,7 +153,7 @@ data class GetSubmissionsByQualificationIdsResult(
 
                     data class BusinessFunction(
                         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
-                        @param:JsonProperty("type") @field:JsonProperty("type") val type: String,
+                        @param:JsonProperty("type") @field:JsonProperty("type") val type: BusinessFunctionType,
                         @param:JsonProperty("jobTitle") @field:JsonProperty("jobTitle") val jobTitle: String,
                         @param:JsonProperty("period") @field:JsonProperty("period") val period: Period,
 
