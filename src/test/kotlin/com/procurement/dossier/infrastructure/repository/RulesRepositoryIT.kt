@@ -86,7 +86,7 @@ class RulesRepositoryIT {
 
         @Test
         fun success() {
-            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_DURATION_VALUE.toDays())
+            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_DURATION_VALUE.seconds)
 
             val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
 
