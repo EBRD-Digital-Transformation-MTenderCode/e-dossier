@@ -8,4 +8,5 @@ import java.time.Duration
 interface RulesRepository {
     fun findPeriodDuration(country: String, pmd: ProcurementMethod): Duration?
     fun findSubmissionsMinimumQuantity(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident>
+    fun findExtensionAfterUnsuspended(country: String, pmd: ProcurementMethod): Duration?
 }

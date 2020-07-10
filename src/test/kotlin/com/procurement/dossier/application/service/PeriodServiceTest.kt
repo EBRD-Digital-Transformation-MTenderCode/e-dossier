@@ -9,6 +9,8 @@ import com.procurement.dossier.application.model.data.period.check.CheckPeriodCo
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodResult
 import com.procurement.dossier.application.model.data.period.check.params.CheckPeriod2Params
+import com.procurement.dossier.application.model.data.period.extend.ExtendSubmissionPeriodContext
+import com.procurement.dossier.application.model.data.period.extend.ExtendSubmissionPeriodResult
 import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateParams
 import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateResult
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
@@ -53,6 +55,15 @@ internal class PeriodServiceTest {
         private val periodRepository: PeriodRepository = mock()
         private val periodService: PeriodService = PeriodService(rulesRepository, periodRepository)
     }
+
+    private fun stubPeriodEntity() =
+        PeriodEntity(
+            startDate = ENTITY_START_DATE,
+            endDate = ENTITY_END_DATE,
+            ocid = OCID,
+            cpid = CPID
+        )
+
 
     @Nested
     inner class Validate {
@@ -254,14 +265,6 @@ internal class PeriodServiceTest {
         private fun createCheckPeriodData(startDate: LocalDateTime, endDate: LocalDateTime) =
             CheckPeriodData(period = CheckPeriodData.Period(startDate = startDate, endDate = endDate))
 
-        private fun stubPeriodEntity() =
-            PeriodEntity(
-                startDate = ENTITY_START_DATE,
-                endDate = ENTITY_END_DATE,
-                ocid = OCID,
-                cpid = CPID
-            )
-
         private fun stubContext() = CheckPeriodContext(cpid = CPID, ocid = OCID)
     }
 
@@ -440,5 +443,66 @@ internal class PeriodServiceTest {
             cpid = CPID.toString(),
             ocid = OCID.toString()
         ).get
+    }
+
+    @Nested
+    inner class ExtendSubmissionPeriod{
+        @Test
+        fun success() {
+            val context = ExtendSubmissionPeriodContext(
+                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY
+            )
+
+            val periodEntity = stubPeriodEntity()
+            whenever(periodRepository.findBy(cpid = context.cpid, ocid = context.ocid))
+                .thenReturn(periodEntity)
+
+            val extensionInSeconds = 20L
+            whenever(rulesRepository.findExtensionAfterUnsuspended(country = context.country, pmd = context.pmd))
+                .thenReturn(Duration.ofSeconds(extensionInSeconds))
+
+            val actual = periodService.extendSubmissionPeriod(context = context)
+            val expected = ExtendSubmissionPeriodResult(startDate = periodEntity.startDate, endDate = periodEntity.endDate.plusSeconds(extensionInSeconds))
+
+            assertEquals(expected, actual)
+        }
+
+        @Test
+        fun periodNotFound_error() {
+            val context = ExtendSubmissionPeriodContext(
+                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY
+            )
+
+            whenever(periodRepository.findBy(cpid = context.cpid, ocid = context.ocid))
+                .thenReturn(null)
+
+            val exception = assertThrows<ErrorException> {
+                periodService.extendSubmissionPeriod(context = context)
+            }
+            val expectedErrorCode = ErrorType.PERIOD_NOT_FOUND.code
+
+            assertEquals(expectedErrorCode, exception.code)
+        }
+
+        @Test
+        fun extensionRuleNotFound_error() {
+            val context = ExtendSubmissionPeriodContext(
+                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY
+            )
+
+            val periodEntity = stubPeriodEntity()
+            whenever(periodRepository.findBy(cpid = context.cpid, ocid = context.ocid))
+                .thenReturn(periodEntity)
+
+            whenever(rulesRepository.findExtensionAfterUnsuspended(country = context.country, pmd = context.pmd))
+                .thenReturn(null)
+
+            val exception = assertThrows<ErrorException> {
+                periodService.extendSubmissionPeriod(context = context)
+            }
+            val expectedErrorCode = ErrorType.EXTENSION_RULE_NOT_FOUND.code
+
+            assertEquals(expectedErrorCode, exception.code)
+        }
     }
 }
