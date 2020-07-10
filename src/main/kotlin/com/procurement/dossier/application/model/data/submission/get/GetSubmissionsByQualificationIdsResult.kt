@@ -34,7 +34,8 @@ data class GetSubmissionsByQualificationIdsResult(
             @JsonInclude(JsonInclude.Include.NON_EMPTY)
             @param:JsonProperty("requirementResponses") @field:JsonProperty("requirementResponses") val requirementResponses: List<RequirementResponse>?,
             @param:JsonProperty("candidates") @field:JsonProperty("candidates") val candidates: List<Candidate>,
-            @param:JsonProperty("documents") @field:JsonProperty("documents") val documents: List<Document>
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
+            @param:JsonProperty("documents") @field:JsonProperty("documents") val documents: List<Document>?
         ) {
             data class RequirementResponse(
                 @param:JsonProperty("id") @field:JsonProperty("id") val id: RequirementResponseId,
