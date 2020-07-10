@@ -9,6 +9,7 @@ import com.procurement.dossier.infrastructure.handler.query.FindSubmissionsForOp
 import com.procurement.dossier.infrastructure.handler.query.GetOrganizationsHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionPeriodEndDateHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionStateByIdsHandler
+import com.procurement.dossier.infrastructure.handler.query.GetSubmissionsByQualificationIdsHandler
 import com.procurement.dossier.infrastructure.handler.validate.period.CheckPeriod2Handler
 import com.procurement.dossier.infrastructure.handler.validate.requirementresponse.ValidateRequirementResponseHandler
 import com.procurement.dossier.infrastructure.handler.validate.submission.CheckAccessToSubmissionHandler
@@ -34,7 +35,8 @@ class Command2Service(
     private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler,
     private val getOrganizationsHandler: GetOrganizationsHandler,
     private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
-    private val findSubmissionsForOpeningHandler: FindSubmissionsForOpeningHandler
+    private val findSubmissionsForOpeningHandler: FindSubmissionsForOpeningHandler,
+    private val getSubmissionsByQualificationIdsHandler: GetSubmissionsByQualificationIdsHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -68,6 +70,7 @@ class Command2Service(
             Command2Type.GET_ORGANIZATIONS -> getOrganizationsHandler.handle(node = request)
             Command2Type.GET_SUBMISSION_PERIOD_END_DATE -> getSubmissionPeriodEndDateHandler.handle(node = request)
             Command2Type.FIND_SUBMISSIONS_FOR_OPENING -> findSubmissionsForOpeningHandler.handle(node = request)
+            Command2Type.GET_SUBMISSIONS_BY_QUALIFICATION_IDS -> getSubmissionsByQualificationIdsHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
