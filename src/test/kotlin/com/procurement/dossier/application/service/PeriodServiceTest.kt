@@ -462,7 +462,7 @@ internal class PeriodServiceTest {
                 .thenReturn(Duration.ofSeconds(extensionInSeconds))
 
             val actual = periodService.extendSubmissionPeriod(context = context)
-            val expected = ExtendSubmissionPeriodResult(startDate = periodEntity.startDate, endDate = periodEntity.endDate.plusSeconds(extensionInSeconds))
+            val expected = ExtendSubmissionPeriodResult(ExtendSubmissionPeriodResult.Period(startDate = periodEntity.startDate, endDate = periodEntity.endDate.plusSeconds(extensionInSeconds)))
 
             assertEquals(expected, actual)
         }
