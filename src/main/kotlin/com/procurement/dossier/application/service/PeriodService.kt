@@ -157,16 +157,23 @@ class PeriodService(
             message = "No period found by cpid '${context.cpid}' and ocid '${context.ocid}'."
         )
 
-        val extension = rulesRepository.findExtensionAfterUnsuspended(country = context.country, pmd = context.pmd)?: throw ErrorException(
-            error = ErrorType.EXTENSION_RULE_NOT_FOUND,
-            message = "No extension rule found by country '${context.country}' and pmd '${context.pmd}'."
-        )
+        val extension =
+            rulesRepository.findExtensionAfterUnsuspended(country = context.country, pmd = context.pmd)
+                ?: throw ErrorException(
+                    error = ErrorType.EXTENSION_RULE_NOT_FOUND,
+                    message = "No extension rule found by country '${context.country}' and pmd '${context.pmd}'."
+                )
 
         val updatedEndDate = storedPeriod.endDate.plusSeconds(extension.seconds)
         val updatedPeriod = storedPeriod.copy(endDate = updatedEndDate)
 
         periodRepository.saveOrUpdatePeriod(period = updatedPeriod)
 
-        return ExtendSubmissionPeriodResult(startDate = updatedPeriod.startDate, endDate = updatedPeriod.endDate)
+        return ExtendSubmissionPeriodResult(
+            ExtendSubmissionPeriodResult.Period(
+                startDate = updatedPeriod.startDate,
+                endDate = updatedPeriod.endDate
+            )
+        )
     }
 }
