@@ -43,6 +43,7 @@ internal class PeriodServiceTest {
         private val ALLOWED_DURATION = Duration.ofDays(10)
         private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1565251033096")!!
         private val OCID = Ocid.tryCreateOrNull("ocds-b3wdp1-MD-1581509539187-EV-1581509653044")!!
+        private val START_DATE = LocalDateTime.now()
 
         private const val FORMAT_PATTERN = "uuuu-MM-dd'T'HH:mm:ss'Z'"
         private val FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(FORMAT_PATTERN)
@@ -450,7 +451,7 @@ internal class PeriodServiceTest {
         @Test
         fun success() {
             val context = ExtendSubmissionPeriodContext(
-                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY
+                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY, startDate = START_DATE
             )
 
             val periodEntity = stubPeriodEntity()
@@ -462,7 +463,11 @@ internal class PeriodServiceTest {
                 .thenReturn(Duration.ofSeconds(extensionInSeconds))
 
             val actual = periodService.extendSubmissionPeriod(context = context)
-            val expected = ExtendSubmissionPeriodResult(ExtendSubmissionPeriodResult.Period(startDate = periodEntity.startDate, endDate = periodEntity.endDate.plusSeconds(extensionInSeconds)))
+            val expected = ExtendSubmissionPeriodResult(
+                ExtendSubmissionPeriodResult.Period(
+                    startDate = periodEntity.startDate,
+                    endDate = context.startDate.plusSeconds(extensionInSeconds))
+            )
 
             assertEquals(expected, actual)
         }
@@ -470,7 +475,7 @@ internal class PeriodServiceTest {
         @Test
         fun periodNotFound_error() {
             val context = ExtendSubmissionPeriodContext(
-                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY
+                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY, startDate = START_DATE
             )
 
             whenever(periodRepository.findBy(cpid = context.cpid, ocid = context.ocid))
@@ -487,7 +492,7 @@ internal class PeriodServiceTest {
         @Test
         fun extensionRuleNotFound_error() {
             val context = ExtendSubmissionPeriodContext(
-                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY
+                cpid = CPID, ocid = OCID, pmd = PMD, country = COUNTRY, startDate = START_DATE
             )
 
             val periodEntity = stubPeriodEntity()
