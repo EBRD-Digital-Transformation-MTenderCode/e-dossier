@@ -164,7 +164,7 @@ class PeriodService(
                     message = "No extension rule found by country '${context.country}' and pmd '${context.pmd.name}'."
                 )
 
-        val updatedEndDate = storedPeriod.endDate.plusSeconds(extension.seconds)
+        val updatedEndDate = context.startDate.plus(extension)
         val updatedPeriod = storedPeriod.copy(endDate = updatedEndDate)
 
         periodRepository.saveOrUpdatePeriod(period = updatedPeriod)

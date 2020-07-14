@@ -29,6 +29,7 @@ import com.procurement.dossier.infrastructure.model.dto.bpe.ocidParsed
 import com.procurement.dossier.infrastructure.model.dto.bpe.operationType
 import com.procurement.dossier.infrastructure.model.dto.bpe.owner
 import com.procurement.dossier.infrastructure.model.dto.bpe.pmd
+import com.procurement.dossier.infrastructure.model.dto.bpe.startDate
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.dossier.infrastructure.model.dto.request.period.CheckPeriodRequest
 import com.procurement.dossier.infrastructure.model.dto.request.period.SavePeriodRequest
@@ -255,7 +256,11 @@ class CommandService(
                         if (historyEntity != null) historyEntity
                         else {
                             val context = ExtendSubmissionPeriodContext(
-                                cpid = cm.cpidParsed(), ocid = cm.ocidParsed(), pmd = cm.pmd, country = cm.country
+                                cpid = cm.cpidParsed(),
+                                ocid = cm.ocidParsed(),
+                                pmd = cm.pmd,
+                                country = cm.country,
+                                startDate = cm.startDate
                             )
                             periodService.extendSubmissionPeriod(context = context)
                                 .also {

@@ -11,12 +11,14 @@ import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
+import com.procurement.dossier.domain.util.extension.parseLocalDateTime
 import com.procurement.dossier.infrastructure.bind.apiversion.ApiVersionDeserializer
 import com.procurement.dossier.infrastructure.bind.apiversion.ApiVersionSerializer
 import com.procurement.dossier.infrastructure.config.properties.GlobalProperties
 import com.procurement.dossier.infrastructure.dto.ApiErrorResponse
 import com.procurement.dossier.infrastructure.dto.ApiVersion
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
+import java.time.LocalDateTime
 import java.util.*
 
 data class CommandMessage @JsonCreator constructor(
@@ -128,6 +130,13 @@ val CommandMessage.language: String
         ?: throw ErrorException(
             error = ErrorType.CONTEXT,
             message = "Missing the 'language' attribute in context."
+        )
+
+val CommandMessage.startDate: LocalDateTime
+    get() = this.context.startDate?.parseLocalDateTime()
+        ?: throw ErrorException(
+            error = ErrorType.CONTEXT,
+            message = "Missing the 'startDate' attribute in context."
         )
 
 data class Context @JsonCreator constructor(
