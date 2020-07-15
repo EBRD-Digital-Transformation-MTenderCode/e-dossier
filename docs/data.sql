@@ -61,3 +61,6 @@ INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 
     Submissions minimum quantity
 */
 INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'minQtySubmissionsForOpening', '3');
+
+INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'extensionAfterUnsuspended', '604800');
+INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'TEST_GPA', 'extensionAfterUnsuspended', '120');

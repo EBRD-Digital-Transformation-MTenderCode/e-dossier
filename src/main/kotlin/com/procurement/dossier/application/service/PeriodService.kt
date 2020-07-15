@@ -6,6 +6,8 @@ import com.procurement.dossier.application.model.data.period.check.CheckPeriodCo
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodResult
 import com.procurement.dossier.application.model.data.period.check.params.CheckPeriod2Params
+import com.procurement.dossier.application.model.data.period.extend.ExtendSubmissionPeriodContext
+import com.procurement.dossier.application.model.data.period.extend.ExtendSubmissionPeriodResult
 import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateParams
 import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateResult
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
@@ -147,5 +149,31 @@ class PeriodService(
             ).asFailure()
 
         return GetSubmissionPeriodEndDateResult(endDate = storedPeriod.endDate).asSuccess()
+    }
+
+    fun extendSubmissionPeriod(context: ExtendSubmissionPeriodContext): ExtendSubmissionPeriodResult {
+        val storedPeriod = periodRepository.findBy(cpid = context.cpid, ocid = context.ocid) ?: throw ErrorException(
+            error = ErrorType.PERIOD_NOT_FOUND,
+            message = "No period found by cpid '${context.cpid}' and ocid '${context.ocid}'."
+        )
+
+        val extension =
+            rulesRepository.findExtensionAfterUnsuspended(country = context.country, pmd = context.pmd)
+                ?: throw ErrorException(
+                    error = ErrorType.EXTENSION_RULE_NOT_FOUND,
+                    message = "No extension rule found by country '${context.country}' and pmd '${context.pmd.name}'."
+                )
+
+        val updatedEndDate = context.startDate.plus(extension)
+        val updatedPeriod = storedPeriod.copy(endDate = updatedEndDate)
+
+        periodRepository.saveOrUpdatePeriod(period = updatedPeriod)
+
+        return ExtendSubmissionPeriodResult(
+            ExtendSubmissionPeriodResult.Period(
+                startDate = updatedPeriod.startDate,
+                endDate = updatedPeriod.endDate
+            )
+        )
     }
 }

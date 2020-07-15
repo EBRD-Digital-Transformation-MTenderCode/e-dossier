@@ -42,10 +42,12 @@ class RulesRepositoryIT {
 
         private const val PERIOD_DURATION_PARAMETER = "minSubmissionPeriodDuration"
         private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForOpening"
+        private const val EXTERNSION_PARAMETER = "extensionAfterUnsuspended"
         private val PMD = ProcurementMethod.GPA
         private val COUNTRY = "country"
         private val PERIOD_DURATION_VALUE = Duration.ofDays(1)
         private val SUBMISSION_MINIMUM_VALUE: Long = 1
+        private val EXTENSION_VALUE = Duration.ofSeconds(10)
     }
 
     @Autowired
@@ -84,7 +86,7 @@ class RulesRepositoryIT {
 
         @Test
         fun success() {
-            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_DURATION_VALUE.toDays())
+            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_DURATION_VALUE.seconds)
 
             val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
 
@@ -153,6 +155,46 @@ class RulesRepositoryIT {
                 .value(COLUMN_COUNTRY, country)
                 .value(COLUMN_PMD, pmd.name)
                 .value(COLUMN_PARAMETER, SUBMISSIONS_MINIMUM_PARAMETER)
+                .value(COLUMN_VALUE, value.toString())
+            session.execute(record)
+        }
+    }
+
+    @Nested
+    inner class FindExtensionAfterUnsuspended {
+
+        @Test
+        fun success() {
+            insertExtensionRule(pmd = PMD, country = COUNTRY, value = EXTENSION_VALUE.seconds)
+
+            val actualValue = rulesRepository.findExtensionAfterUnsuspended(pmd = PMD, country = COUNTRY)
+
+            assertEquals(EXTENSION_VALUE, actualValue)
+        }
+
+        @Test
+        fun ruleNotFound() {
+            val actualValue = rulesRepository.findExtensionAfterUnsuspended(pmd = PMD, country = COUNTRY)
+
+            assertTrue(actualValue == null)
+        }
+
+        @Test
+        fun `error while finding`() {
+            doThrow(RuntimeException())
+                .whenever(session)
+                .execute(any<BoundStatement>())
+
+            assertThrows<ReadEntityException> {
+                rulesRepository.findExtensionAfterUnsuspended(pmd = PMD, country = COUNTRY)
+            }
+        }
+
+        private fun insertExtensionRule(pmd: ProcurementMethod, country: String, value: Long) {
+            val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
+                .value(COLUMN_COUNTRY, country)
+                .value(COLUMN_PMD, pmd.name)
+                .value(COLUMN_PARAMETER, EXTERNSION_PARAMETER)
                 .value(COLUMN_VALUE, value.toString())
             session.execute(record)
         }

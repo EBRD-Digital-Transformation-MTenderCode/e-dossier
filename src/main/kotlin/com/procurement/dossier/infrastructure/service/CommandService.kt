@@ -5,6 +5,7 @@ import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.data.CreatedCriteria
 import com.procurement.dossier.application.model.data.GetCriteriaData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodContext
+import com.procurement.dossier.application.model.data.period.extend.ExtendSubmissionPeriodContext
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
 import com.procurement.dossier.application.repository.history.HistoryDao
@@ -28,6 +29,7 @@ import com.procurement.dossier.infrastructure.model.dto.bpe.ocidParsed
 import com.procurement.dossier.infrastructure.model.dto.bpe.operationType
 import com.procurement.dossier.infrastructure.model.dto.bpe.owner
 import com.procurement.dossier.infrastructure.model.dto.bpe.pmd
+import com.procurement.dossier.infrastructure.model.dto.bpe.startDate
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.dossier.infrastructure.model.dto.request.period.CheckPeriodRequest
 import com.procurement.dossier.infrastructure.model.dto.request.period.SavePeriodRequest
@@ -222,7 +224,7 @@ class CommandService(
                         val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
                         if (historyEntity != null) Unit
                         else {
-                            val ocid = if(cm.operationType == "createCNonPN")
+                            val ocid = if (cm.operationType == "createCNonPN")
                                 cm.ocidCnParsed()
                             else
                                 cm.ocidParsed()
@@ -233,6 +235,38 @@ class CommandService(
                                     historyDao.saveHistory(cm.id, cm.command.value(), it)
                                     if (log.isDebugEnabled)
                                         log.debug("Period save completed successfully")
+                                }
+                        }
+                    }
+                    ProcurementMethod.OT, ProcurementMethod.TEST_OT,
+                    ProcurementMethod.SV, ProcurementMethod.TEST_SV,
+                    ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
+                    ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
+                }
+            }
+
+            CommandType.EXTEND_SUBMISSION_PERIOD -> {
+                when (cm.pmd) {
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
+                        val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
+                        if (historyEntity != null) historyEntity
+                        else {
+                            val context = ExtendSubmissionPeriodContext(
+                                cpid = cm.cpidParsed(),
+                                ocid = cm.ocidParsed(),
+                                pmd = cm.pmd,
+                                country = cm.country,
+                                startDate = cm.startDate
+                            )
+                            periodService.extendSubmissionPeriod(context = context)
+                                .also {
+                                    historyDao.saveHistory(cm.id, cm.command.value(), it)
+                                    if (log.isDebugEnabled)
+                                        log.debug("Period extension completed successfully")
                                 }
                         }
                     }
