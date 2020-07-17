@@ -98,6 +98,14 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                 WHERE $columnCpid=? 
                   AND $columnOcid=?                
             """
+
+        private const val FIND_SUBMISSIONS_BY_IDS_CQL = """
+               SELECT $columnJsonData
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId IN :$idValues;
+            """
     }
 
     private val preparedSaveSubmissionCQL = session.prepare(SAVE_SUBMISSION_CQL)
@@ -106,6 +114,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     private val preparedGetSubmissionCredentialsCQL = session.prepare(GET_SUBMISSION_CREDENTIALS_CQL)
     private val preparedFindSubmissionCQL = session.prepare(FIND_SUBMISSION_CQL)
     private val preparedFindSubmissionsCQL = session.prepare(FIND_SUBMISSIONS_CQL)
+    private val preparedFindSubmissionsByIdsCQL = session.prepare(FIND_SUBMISSIONS_BY_IDS_CQL)
 
     override fun saveSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): MaybeFail<Fail.Incident> {
         val entity = submission.convert()
@@ -411,6 +420,22 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             .one()
             ?.let { row -> convertToSubmission(row = row) }
             ?.orForwardFail { fail -> return fail }
+            .asSuccess()
+    }
+
+    override fun findBy(
+        cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>
+    ): Result<List<Submission>, Fail.Incident> {
+        val query = preparedFindSubmissionsByIdsCQL.bind()
+            .setList(idValues, submissionIds)
+            .setString(columnCpid, cpid.toString())
+            .setString(columnOcid, ocid.toString())
+
+        return query.tryExecute(session)
+            .orForwardFail { error -> return error }
+            .map { row ->
+                convertToSubmission(row = row).orForwardFail { fail -> return fail }
+            }
             .asSuccess()
     }
 

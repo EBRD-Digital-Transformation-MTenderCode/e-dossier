@@ -30,4 +30,7 @@ interface SubmissionRepository {
     fun findSubmission(cpid: Cpid, ocid: Ocid, id: SubmissionId): Result<Submission?, Fail.Incident>
 
     fun findBy(cpid: Cpid, ocid: Ocid): Result<List<Submission>, Fail.Incident>
+
+    fun findBy(cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>): Result<List<Submission>, Fail.Incident>
+
 }

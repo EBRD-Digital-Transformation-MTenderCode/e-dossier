@@ -8,14 +8,16 @@ import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
+import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
+import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsResult
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsResult
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsResult
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionParams
 import com.procurement.dossier.application.model.data.submission.state.set.SetStateForSubmissionResult
-import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.model.data.submission.validate.ValidateSubmissionParams
+import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
@@ -28,6 +30,7 @@ import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
+import com.procurement.dossier.domain.model.qualification.QualificationId
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionState
@@ -1156,6 +1159,293 @@ internal class SubmissionServiceTest {
             id = id,
             description = "document.description",
             title = "document.title"
+        ).get
+    }
+
+    @Nested
+    inner class GetSubmissionsByQualificationIds {
+
+        @Test
+        fun success() {
+            val params = getParams()
+
+            val submissionIds = params.qualifications.map { it.relatedSubmission }
+            val storedSubmissions = listOf(
+                stubSubmission().copy(id = submissionIds[0]),
+                stubSubmission().copy(id = submissionIds[1])
+            )
+            whenever(submissionRepository.findBy(cpid = CPID, ocid = OCID, submissionIds = submissionIds))
+                .thenReturn(storedSubmissions.asSuccess())
+
+            val expected = storedSubmissions.convertToResult()
+            val actual = submissionService.getSubmissionsByQualificationIds(params = params).get
+
+            assertEquals(expected, actual)
+        }
+
+        @Test
+        fun oneSubmissionNotFound_fail() {
+            val params = getParams()
+
+            val requestSubmissionIds = params.qualifications.map { it.relatedSubmission }
+            val storedSubmissions = listOf(stubSubmission().copy(id = requestSubmissionIds[0]))
+            whenever(submissionRepository.findBy(cpid = CPID, ocid = OCID, submissionIds = requestSubmissionIds))
+                .thenReturn(storedSubmissions.asSuccess())
+
+            val actual = submissionService.getSubmissionsByQualificationIds(params = params).error
+
+            val expectedErrorCode = "VR.COM-5.17.1"
+            val expectedDescription = "Submission id(s) '${requestSubmissionIds[1]}' not found."
+
+            assertEquals(expectedErrorCode, actual.code)
+            assertEquals(expectedDescription, actual.description)
+        }
+
+        @Test
+        fun noSubmissionFound_fail() {
+            val params = getParams()
+            val requestSubmissionIds = params.qualifications.map { it.relatedSubmission }
+
+            whenever(submissionRepository.findBy(cpid = CPID, ocid = OCID, submissionIds = requestSubmissionIds))
+                .thenReturn(emptyList<Submission>().asSuccess())
+
+            val actual = submissionService.getSubmissionsByQualificationIds(params = params).error
+
+            val expectedErrorCode = "VR.COM-5.17.1"
+            val expectedDescription = "Submission id(s) '${requestSubmissionIds[0]}, ${requestSubmissionIds[1]}' not found."
+
+            assertEquals(expectedErrorCode, actual.code)
+            assertEquals(expectedDescription, actual.description)
+        }
+
+        private fun List<Submission>.convertToResult() =
+            GetSubmissionsByQualificationIdsResult(
+                submissions = GetSubmissionsByQualificationIdsResult.Submissions(
+                    details = this.map { submission ->
+                        GetSubmissionsByQualificationIdsResult.Submissions.Detail(
+                            id = submission.id,
+                            date = submission.date,
+                            status = submission.status,
+                            requirementResponses = submission.requirementResponses.map { requirementResponse ->
+                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.RequirementResponse(
+                                    id = requirementResponse.id,
+                                    relatedCandidate = requirementResponse.relatedCandidate.let { relatedCandidate ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.RequirementResponse.RelatedCandidate(
+                                            id = relatedCandidate.id,
+                                            name = relatedCandidate.name
+                                        )
+                                    },
+                                    requirement = requirementResponse.requirement.let { requirement ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.RequirementResponse.Requirement(
+                                            id = requirement.id
+                                        )
+                                    },
+                                    value = requirementResponse.value
+                                )
+                            },
+                            documents = submission.documents.map { document ->
+                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Document(
+                                    id = document.id,
+                                    description = document.description,
+                                    documentType = document.documentType,
+                                    title = document.title
+                                )
+                            },
+                            candidates = submission.candidates.map { candidate ->
+                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate(
+                                    id = candidate.id,
+                                    name = candidate.name,
+                                    additionalIdentifiers = candidate.additionalIdentifiers.map { additionalIdentifier ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.AdditionalIdentifier(
+                                            id = additionalIdentifier.id,
+                                            legalName = additionalIdentifier.legalName,
+                                            scheme = additionalIdentifier.scheme,
+                                            uri = additionalIdentifier.uri
+                                        )
+                                    },
+                                    address = candidate.address.let { address ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Address(
+                                            streetAddress = address.streetAddress,
+                                            postalCode = address.postalCode,
+                                            addressDetails = address.addressDetails.let { addressDetails ->
+                                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Address.AddressDetails(
+                                                    country = addressDetails.country.let { country ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Address.AddressDetails.Country(
+                                                            id = country.id,
+                                                            scheme = country.scheme,
+                                                            description = country.description,
+                                                            uri = country.uri
+                                                        )
+                                                    },
+                                                    locality = addressDetails.locality.let { locality ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Address.AddressDetails.Locality(
+                                                            id = locality.id,
+                                                            scheme = locality.scheme,
+                                                            description = locality.description,
+                                                            uri = locality.uri
+                                                        )
+                                                    },
+                                                    region = addressDetails.region.let { region ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Address.AddressDetails.Region(
+                                                            id = region.id,
+                                                            scheme = region.scheme,
+                                                            description = region.description,
+                                                            uri = region.uri
+                                                        )
+                                                    }
+                                                )
+                                            }
+                                        )
+
+                                    },
+                                    contactPoint = candidate.contactPoint.let { contactPoint ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.ContactPoint(
+                                            name = contactPoint.name,
+                                            email = contactPoint.email,
+                                            faxNumber = contactPoint.faxNumber,
+                                            telephone = contactPoint.telephone,
+                                            url = contactPoint.url
+                                        )
+                                    },
+                                    details = candidate.details.let { details ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details(
+                                            typeOfSupplier = details.typeOfSupplier,
+                                            bankAccounts = details.bankAccounts.map { bankAccount ->
+                                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount(
+                                                    description = bankAccount.description,
+                                                    address = bankAccount.address.let { address ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.Address(
+                                                            streetAddress = address.streetAddress,
+                                                            postalCode = address.postalCode,
+                                                            addressDetails = address.addressDetails.let { addressDetails ->
+                                                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.Address.AddressDetails(
+                                                                    country = addressDetails.country.let { country ->
+                                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.Address.AddressDetails.Country(
+                                                                            id = country.id,
+                                                                            scheme = country.scheme,
+                                                                            description = country.description
+                                                                        )
+                                                                    },
+                                                                    locality = addressDetails.locality.let { locality ->
+                                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
+                                                                            id = locality.id,
+                                                                            scheme = locality.scheme,
+                                                                            description = locality.description
+                                                                        )
+                                                                    },
+                                                                    region = addressDetails.region.let { region ->
+                                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.Address.AddressDetails.Region(
+                                                                            id = region.id,
+                                                                            scheme = region.scheme,
+                                                                            description = region.description
+                                                                        )
+                                                                    }
+                                                                )
+                                                            }
+                                                        )
+                                                    },
+                                                    accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.AccountIdentification(
+                                                            id = accountIdentification.id,
+                                                            scheme = accountIdentification.scheme
+                                                        )
+                                                    },
+                                                    additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
+                                                            id = additionalAccountIdentifier.id,
+                                                            scheme = additionalAccountIdentifier.scheme
+                                                        )
+                                                    },
+                                                    bankName = bankAccount.bankName,
+                                                    identifier = bankAccount.identifier.let { identifier ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.BankAccount.Identifier(
+                                                            id = identifier.id,
+                                                            scheme = identifier.scheme
+                                                        )
+                                                    }
+                                                )
+                                            },
+                                            legalForm = details.legalForm?.let { legalForm ->
+                                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.LegalForm(
+                                                    id = legalForm.id,
+                                                    scheme = legalForm.scheme,
+                                                    description = legalForm.description,
+                                                    uri = legalForm.uri
+                                                )
+                                            },
+                                            mainEconomicActivities = details.mainEconomicActivities.map { mainEconomicActivity ->
+                                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Details.MainEconomicActivity(
+                                                    id = mainEconomicActivity.id,
+                                                    uri = mainEconomicActivity.uri,
+                                                    description = mainEconomicActivity.description,
+                                                    scheme = mainEconomicActivity.scheme
+                                                )
+                                            },
+                                            scale = details.scale
+                                        )
+                                    },
+                                    identifier = candidate.identifier.let { identifier ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Identifier(
+                                            id = identifier.id,
+                                            scheme = identifier.scheme,
+                                            uri = identifier.uri,
+                                            legalName = identifier.legalName
+                                        )
+                                    },
+                                    persones = candidate.persones.map { person ->
+                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Person(
+                                            id = person.id,
+                                            title = person.title,
+                                            identifier = person.identifier.let { identifier ->
+                                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Person.Identifier(
+                                                    id = identifier.id,
+                                                    uri = identifier.uri,
+                                                    scheme = identifier.scheme
+                                                )
+                                            },
+                                            name = person.name,
+                                            businessFunctions = person.businessFunctions.map { businessFunction ->
+                                                GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Person.BusinessFunction(
+                                                    id = businessFunction.id,
+                                                    documents = businessFunction.documents.map { document ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Person.BusinessFunction.Document(
+                                                            id = document.id,
+                                                            title = document.title,
+                                                            description = document.description,
+                                                            documentType = document.documentType
+                                                        )
+                                                    },
+                                                    jobTitle = businessFunction.jobTitle,
+                                                    period = businessFunction.period.let { period ->
+                                                        GetSubmissionsByQualificationIdsResult.Submissions.Detail.Candidate.Person.BusinessFunction.Period(
+                                                            startDate = period.startDate
+                                                        )
+                                                    },
+                                                    type = businessFunction.type
+                                                )
+                                            }
+                                        )
+                                    }
+                                )
+                            }
+                        )
+                    }
+                )
+            )
+
+        private fun getParams() = GetSubmissionsByQualificationIdsParams.tryCreate(
+            cpid = CPID.toString(),
+            ocid = OCID.toString(),
+            qualifications = listOf(
+                GetSubmissionsByQualificationIdsParams.Qualification.tryCreate(
+                    id = QualificationId.generate().toString(),
+                    relatedSubmission = UUID.randomUUID().toString()
+                ).get,
+                GetSubmissionsByQualificationIdsParams.Qualification.tryCreate(
+                    id = QualificationId.generate().toString(),
+                    relatedSubmission = UUID.randomUUID().toString()
+                ).get
+            )
         ).get
     }
 

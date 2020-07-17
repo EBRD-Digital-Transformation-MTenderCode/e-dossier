@@ -15,6 +15,7 @@ import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
+import com.procurement.dossier.domain.model.qualification.QualificationId
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.requirement.response.tryRequirementResponseId
@@ -149,6 +150,20 @@ fun parseSubmissionId(
                 )
             )
         }.asSuccess()
+
+fun parseQualificationId(
+    value: String, attributeName: String
+): Result<QualificationId, DataErrors.Validation.DataMismatchToPattern> {
+    val id = QualificationId.tryCreateOrNull(value)
+        ?: return Result.failure(
+            DataErrors.Validation.DataMismatchToPattern(
+                name = attributeName,
+                pattern = QualificationId.pattern,
+                actualValue = value
+            )
+        )
+    return id.asSuccess()
+}
 
 fun parsePersonTitle(
     value: String, allowedEnums: List<PersonTitle>, attributeName: String
