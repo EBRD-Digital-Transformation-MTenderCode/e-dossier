@@ -3,6 +3,9 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
+import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsParams
+import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsResult
+import com.procurement.dossier.application.model.data.submission.finalize.convert
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
@@ -18,10 +21,15 @@ import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
+import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionNotFoundFor
+import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionsNotFoundFor
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
+import com.procurement.dossier.domain.model.qualification.QualificationStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.Result.Companion.failure
+import com.procurement.dossier.domain.util.Result.Companion.success
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
@@ -42,6 +50,48 @@ class SubmissionService(
         submissionRepository.saveSubmission(cpid = params.cpid, ocid = params.ocid, submission = submission)
             .doOnFail { incident -> return incident.asFailure() }
         return submission.toCreateSubmissionResult().asSuccess()
+    }
+
+    fun finalizeSubmissions(params: FinalizeSubmissionsParams): Result<FinalizeSubmissionsResult, Fail> {
+
+        val submissionsFromDb = submissionRepository
+            .findBy(cpid = params.cpid, ocid = params.ocid)
+            .map { submissions -> submissions.takeIf { it.isNotEmpty() } }
+            .doReturn { fail ->
+                return failure(SubmissionsNotFoundFor.FinalizeSubmissions(params.cpid, params.ocid))
+            }
+            ?: return failure(SubmissionsNotFoundFor.FinalizeSubmissions(params.cpid, params.ocid))
+
+        val submissionFromDbById = submissionsFromDb.associateBy { it.id }
+        val receivedQualificationById = params.qualifications.associateBy { it.relatedSubmission }
+
+        val receivedRelatedSubmission = params.qualifications.map { it.relatedSubmission }
+        val missingSubmissions = submissionFromDbById.keys.getUnknownElements(receivedRelatedSubmission)
+        if (missingSubmissions.isNotEmpty())
+            return failure(SubmissionNotFoundFor.FinalizeSubmission(missingSubmissions))
+
+        val updatedSubmissions = submissionsFromDb
+            .filter { it.status == SubmissionStatus.PENDING }
+            .map { submission ->
+                val definedStatus = defineStatusToUpdate(receivedQualificationById[submission.id]?.status)
+                submission.copy(status = definedStatus)
+            }
+
+        val result = FinalizeSubmissionsResult(
+            submissions = FinalizeSubmissionsResult.Submissions(
+                details = updatedSubmissions.map { it.convert() }
+            )
+        )
+
+        submissionRepository.saveAll(params.cpid, params.ocid, updatedSubmissions)
+
+        return success(result)
+    }
+
+    fun defineStatusToUpdate(status: QualificationStatus?): SubmissionStatus = when (status) {
+        QualificationStatus.ACTIVE -> SubmissionStatus.VALID
+        QualificationStatus.UNSUCCESSFUL -> SubmissionStatus.DISQUALIFIED
+        null -> SubmissionStatus.WITHDRAWN
     }
 
     private fun CreateSubmissionParams.convert() =
