@@ -16,6 +16,7 @@ import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.qualification.QualificationId
+import com.procurement.dossier.domain.model.qualification.QualificationStatus
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.requirement.response.tryRequirementResponseId
@@ -194,6 +195,11 @@ fun parseSubmissionStatus(
     value: String, allowedEnums: List<SubmissionStatus>, attributeName: String
 ): Result<SubmissionStatus, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SubmissionStatus)
+
+fun parseQualificationStatus(
+    value: String, allowedEnums: Collection<QualificationStatus>, attributeName: String
+): Result<QualificationStatus, DataErrors.Validation.UnknownValue> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = QualificationStatus)
 
 private fun <T> parseEnum(
     value: String, allowedEnums: Collection<T>, attributeName: String, target: EnumElementProvider<T>
