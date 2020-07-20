@@ -28,18 +28,19 @@ import java.time.LocalDateTime
 import java.util.*
 
 enum class Command2Type(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
-    VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse"),
-    VALIDATE_SUBMISSION("validateSubmission"),
-    CREATE_SUBMISSION("createSubmission"),
-    CHECK_PERIOD_2("checkPeriod"),
-    GET_SUBMISSION_STATE_BY_IDS("getSubmissionStateByIds"),
-    SET_STATE_FOR_SUBMISSION("setStateForSubmission"),
     CHECK_ACCESS_TO_SUBMISSION("checkAccessToSubmission"),
-    VERIFY_SUBMISSION_PERIOD_END("verifySubmissionPeriodEnd"),
+    CHECK_PERIOD_2("checkPeriod"),
+    CREATE_SUBMISSION("createSubmission"),
+    FINALIZE_SUBMISSIONS("finalizeSubmissions"),
+    FIND_SUBMISSIONS_FOR_OPENING("findSubmissionsForOpening"),
     GET_ORGANIZATIONS("getOrganizations"),
     GET_SUBMISSION_PERIOD_END_DATE("getSubmissionPeriodEndDate"),
-    FIND_SUBMISSIONS_FOR_OPENING("findSubmissionsForOpening"),
-    GET_SUBMISSIONS_BY_QUALIFICATION_IDS("getSubmissionsByQualificationIds");
+    GET_SUBMISSION_STATE_BY_IDS("getSubmissionStateByIds"),
+    GET_SUBMISSIONS_BY_QUALIFICATION_IDS("getSubmissionsByQualificationIds"),
+    SET_STATE_FOR_SUBMISSION("setStateForSubmission"),
+    VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse"),
+    VALIDATE_SUBMISSION("validateSubmission"),
+    VERIFY_SUBMISSION_PERIOD_END("verifySubmissionPeriodEnd");
 
     override fun toString(): String = key
 
