@@ -1,5 +1,6 @@
 package com.procurement.dossier.infrastructure.repository
 
+import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.procurement.dossier.application.repository.SubmissionRepository
@@ -131,6 +132,31 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             }
 
         statement.tryExecute(session).doReturn { fail -> return MaybeFail.fail(fail) }
+        return MaybeFail.none()
+    }
+
+    override fun saveAll(cpid: Cpid, ocid: Ocid, submissions: List<Submission>): MaybeFail<Fail.Incident> {
+
+        val statement = BatchStatement()
+
+        submissions.forEach { submission ->
+            val data = tryToJson(submission)
+                .doReturn { incident -> return MaybeFail.fail(incident) }
+
+            statement.add(
+                preparedSaveSubmissionCQL.bind()
+                    .apply {
+                        setString(columnCpid, cpid.toString())
+                        setString(columnOcid, ocid.toString())
+                        setString(columnId, submission.id.toString())
+                        setString(columnJsonData, data)
+                    }
+            )
+        }
+
+        statement.tryExecute(session)
+            .doOnError { fail -> return MaybeFail.fail(fail) }
+
         return MaybeFail.none()
     }
 
