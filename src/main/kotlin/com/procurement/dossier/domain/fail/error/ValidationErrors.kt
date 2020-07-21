@@ -68,6 +68,11 @@ sealed class ValidationErrors(
         )
     }
 
+    class PeriodNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+        numberError = "5.6.1",
+        description = "Record of a period by cpid: '$cpid' and ocid: '$ocid' not found."
+    )
+
     class InvalidToken() : ValidationErrors(
         numberError = "5.9.1",
         description = "Received token does not match submission token."
