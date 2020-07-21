@@ -67,6 +67,9 @@ class SubmissionService(
         if (missingSubmissions.isNotEmpty())
             return failure(SubmissionNotFoundFor.FinalizeSubmission(missingSubmissions))
 
+        checkMissingSubmission(available = submissionFromDbById.keys, received = receivedRelatedSubmission)
+            .orForwardFail { error -> return error }
+
         val receivedQualificationById = params.qualifications.associateBy { it.relatedSubmission }
 
         val updatedSubmissions = submissionsFromDb
@@ -85,6 +88,15 @@ class SubmissionService(
         submissionRepository.saveAll(params.cpid, params.ocid, updatedSubmissions)
 
         return success(result)
+    }
+
+    fun checkMissingSubmission(available: Collection<SubmissionId>, received: Collection<SubmissionId>)
+    : Result<Collection<SubmissionId>, SubmissionNotFoundFor.FinalizeSubmission> {
+        val missingSubmissions = received.getUnknownElements(received)
+        return if (missingSubmissions.isNotEmpty())
+            failure(SubmissionNotFoundFor.FinalizeSubmission(missingSubmissions))
+        else
+            success(missingSubmissions)
     }
 
     fun defineStatusToUpdate(status: QualificationStatus?): SubmissionStatus = when (status) {
@@ -317,10 +329,10 @@ class SubmissionService(
 
     private fun checkForUnknownElements(
         received: List<SubmissionId>, known: List<SubmissionId>
-    ): ValidationResult<ValidationErrors.SubmissionNotFoundFor> {
+    ): ValidationResult<SubmissionNotFoundFor> {
         val unknownElements = known.getUnknownElements(received = received)
         return if (unknownElements.isNotEmpty())
-            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.first()))
+            ValidationResult.error(SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.first()))
         else ValidationResult.ok()
     }
 
@@ -331,7 +343,7 @@ class SubmissionService(
             cpid = params.cpid, ocid = params.ocid, id = requestSubmission.id
         )
             .orForwardFail { fail -> return fail }
-            ?: return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id)
+            ?: return SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id)
                 .asFailure()
 
         val updatedSubmission = storedSubmission.copy(status = requestSubmission.status)
@@ -350,7 +362,7 @@ class SubmissionService(
         val credentials = submissionRepository.getSubmissionCredentials(
             cpid = params.cpid, ocid = params.ocid, id = params.submissionId
         ).doReturn { incident -> return ValidationResult.error(incident) }
-            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId))
+            ?: return ValidationResult.error(SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId))
 
         if (params.token != credentials.token)
             return ValidationResult.error(ValidationErrors.InvalidToken())
@@ -838,7 +850,7 @@ class SubmissionService(
             .getUnknownElements(received = submissionIds)
 
         if (unknownSubmissions.isNotEmpty())
-            return ValidationErrors.SubmissionNotFoundFor.SubmissionsByQualificationIds(ids = unknownSubmissions.toList())
+            return SubmissionNotFoundFor.SubmissionsByQualificationIds(ids = unknownSubmissions.toList())
                 .asFailure()
 
         return GetSubmissionsByQualificationIdsResult(
