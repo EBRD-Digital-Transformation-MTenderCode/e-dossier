@@ -57,7 +57,7 @@ class SubmissionService(
         val submissionsFromDb = submissionRepository
             .findBy(cpid = params.cpid, ocid = params.ocid)
             .map { submissions -> submissions.takeIf { it.isNotEmpty() } }
-            .doReturn { fail -> return failure(fail) }
+            .orForwardFail { fail -> return fail }
             ?: return failure(SubmissionsNotFoundFor.FinalizeSubmissions(params.cpid, params.ocid))
 
         val submissionFromDbById = submissionsFromDb.associateBy { it.id }
