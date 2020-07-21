@@ -61,12 +61,13 @@ class SubmissionService(
             ?: return failure(SubmissionsNotFoundFor.FinalizeSubmissions(params.cpid, params.ocid))
 
         val submissionFromDbById = submissionsFromDb.associateBy { it.id }
-        val receivedQualificationById = params.qualifications.associateBy { it.relatedSubmission }
 
         val receivedRelatedSubmission = params.qualifications.map { it.relatedSubmission }
         val missingSubmissions = submissionFromDbById.keys.getUnknownElements(receivedRelatedSubmission)
         if (missingSubmissions.isNotEmpty())
             return failure(SubmissionNotFoundFor.FinalizeSubmission(missingSubmissions))
+
+        val receivedQualificationById = params.qualifications.associateBy { it.relatedSubmission }
 
         val updatedSubmissions = submissionsFromDb
             .filter { it.status == SubmissionStatus.PENDING }
