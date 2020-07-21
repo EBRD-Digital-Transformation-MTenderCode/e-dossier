@@ -100,7 +100,10 @@ class PeriodService(
 
     fun checkPeriod2(params: CheckPeriod2Params): ValidationResult<Fail> {
         val storedPeriod = periodRepository.tryFindBy(cpid = params.cpid, ocid = params.ocid)
-            .doReturn { incident -> return ValidationResult.error(incident) }!!
+            .doReturn { incident -> return ValidationResult.error(incident) }
+            ?: return ValidationResult.error(
+                ValidationErrors.PeriodNotFound(cpid = params.cpid, ocid = params.ocid)
+            )
 
         val requestDate = params.date
 
