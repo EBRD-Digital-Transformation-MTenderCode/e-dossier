@@ -1,11 +1,36 @@
 package com.procurement.dossier.domain.model.submission
 
-import com.procurement.dossier.domain.fail.Fail
-import com.procurement.dossier.domain.util.Result
-import com.procurement.dossier.domain.util.extension.tryUUID
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
+import java.io.Serializable
 import java.util.*
 
-typealias SubmissionId = UUID
+//typealias SubmissionId = UUID
+//
+//fun String.trySubmissionId(): Result<SubmissionId, Fail.Incident.Transform.Parsing> =
+//    this.tryUUID()
 
-fun String.trySubmissionId(): Result<SubmissionId, Fail.Incident.Transform.Parsing> =
-    this.tryUUID()
+class SubmissionId private constructor(private val value: String) : Serializable {
+
+    companion object {
+
+        @JvmStatic
+        @JsonCreator
+        fun create(text: String): SubmissionId = SubmissionId(text)
+
+        fun generate(): SubmissionId = SubmissionId(UUID.randomUUID().toString())
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return if (this !== other)
+            other is SubmissionId
+                && this.value == other.value
+        else
+            true
+    }
+
+    override fun hashCode(): Int = value.hashCode()
+
+    @JsonValue
+    override fun toString(): String = value
+}

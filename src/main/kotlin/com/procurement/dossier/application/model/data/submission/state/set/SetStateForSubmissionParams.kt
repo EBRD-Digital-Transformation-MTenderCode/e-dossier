@@ -2,7 +2,6 @@ package com.procurement.dossier.application.model.data.submission.state.set
 
 import com.procurement.dossier.application.model.parseCpid
 import com.procurement.dossier.application.model.parseOcid
-import com.procurement.dossier.application.model.parseSubmissionId
 import com.procurement.dossier.application.model.parseSubmissionStatus
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
@@ -45,8 +44,8 @@ class SetStateForSubmissionParams private constructor(
                 }
 
             fun tryCreate(id: String, status: String): Result<Submission, DataErrors> {
-                val idParsed = parseSubmissionId(id, SUBMISSION_ID_ATTRIBUTE_NAME)
-                    .orForwardFail { fail -> return fail }
+                val idParsed = SubmissionId.create(id)
+
                 val statusParsed = parseSubmissionStatus(
                     value = status,
                     attributeName = SUBMISSION_STATUS_ATTRIBUTE_NAME,
