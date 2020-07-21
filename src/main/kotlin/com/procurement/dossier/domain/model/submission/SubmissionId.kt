@@ -5,11 +5,6 @@ import com.fasterxml.jackson.annotation.JsonValue
 import java.io.Serializable
 import java.util.*
 
-//typealias SubmissionId = UUID
-//
-//fun String.trySubmissionId(): Result<SubmissionId, Fail.Incident.Transform.Parsing> =
-//    this.tryUUID()
-
 class SubmissionId private constructor(private val value: String) : Serializable {
 
     companion object {
