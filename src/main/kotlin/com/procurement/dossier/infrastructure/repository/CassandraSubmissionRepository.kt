@@ -150,6 +150,9 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                         setString(columnCpid, cpid.toString())
                         setString(columnOcid, ocid.toString())
                         setString(columnId, submission.id.toString())
+                        setString(columnStatus, submission.status.key)
+                        setUUID(columnToken, submission.token)
+                        setUUID(columnOwner, submission.owner)
                         setString(columnJsonData, data)
                     }
             )
