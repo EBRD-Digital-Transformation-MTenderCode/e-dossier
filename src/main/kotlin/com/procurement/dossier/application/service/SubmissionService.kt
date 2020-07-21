@@ -5,7 +5,6 @@ import com.procurement.dossier.application.model.data.submission.create.CreateSu
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
 import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsParams
 import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsResult
-import com.procurement.dossier.application.model.data.submission.finalize.convert
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
@@ -81,7 +80,7 @@ class SubmissionService(
 
         val result = FinalizeSubmissionsResult(
             submissions = FinalizeSubmissionsResult.Submissions(
-                details = updatedSubmissions.map { it.convert() }
+                details = updatedSubmissions.map { FinalizeSubmissionsResult.fromDomain(it) }
             )
         )
 

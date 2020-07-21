@@ -16,7 +16,9 @@ data class FinalizeSubmissionsResult(
             @param:JsonProperty("status") @field:JsonProperty("status") val status: SubmissionStatus
         )
     }
-}
 
-fun Submission.convert(): FinalizeSubmissionsResult.Submissions.Submission =
-    FinalizeSubmissionsResult.Submissions.Submission(id = this.id, status = this.status)
+    companion object {
+        fun fromDomain(submission: Submission): Submissions.Submission =
+            Submissions.Submission(id = submission.id, status = submission.status)
+    }
+}
