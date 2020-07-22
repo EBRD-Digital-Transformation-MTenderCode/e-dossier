@@ -64,3 +64,34 @@ INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 
 
 INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'extensionAfterUnsuspended', '604800');
 INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'TEST_GPA', 'extensionAfterUnsuspended', '120');
+
+DROP TABLE IF EXISTS dossier.rules;
+
+CREATE TABLE IF NOT EXISTS dossier.rules (
+    country text,
+    pmd text,
+    operationType test,
+    parameter text,
+    value text,
+    primary key (country, pmd, operation_type, parameter)
+);
+
+
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'all', 'minSubmissionPeriodDuration', '864000');
+
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'submissionsPeriodEnd', 'minQtySubmissionsForReturning', '3');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'TEST_GPA', 'submissionsPeriodEnd', 'minQtySubmissionsForReturning', '0');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'qualification', 'minQtySubmissionsForReturning', '0');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'TEST_GPA', 'qualification', 'minQtySubmissionsForReturning', '0');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'startSecondStage', 'minQtySubmissionsForReturning', '0');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'TEST_GPA', 'startSecondStage', 'minQtySubmissionsForReturning', '0');
+
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'all', 'extensionAfterUnsuspended', '604800');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'TEST_GPA', 'all', 'extensionAfterUnsuspended', '120');
+
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'submissionsPeriodEnd', 'validStates', 'pending');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'TEST_GPA', 'submissionsPeriodEnd', 'validStates', 'pending');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'qualification', 'validStates', 'pending');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'TEST_GPA', 'qualification', 'validStates', 'pending');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'GPA', 'startSecondStage', 'validStates', 'active');
+INSERT INTO dossier.rules (country, pmd, operation_type, parameter, value) VALUES ('MD', 'TEST_GPA', 'startSecondStage', 'validStates', 'active');
