@@ -15,6 +15,7 @@ import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.infrastructure.config.DatabaseTestConfiguration
 import com.procurement.dossier.infrastructure.exception.io.ReadEntityException
+import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,17 +38,19 @@ class RulesRepositoryIT {
         private const val TABLE_NAME = "rules"
         private const val COLUMN_COUNTRY = "country"
         private const val COLUMN_PMD = "pmd"
+        private const val COLUMN_OPERATION_TYPE = "operationType"
         private const val COLUMN_VALUE = "value"
         private const val COLUMN_PARAMETER = "parameter"
 
         private const val PERIOD_DURATION_PARAMETER = "minSubmissionPeriodDuration"
-        private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForOpening"
-        private const val EXTERNSION_PARAMETER = "extensionAfterUnsuspended"
+        private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForReturning"
+        private const val EXTENSION_PARAMETER = "extensionAfterUnsuspended"
         private val PMD = ProcurementMethod.GPA
         private val COUNTRY = "country"
         private val PERIOD_DURATION_VALUE = Duration.ofDays(1)
         private val SUBMISSION_MINIMUM_VALUE: Long = 1
         private val EXTENSION_VALUE = Duration.ofSeconds(10)
+        private val OPERATION_TYPE = Operation.START_SECOND_STAGE
     }
 
     @Autowired
@@ -86,9 +89,9 @@ class RulesRepositoryIT {
 
         @Test
         fun success() {
-            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_DURATION_VALUE.seconds)
+            insertPeriodRule(pmd = PMD, country = COUNTRY, value = PERIOD_DURATION_VALUE.seconds, operationType = OPERATION_TYPE)
 
-            val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY)
+            val actualValue = rulesRepository.findPeriodDuration(pmd = PMD, country = COUNTRY, operationType = OPERATION_TYPE)
 
             assertEquals(actualValue, PERIOD_DURATION_VALUE)
         }
@@ -111,10 +114,11 @@ class RulesRepositoryIT {
             }
         }
 
-        private fun insertPeriodRule(pmd: ProcurementMethod, country: String, value: Long) {
+        private fun insertPeriodRule(pmd: ProcurementMethod, country: String, value: Long, operationType: Operation) {
             val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
                 .value(COLUMN_COUNTRY, country)
                 .value(COLUMN_PMD, pmd.name)
+                .value(COLUMN_OPERATION_TYPE, operationType.key)
                 .value(COLUMN_PARAMETER, PERIOD_DURATION_PARAMETER)
                 .value(COLUMN_VALUE, value.toString())
             session.execute(record)
@@ -126,9 +130,9 @@ class RulesRepositoryIT {
 
         @Test
         fun success() {
-            insertSubmissionMinimumRule(pmd = PMD, country = COUNTRY, value = SUBMISSION_MINIMUM_VALUE)
+            insertSubmissionMinimumRule(pmd = PMD, country = COUNTRY, value = SUBMISSION_MINIMUM_VALUE, operationType = OPERATION_TYPE)
 
-            val actualValue = rulesRepository.findSubmissionsMinimumQuantity(pmd = PMD, country = COUNTRY).get
+            val actualValue = rulesRepository.findSubmissionsMinimumQuantity(pmd = PMD, country = COUNTRY, operationType = OPERATION_TYPE).get
 
             assertEquals(actualValue, SUBMISSION_MINIMUM_VALUE)
         }
@@ -150,10 +154,16 @@ class RulesRepositoryIT {
             assertTrue(result is Fail.Incident.Database.Interaction)
         }
 
-        private fun insertSubmissionMinimumRule(pmd: ProcurementMethod, country: String, value: Long) {
+        private fun insertSubmissionMinimumRule(
+            pmd: ProcurementMethod,
+            country: String,
+            value: Long,
+            operationType: Operation
+        ) {
             val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
                 .value(COLUMN_COUNTRY, country)
                 .value(COLUMN_PMD, pmd.name)
+                .value(COLUMN_OPERATION_TYPE, operationType.key)
                 .value(COLUMN_PARAMETER, SUBMISSIONS_MINIMUM_PARAMETER)
                 .value(COLUMN_VALUE, value.toString())
             session.execute(record)
@@ -165,9 +175,9 @@ class RulesRepositoryIT {
 
         @Test
         fun success() {
-            insertExtensionRule(pmd = PMD, country = COUNTRY, value = EXTENSION_VALUE.seconds)
+            insertExtensionRule(pmd = PMD, country = COUNTRY, value = EXTENSION_VALUE.seconds, operationType = OPERATION_TYPE)
 
-            val actualValue = rulesRepository.findExtensionAfterUnsuspended(pmd = PMD, country = COUNTRY)
+            val actualValue = rulesRepository.findExtensionAfterUnsuspended(pmd = PMD, country = COUNTRY, operationType = OPERATION_TYPE)
 
             assertEquals(EXTENSION_VALUE, actualValue)
         }
@@ -190,11 +200,12 @@ class RulesRepositoryIT {
             }
         }
 
-        private fun insertExtensionRule(pmd: ProcurementMethod, country: String, value: Long) {
+        private fun insertExtensionRule(pmd: ProcurementMethod, country: String, value: Long, operationType: Operation) {
             val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
                 .value(COLUMN_COUNTRY, country)
                 .value(COLUMN_PMD, pmd.name)
-                .value(COLUMN_PARAMETER, EXTERNSION_PARAMETER)
+                .value(COLUMN_OPERATION_TYPE, operationType.key)
+                .value(COLUMN_PARAMETER, EXTENSION_PARAMETER)
                 .value(COLUMN_VALUE, value.toString())
             session.execute(record)
         }
@@ -217,9 +228,10 @@ class RulesRepositoryIT {
                 CREATE TABLE IF NOT EXISTS  $KEYSPACE.$TABLE_NAME (
                     $COLUMN_COUNTRY text,
                     $COLUMN_PMD text,
+                    $COLUMN_OPERATION_TYPE text,
                     $COLUMN_VALUE text,
                     $COLUMN_PARAMETER text,
-                    primary key($COLUMN_COUNTRY, $COLUMN_PMD, $COLUMN_PARAMETER)
+                    primary key($COLUMN_COUNTRY, $COLUMN_PMD, $COLUMN_OPERATION_TYPE, $COLUMN_PARAMETER)
                 );
             """
         )
