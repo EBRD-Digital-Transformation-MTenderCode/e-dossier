@@ -40,6 +40,7 @@ import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.format
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -573,7 +574,8 @@ internal class SubmissionServiceTest {
             cpid = CPID.toString(),
             ocid = OCID.toString(),
             country = COUNTRY,
-            pmd = PMD.name
+            pmd = PMD.name,
+            operationType = Operation.START_SECOND_STAGE.toString()
         ).get
 
         private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsForOpeningResult(
