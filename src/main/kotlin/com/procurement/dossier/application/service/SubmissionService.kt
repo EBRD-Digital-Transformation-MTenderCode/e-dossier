@@ -3,7 +3,7 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
-import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsResult
@@ -509,7 +509,7 @@ class SubmissionService(
             }
         )
 
-    fun findSubmissionsForOpening(params: FindSubmissionsForOpeningParams): Result<List<FindSubmissionsResult>, Fail> {
+    fun findSubmissionsForOpening(params: FindSubmissionsParams): Result<List<FindSubmissionsResult>, Fail> {
         val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
 

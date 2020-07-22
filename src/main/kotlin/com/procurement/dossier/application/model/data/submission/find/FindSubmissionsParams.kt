@@ -12,7 +12,7 @@ import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 
-class FindSubmissionsForOpeningParams private constructor(
+class FindSubmissionsParams private constructor(
     val cpid: Cpid,
     val ocid: Ocid,
     val pmd: ProcurementMethod,
@@ -53,7 +53,7 @@ class FindSubmissionsForOpeningParams private constructor(
 
         fun tryCreate(
             cpid: String, ocid: String, pmd: String, country: String, operationType: String
-        ): Result<FindSubmissionsForOpeningParams, DataErrors> {
+        ): Result<FindSubmissionsParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .orForwardFail { fail -> return fail }
             val ocidParsed = parseOcid(ocid)
@@ -63,7 +63,7 @@ class FindSubmissionsForOpeningParams private constructor(
             val operationTypeParsed = parseOperationType(value = operationType, allowedEnums = allowedOperationType)
                 .orForwardFail { fail -> return fail }
 
-            return FindSubmissionsForOpeningParams(
+            return FindSubmissionsParams(
                 cpid = cpidParsed,
                 ocid = ocidParsed,
                 country = country,

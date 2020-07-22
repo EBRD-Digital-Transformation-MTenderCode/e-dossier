@@ -6,7 +6,7 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
-import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsResult
@@ -672,7 +672,7 @@ internal class SubmissionServiceTest {
         }
 
 
-        private fun getParams() = FindSubmissionsForOpeningParams.tryCreate(
+        private fun getParams() = FindSubmissionsParams.tryCreate(
             cpid = CPID.toString(),
             ocid = OCID.toString(),
             country = COUNTRY,
