@@ -167,56 +167,54 @@ fun parseQualificationId(
 }
 
 fun parsePersonTitle(
-    value: String, allowedEnums: List<PersonTitle>, attributeName: String
+    value: String, allowedEnums: Set<PersonTitle>, attributeName: String
 ): Result<PersonTitle, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = PersonTitle)
 
 fun parseBusinessFunctionType(
-    value: String, allowedEnums: List<BusinessFunctionType>, attributeName: String
+    value: String, allowedEnums: Set<BusinessFunctionType>, attributeName: String
 ): Result<BusinessFunctionType, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = BusinessFunctionType)
 
 fun parseDocumentType(
-    value: String, allowedEnums: List<DocumentType>, attributeName: String
+    value: String, allowedEnums: Set<DocumentType>, attributeName: String
 ): Result<DocumentType, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = DocumentType)
 
 fun parseSupplierType(
-    value: String, allowedEnums: List<SupplierType>, attributeName: String
+    value: String, allowedEnums: Set<SupplierType>, attributeName: String
 ): Result<SupplierType, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SupplierType)
 
 fun parseScale(
-    value: String, allowedEnums: List<Scale>, attributeName: String
+    value: String, allowedEnums: Set<Scale>, attributeName: String
 ): Result<Scale, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Scale)
 
 fun parseSubmissionStatus(
-    value: String, allowedEnums: List<SubmissionStatus>, attributeName: String
+    value: String, allowedEnums: Set<SubmissionStatus>, attributeName: String
 ): Result<SubmissionStatus, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SubmissionStatus)
 
 fun parseOperationType(
-    value: String, allowedEnums: List<Operation>, attributeName: String = "operationType"
+    value: String, allowedEnums: Set<Operation>, attributeName: String = "operationType"
 ): Result<Operation, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Operation)
 
 private fun <T> parseEnum(
-    value: String, allowedEnums: Collection<T>, attributeName: String, target: EnumElementProvider<T>
+    value: String, allowedEnums: Set<T>, attributeName: String, target: EnumElementProvider<T>
 ): Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,
-                                                       T : EnumElementProvider.Key {
-    val allowed = allowedEnums.toSet()
-    return target.orNull(value)
-        ?.takeIf { it in allowed }
+                                                       T : EnumElementProvider.Key =
+    target.orNull(value)
+        ?.takeIf { it in allowedEnums }
         ?.asSuccess()
         ?: Result.failure(
             DataErrors.Validation.UnknownValue(
                 name = attributeName,
-                expectedValues = allowed.keysAsStrings(),
+                expectedValues = allowedEnums.keysAsStrings(),
                 actualValue = value
             )
         )
-}
 
 fun parseDate(
     value: String,
