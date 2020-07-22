@@ -69,7 +69,7 @@ class Command2Service(
             Command2Type.VERIFY_SUBMISSION_PERIOD_END -> verifySubmissionPeriodEndHandler.handle(node = request)
             Command2Type.GET_ORGANIZATIONS -> getOrganizationsHandler.handle(node = request)
             Command2Type.GET_SUBMISSION_PERIOD_END_DATE -> getSubmissionPeriodEndDateHandler.handle(node = request)
-            Command2Type.FIND_SUBMISSIONS_FOR_OPENING -> findSubmissionsForOpeningHandler.handle(node = request)
+            Command2Type.FIND_SUBMISSIONS -> findSubmissionsForOpeningHandler.handle(node = request)
             Command2Type.GET_SUBMISSIONS_BY_QUALIFICATION_IDS -> getSubmissionsByQualificationIdsHandler.handle(node = request)
         }
 

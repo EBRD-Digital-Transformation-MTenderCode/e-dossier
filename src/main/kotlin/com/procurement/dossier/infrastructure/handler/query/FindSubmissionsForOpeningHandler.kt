@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 class FindSubmissionsForOpeningHandler(logger: Logger, private val submissionService: SubmissionService) :
     AbstractQueryHandler<Command2Type, List<FindSubmissionsForOpeningResult>>(logger) {
 
-    override val action: Command2Type = Command2Type.FIND_SUBMISSIONS_FOR_OPENING
+    override val action: Command2Type = Command2Type.FIND_SUBMISSIONS
 
     override fun execute(node: JsonNode): Result<List<FindSubmissionsForOpeningResult>, Fail> {
         val params = node.tryGetParams(FindSubmissionsForOpeningRequest::class.java)
