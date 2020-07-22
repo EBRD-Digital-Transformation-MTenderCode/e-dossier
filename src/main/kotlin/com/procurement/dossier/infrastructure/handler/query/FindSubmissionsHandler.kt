@@ -25,6 +25,6 @@ class FindSubmissionsHandler(logger: Logger, private val submissionService: Subm
             .convert()
             .orForwardFail { fail -> return fail }
 
-        return submissionService.findSubmissionsForOpening(params)
+        return submissionService.findSubmissions(params)
     }
 }

@@ -509,7 +509,7 @@ class SubmissionService(
             }
         )
 
-    fun findSubmissionsForOpening(params: FindSubmissionsParams): Result<List<FindSubmissionsResult>, Fail> {
+    fun findSubmissions(params: FindSubmissionsParams): Result<List<FindSubmissionsResult>, Fail> {
         val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
 

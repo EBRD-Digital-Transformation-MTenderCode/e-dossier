@@ -551,7 +551,7 @@ internal class SubmissionServiceTest {
     }
 
     @Nested
-    inner class FindSubmissionsForOpening {
+    inner class FindSubmissions {
 
         @Test
         fun success() {
@@ -568,7 +568,7 @@ internal class SubmissionServiceTest {
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(submissions.asSuccess())
 
-            val actual = submissionService.findSubmissionsForOpening(params).get
+            val actual = submissionService.findSubmissions(params).get
             val expected = submissions.map { it.toFindSubmissionsForOpeningResult() }
 
             assertEquals(expected, actual)
@@ -587,7 +587,7 @@ internal class SubmissionServiceTest {
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(listOf(submission).asSuccess())
 
-            val actual = submissionService.findSubmissionsForOpening(params).get
+            val actual = submissionService.findSubmissions(params).get
 
             assertTrue(actual.isEmpty())
         }
@@ -607,7 +607,7 @@ internal class SubmissionServiceTest {
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(submissions.asSuccess())
 
-            val actual = submissionService.findSubmissionsForOpening(params).get
+            val actual = submissionService.findSubmissions(params).get
 
             assertTrue(actual.isEmpty())
         }
@@ -618,7 +618,7 @@ internal class SubmissionServiceTest {
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(emptyList<Submission>().asSuccess())
 
-            val actual = submissionService.findSubmissionsForOpening(params).get
+            val actual = submissionService.findSubmissions(params).get
 
             assertTrue(actual.isEmpty())
         }
@@ -638,7 +638,7 @@ internal class SubmissionServiceTest {
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(submissions.asSuccess())
 
-            val actual = submissionService.findSubmissionsForOpening(params).error
+            val actual = submissionService.findSubmissions(params).error
 
             val expectedErrorCode = "VR-17"
             val expectedDescription = "Rule for submission minimum quantity not found by country 'MD', pmd 'GPA', operationType 'startSecondStage'."
@@ -662,7 +662,7 @@ internal class SubmissionServiceTest {
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(submissions.asSuccess())
 
-            val actual = submissionService.findSubmissionsForOpening(params).error
+            val actual = submissionService.findSubmissions(params).error
 
             val expectedErrorCode = "VR-17"
             val expectedDescription = "Rule for submission state not found by country 'MD', pmd 'GPA', operationType 'startSecondStage'."
