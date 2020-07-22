@@ -49,7 +49,7 @@ class FindSubmissionsForOpeningParams private constructor(
                     Operation.UPDATE_CN,
                     Operation.UPDATE_PN -> false
                 }
-            }
+            }.toSet()
 
         fun tryCreate(
             cpid: String, ocid: String, pmd: String, country: String, operationType: String

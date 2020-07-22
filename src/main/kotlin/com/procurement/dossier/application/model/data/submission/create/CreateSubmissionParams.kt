@@ -225,7 +225,7 @@ class CreateSubmissionParams private constructor(
                         val parsedPersonTitle = parsePersonTitle(
                             value = title,
                             attributeName = TITLE_ATTRIBUTE_NAME,
-                            allowedEnums = PersonTitle.allowedElements
+                            allowedEnums = PersonTitle.allowedElements.toSet()
                         ).orForwardFail { fail -> return fail }
 
                         return Person(
@@ -267,7 +267,7 @@ class CreateSubmissionParams private constructor(
                                     BusinessFunctionType.TECHNICAL_EVALUATOR,
                                     BusinessFunctionType.TECHNICAL_OPENER -> false
                                 }
-                            }
+                            }.toSet()
 
                         fun tryCreate(
                             id: String, type: String, jobTitle: String, period: Period, documents: List<Document>?
@@ -327,7 +327,7 @@ class CreateSubmissionParams private constructor(
                                         DocumentType.X_QUALIFICATION_DOCUMENTS,
                                         DocumentType.X_TECHNICAL_DOCUMENTS -> false
                                     }
-                                }
+                                }.toSet()
 
                             fun tryCreate(
                                 id: String, documentType: String, title: String, description: String?
@@ -371,7 +371,7 @@ class CreateSubmissionParams private constructor(
                                 SupplierType.COMPANY,
                                 SupplierType.INDIVIDUAL -> true
                             }
-                        }
+                        }.toSet()
 
                     private val allowedScales = Scale.allowedElements
                         .filter { value ->
@@ -380,7 +380,7 @@ class CreateSubmissionParams private constructor(
                                 Scale.MICRO,
                                 Scale.SME -> true
                             }
-                        }
+                        }.toSet()
 
                     fun tryCreate(
                         typeOfSupplier: String?,
@@ -532,7 +532,7 @@ class CreateSubmissionParams private constructor(
                             DocumentType.REGULATORY_DOCUMENT -> false
 
                         }
-                    }
+                    }.toSet()
 
                 fun tryCreate(
                     id: String, documentType: String, title: String, description: String?

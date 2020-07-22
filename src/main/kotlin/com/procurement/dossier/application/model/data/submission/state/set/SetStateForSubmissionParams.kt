@@ -42,7 +42,7 @@ class SetStateForSubmissionParams private constructor(
                         SubmissionStatus.VALID,
                         SubmissionStatus.WITHDRAWN -> true
                     }
-                }
+                }.toSet()
 
             fun tryCreate(id: String, status: String): Result<Submission, DataErrors> {
                 val idParsed = parseSubmissionId(id, SUBMISSION_ID_ATTRIBUTE_NAME)
