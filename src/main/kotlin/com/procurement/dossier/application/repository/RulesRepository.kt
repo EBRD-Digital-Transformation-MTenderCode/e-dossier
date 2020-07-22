@@ -1,6 +1,7 @@
 package com.procurement.dossier.application.repository
 
 import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
@@ -20,4 +21,10 @@ interface RulesRepository {
         pmd: ProcurementMethod,
         operationType: Operation? = null
     ): Duration?
+
+    fun findSubmissionValidStates(
+        country: String,
+        pmd: ProcurementMethod,
+        operationType: Operation
+    ): Result<SubmissionStatus?, Fail.Incident>
 }

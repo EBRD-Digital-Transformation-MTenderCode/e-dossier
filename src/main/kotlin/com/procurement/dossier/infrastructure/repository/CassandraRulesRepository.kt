@@ -4,6 +4,7 @@ import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.Session
 import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.domain.fail.Fail
+import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
@@ -107,6 +108,29 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             ?.getString(columnValue)
             ?.toLong()
             ?.let { Duration.ofSeconds(it) }
+    }
+
+    override fun findSubmissionValidStates(
+        country: String,
+        pmd: ProcurementMethod,
+        operationType: Operation
+    ): Result<SubmissionStatus?, Fail.Incident> {
+        val query = preparedFindPeriodRuleCQL.bind()
+            .apply {
+                setString(columnCountry, country)
+                setString(columnPmd, pmd.name)
+                setString(columnOperationType, operationType.key)
+                setString(columnParameter, PERIOD_DURATION_PARAMETER)
+            }
+        return executeRead(query).one()
+            ?.getString(columnValue)
+            ?.let {
+                SubmissionStatus.tryOf(it)
+                    .doReturn { error ->
+                        return Fail.Incident.Database.Parsing(column = columnValue, value = it).asFailure()
+                    }
+            }
+            .asSuccess()
     }
 
     private fun executeRead(query: BoundStatement) = query.executeRead(
