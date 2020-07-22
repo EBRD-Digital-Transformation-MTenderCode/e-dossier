@@ -10,6 +10,7 @@ import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.tryToLong
 import com.procurement.dossier.infrastructure.extension.cassandra.executeRead
 import com.procurement.dossier.infrastructure.extension.cassandra.tryExecute
+import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.springframework.stereotype.Repository
 import java.time.Duration
@@ -21,6 +22,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
         private const val tableName = "rules"
         private const val columnCountry = "country"
         private const val columnPmd = "pmd"
+        private const val columnOperationType = "operationType"
         private const val columnParameter = "parameter"
         private const val columnValue = "value"
 
@@ -29,21 +31,28 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
                  FROM $keySpace.$tableName
                 WHERE $columnCountry=? 
                   AND $columnPmd=?
+                  AND $columnOperationType =?
                   AND $columnParameter=?
             """
 
         private const val PERIOD_DURATION_PARAMETER = "minSubmissionPeriodDuration"
-        private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForOpening"
+        private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForReturning"
         private const val EXTENSION_PARAMETER = "extensionAfterUnsuspended"
+        private const val OPERATION_TYPE_ALL = "all"
     }
 
     private val preparedFindPeriodRuleCQL = session.prepare(FIND_BY_CQL)
 
-    override fun findPeriodDuration(country: String, pmd: ProcurementMethod): Duration? {
+    override fun findPeriodDuration(
+        country: String,
+        pmd: ProcurementMethod,
+        operationType: Operation?
+    ): Duration? {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
                 setString(columnPmd, pmd.name)
+                setString(columnOperationType, operationType?.key ?: OPERATION_TYPE_ALL)
                 setString(columnParameter, PERIOD_DURATION_PARAMETER)
             }
         return executeRead(query).one()
@@ -52,11 +61,16 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             ?.let { Duration.ofSeconds(it) }
     }
 
-    override fun findSubmissionsMinimumQuantity(country: String, pmd: ProcurementMethod): Result<Long?, Fail.Incident> {
+    override fun findSubmissionsMinimumQuantity(
+        country: String,
+        pmd: ProcurementMethod,
+        operationType: Operation?
+    ): Result<Long?, Fail.Incident> {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
                 setString(columnPmd, pmd.name)
+                setString(columnOperationType, operationType?.key ?: OPERATION_TYPE_ALL)
                 setString(columnParameter, SUBMISSIONS_MINIMUM_PARAMETER)
             }
 
@@ -79,12 +93,14 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
 
     override fun findExtensionAfterUnsuspended(
         country: String,
-        pmd: ProcurementMethod
+        pmd: ProcurementMethod,
+        operationType: Operation?
     ): Duration? {
         val query = preparedFindPeriodRuleCQL.bind()
             .apply {
                 setString(columnCountry, country)
                 setString(columnPmd, pmd.name)
+                setString(columnOperationType, operationType?.key ?: OPERATION_TYPE_ALL)
                 setString(columnParameter, EXTENSION_PARAMETER)
             }
         return executeRead(query).one()
