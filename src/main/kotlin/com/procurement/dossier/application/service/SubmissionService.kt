@@ -18,6 +18,7 @@ import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
+import com.procurement.dossier.domain.fail.error.ValidationErrors.EntityNotFound
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionId
@@ -511,16 +512,24 @@ class SubmissionService(
     fun findSubmissionsForOpening(params: FindSubmissionsForOpeningParams): Result<List<FindSubmissionsForOpeningResult>, Fail> {
         val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
+
         if (submissions.isEmpty())
             return emptyList<FindSubmissionsForOpeningResult>().asSuccess()
 
-        val pendingSubmissions = submissions.filter { submission -> submission.status == SubmissionStatus.PENDING }
+        val validStatus = rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType)
+            .orForwardFail { fail -> return fail }
+            ?: return EntityNotFound.SubmissionValidStateRule(params.country, params.pmd, params.operationType)
+                .asFailure()
+
+        val validSubmissions = submissions.filter { submission -> submission.status == validStatus }
 
         val minimumQuantity = rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd)
             .orForwardFail { return it }
+            ?: return EntityNotFound.SubmissionMinimumQuantityRule(params.country, params.pmd, params.operationType)
+                .asFailure()
 
-        return if (pendingSubmissions.size >= minimumQuantity!!)
-            pendingSubmissions
+        return if (validSubmissions.size >= minimumQuantity)
+            validSubmissions
                 .map { submission -> submission.toFindSubmissionsForOpeningResult() }
                 .asSuccess()
         else
