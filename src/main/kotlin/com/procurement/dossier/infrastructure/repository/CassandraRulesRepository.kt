@@ -123,7 +123,9 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
                 setString(columnOperationType, operationType.key)
                 setString(columnParameter, VALID_STATES_PARAMETER)
             }
-        return executeRead(query).one()
+        return query.tryExecute(session)
+            .orForwardFail { fail -> return fail }
+            .one()
             ?.getString(columnValue)
             ?.let {
                 SubmissionStatus.tryOf(it)
