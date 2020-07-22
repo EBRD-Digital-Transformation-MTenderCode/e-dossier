@@ -149,13 +149,15 @@ enum class Operation(@JsonValue override val key: String) : EnumElementProvider.
     CREATE_CN("createCN"),
     CREATE_PN("createPN"),
     CREATE_PIN("createPIN"),
-    UPDATE_CN("updateCN"),
-    UPDATE_PN("updatePN"),
     CREATE_CN_ON_PN("createCNonPN"),
     CREATE_CN_ON_PIN("createCNonPIN"),
     CREATE_PIN_ON_PN("createPINonPN"),
     CREATE_NEGOTIATION_CN_ON_PN("createNegotiationCnOnPn"),
-    START_SECOND_STAGE("startSecondStage");
+    QUALIFICATION("qualification"),
+    START_SECOND_STAGE("startSecondStage"),
+    SUBMISSION_PERIOD_END("submissionPeriodEnd"),
+    UPDATE_CN("updateCN"),
+    UPDATE_PN("updatePN");
 
     override fun toString(): String = key
 
