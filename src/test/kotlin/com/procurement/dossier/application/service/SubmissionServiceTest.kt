@@ -4,6 +4,7 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import com.procurement.access.lib.toList
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
@@ -556,11 +557,15 @@ internal class SubmissionServiceTest {
         @Test
         fun success() {
             val params = getParams()
-            val firstSubmission = stubSubmission()
-            val secondSubmission = stubSubmission()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = validStatus)
             val submissions = listOf(firstSubmission, secondSubmission)
+
             whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
                 .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(submissions.asSuccess())
 
@@ -569,6 +574,104 @@ internal class SubmissionServiceTest {
 
             assertEquals(expected, actual)
         }
+
+        @Test
+        fun submissiomsLessThanMinimumQuantity_success() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val submission = stubSubmission().copy(status = validStatus)
+
+            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(submission.toList().asSuccess())
+
+            val actual = submissionService.findSubmissionsForOpening(params).get
+
+            assertTrue(actual.isEmpty())
+        }
+
+        @Test
+        fun submissionsWithCorrectStatusLessThenMinimumQuantity_success() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = SubmissionStatus.WITHDRAWN)
+            val submissions = listOf(firstSubmission, secondSubmission)
+
+            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(submissions.asSuccess())
+
+            val actual = submissionService.findSubmissionsForOpening(params).get
+
+            assertTrue(actual.isEmpty())
+        }
+
+        @Test
+        fun submissionsNotFound_success() {
+            val params = getParams()
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(emptyList<Submission>().asSuccess())
+
+            val actual = submissionService.findSubmissionsForOpening(params).get
+
+            assertTrue(actual.isEmpty())
+        }
+
+        @Test
+        fun quantityRuleNotFound_fail() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = validStatus)
+            val submissions = listOf(firstSubmission, secondSubmission)
+
+            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+                .thenReturn(null.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(submissions.asSuccess())
+
+            val actual = submissionService.findSubmissionsForOpening(params).error
+
+            val expectedErrorCode = "VR-17"
+            val expectedDescription = "Rule for submission minimum quantity not found by country 'MD', pmd 'GPA', operationType 'startSecondStage'."
+
+            assertEquals(expectedErrorCode, actual.code)
+            assertEquals(expectedDescription, actual.description)
+        }
+
+        @Test
+        fun validStateRuleNotFound_fail() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = validStatus)
+            val submissions = listOf(firstSubmission, secondSubmission)
+
+            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(null.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(submissions.asSuccess())
+
+            val actual = submissionService.findSubmissionsForOpening(params).error
+
+            val expectedErrorCode = "VR-17"
+            val expectedDescription = "Rule for submission state not found by country 'MD', pmd 'GPA', operationType 'startSecondStage'."
+
+            assertEquals(expectedErrorCode, actual.code)
+            assertEquals(expectedDescription, actual.description)
+        }
+
 
         private fun getParams() = FindSubmissionsForOpeningParams.tryCreate(
             cpid = CPID.toString(),
