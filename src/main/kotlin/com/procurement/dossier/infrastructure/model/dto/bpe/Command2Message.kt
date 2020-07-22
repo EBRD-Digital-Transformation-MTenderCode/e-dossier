@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
-import com.procurement.access.lib.toList
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.dossier.domain.fail.Fail
@@ -23,6 +22,7 @@ import com.procurement.dossier.infrastructure.dto.ApiErrorResponse2
 import com.procurement.dossier.infrastructure.dto.ApiIncidentResponse2
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.dto.ApiVersion
+import com.procurement.dossier.infrastructure.utils.toList
 import com.procurement.dossier.infrastructure.utils.tryToObject
 import java.time.LocalDateTime
 import java.util.*
