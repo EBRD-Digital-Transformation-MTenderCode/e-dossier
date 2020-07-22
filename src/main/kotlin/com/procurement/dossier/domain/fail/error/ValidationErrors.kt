@@ -8,6 +8,8 @@ import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.extension.format
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
+import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
+import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import java.time.LocalDateTime
 
@@ -133,5 +135,20 @@ sealed class ValidationErrors(
             entityName = "candidates.persons.businessFunctions.documents.id",
             numberError = "5.7.4"
         )
+    }
+
+    sealed class EntityNotFound(description: String) : ValidationErrors("17", description) {
+
+        class SubmissionValidStateRule(
+            country: String,
+            pmd: ProcurementMethod,
+            operationType: Operation
+        ) : EntityNotFound("Rule for submission state not found by country '$country', pmd '${pmd.name}', operationType '$operationType'.")
+
+        class SubmissionMinimumQuantityRule(
+            country: String,
+            pmd: ProcurementMethod,
+            operationType: Operation
+        ) : EntityNotFound("Rule for submission minimum quantity not found by country '$country', pmd '${pmd.name}', operationType '$operationType'.")
     }
 }
