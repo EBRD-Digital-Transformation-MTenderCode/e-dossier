@@ -110,7 +110,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
             ?.let { Duration.ofSeconds(it) }
     }
 
-    override fun findSubmissionValidStates(
+    override fun findSubmissionValidState(
         country: String,
         pmd: ProcurementMethod,
         operationType: Operation

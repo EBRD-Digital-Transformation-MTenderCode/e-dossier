@@ -22,7 +22,7 @@ interface RulesRepository {
         operationType: Operation? = null
     ): Duration?
 
-    fun findSubmissionValidStates(
+    fun findSubmissionValidState(
         country: String,
         pmd: ProcurementMethod,
         operationType: Operation
