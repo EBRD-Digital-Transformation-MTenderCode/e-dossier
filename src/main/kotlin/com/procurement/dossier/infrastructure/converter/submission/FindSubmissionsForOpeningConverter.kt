@@ -7,5 +7,6 @@ fun FindSubmissionsForOpeningRequest.convert() = FindSubmissionsForOpeningParams
     cpid = cpid,
     ocid = ocid,
     country = country,
-    pmd = pmd
+    pmd = pmd,
+    operationType = operationType
 )
