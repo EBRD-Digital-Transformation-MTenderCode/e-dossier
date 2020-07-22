@@ -106,8 +106,8 @@ class CriteriaServiceIT {
         val pre_requestNode = pre_document.jsonString().toNode()
 
         pre_requestNode.getObject("tender")
-            .put("awardCriteria", AwardCriteria.COST_ONLY.value)
-            .put("awardCriteriaDetails", AwardCriteriaDetails.MANUAL.value)
+            .put("awardCriteria", AwardCriteria.COST_ONLY.key)
+            .put("awardCriteriaDetails", AwardCriteriaDetails.MANUAL.key)
             .remove("criteria[0].relatesTo")
 
         val pre_cm = commandMessage(
@@ -126,8 +126,8 @@ class CriteriaServiceIT {
         val post_requestNode = post_document.jsonString().toNode()
 
         post_requestNode.getObject("tender")
-            .put("awardCriteria", AwardCriteria.PRICE_ONLY.value)
-            .put("awardCriteriaDetails", AwardCriteriaDetails.MANUAL.value)
+            .put("awardCriteria", AwardCriteria.PRICE_ONLY.key)
+            .put("awardCriteriaDetails", AwardCriteriaDetails.MANUAL.key)
             .remove("criteria[0].relatesTo")
 
         val post_cm = commandMessage(

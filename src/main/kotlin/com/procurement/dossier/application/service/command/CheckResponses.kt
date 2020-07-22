@@ -2,11 +2,11 @@ package com.procurement.dossier.application.service.command
 
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.application.model.data.CheckResponsesData
 import com.procurement.dossier.application.model.data.CreatedCriteria
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.entity.CnEntity
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
-import com.procurement.dossier.application.model.data.CheckResponsesData
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
 import com.procurement.dossier.infrastructure.model.entity.CreatedCriteriaEntity
@@ -134,7 +134,7 @@ fun CheckResponsesData.checkDataTypeValue(createdCriteria: CreatedCriteria): Che
     ): Nothing = throw ErrorException(
         error = ErrorType.INVALID_REQUIREMENT_VALUE,
         message = "RequirementResponse dataType= ${requirementResponseDatatype.javaClass}, " +
-            "Requirement dataType (DB) = ${requirementDbDataType.value()}. " +
+            "Requirement dataType (DB) = ${requirementDbDataType}. " +
             "ReqirementResponse.id=${requirementResponse.id}." +
             "ReqirementResponse.requirement.id=${requirementResponse.requirement.id}. "
     )

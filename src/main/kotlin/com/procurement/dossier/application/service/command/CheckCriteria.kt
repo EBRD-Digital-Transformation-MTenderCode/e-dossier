@@ -731,7 +731,7 @@ fun CheckCriteriaData.checkCoefficientRelatedOption(): CheckCriteriaData {
                         if (coefficient.relatedOption == null)
                             throw ErrorException(
                                 error = ErrorType.INVALID_COEFFICIENT,
-                                message = "The coefficient '${coefficient.id}' which is related to the requirement '${conversion.relatedItem}' of data type '${requirement.dataType.value()}' does not contain attribute 'relatedOption'."
+                                message = "The coefficient '${coefficient.id}' which is related to the requirement '${conversion.relatedItem}' of data type '${requirement.dataType}' does not contain attribute 'relatedOption'."
                             )
                     }
             }
