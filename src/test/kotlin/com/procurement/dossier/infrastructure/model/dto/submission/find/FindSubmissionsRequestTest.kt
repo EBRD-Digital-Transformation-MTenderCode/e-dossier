@@ -10,6 +10,6 @@ internal class FindSubmissionsRequestTest : AbstractDTOTestBase<FindSubmissionsR
 
     @Test
     fun fully() {
-        testBindingAndMapping("json/dto/submission/find/request/request_find_submission_for_opening_full.json")
+        testBindingAndMapping("json/dto/submission/find/request/request_find_submission_full.json")
     }
 }

@@ -10,21 +10,21 @@ internal class FindSubmissionsResultTest : AbstractDTOTestBase<FindSubmissionsRe
 
     @Test
     fun fully() {
-        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_for_opening_full.json")
+        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_full.json")
     }
 
     @Test
     fun required_1() {
-        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_for_opening_required_1.json")
+        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_required_1.json")
     }
 
     @Test
     fun required_2() {
-        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_for_opening_required_2.json")
+        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_required_2.json")
     }
 
     @Test
     fun required_3() {
-        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_for_opening_required_3.json")
+        testBindingAndMapping("json/dto/submission/find/result/result_find_submission_required_3.json")
     }
 }
