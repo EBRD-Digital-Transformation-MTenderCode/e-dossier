@@ -16,8 +16,9 @@ import java.time.LocalDateTime
 sealed class ValidationErrors(
     numberError: String,
     override val description: String,
-    val entityId: String? = null
-) : Fail.Error(prefix = "VR.COM-") {
+    val entityId: String? = null,
+    prefix: String = "VR.COM-"
+) : Fail.Error(prefix = prefix) {
 
     override val code: String = prefix + numberError
 
@@ -137,7 +138,7 @@ sealed class ValidationErrors(
         )
     }
 
-    sealed class EntityNotFound(description: String) : ValidationErrors("17", description) {
+    sealed class EntityNotFound(description: String) : ValidationErrors(numberError = "17", description = description, prefix = "VR-") {
 
         class SubmissionValidStateRule(
             country: String,
