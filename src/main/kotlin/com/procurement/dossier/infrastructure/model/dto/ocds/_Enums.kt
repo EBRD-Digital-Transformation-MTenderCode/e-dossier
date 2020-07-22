@@ -2,126 +2,111 @@ package com.procurement.dossier.infrastructure.model.dto.ocds
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import com.procurement.dossier.application.exception.EnumException
-import java.util.*
+import com.procurement.dossier.domain.EnumElementProvider
 
-enum class AwardCriteria(@JsonValue val value: String) {
+enum class AwardCriteria(@JsonValue override val key: String) : EnumElementProvider.Key {
     PRICE_ONLY("priceOnly"),
     COST_ONLY("costOnly"),
     QUALITY_ONLY("qualityOnly"),
     RATED_CRITERIA("ratedCriteria");
 
-    override fun toString(): String {
-        return this.value
-    }
+    override fun toString(): String = key
 
-    companion object {
-        private val elements: Map<String, AwardCriteria> =
-            values().associateBy { it.value.toUpperCase() }
+    companion object : EnumElementProvider<AwardCriteria>(info = info()) {
 
-        fun fromString(value: String): AwardCriteria =
-            elements[value.toUpperCase()] ?: throw EnumException(
-                enumType = AwardCriteria::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.value })
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = AwardCriteria.orThrow(name)
     }
 }
 
-enum class AwardCriteriaDetails(@JsonValue val value: String) {
+enum class AwardCriteriaDetails(@JsonValue override val key: String) : EnumElementProvider.Key {
     MANUAL("manual"),
     AUTOMATED("automated");
 
-    override fun toString(): String {
-        return this.value
-    }
+    override fun toString(): String = key
 
-    companion object {
-        private val elements: Map<String, AwardCriteriaDetails> =
-            values().associateBy { it.value.toUpperCase() }
+    companion object : EnumElementProvider<AwardCriteriaDetails>(info = info()) {
 
-        fun fromString(value: String): AwardCriteriaDetails =
-            elements[value.toUpperCase()] ?: throw EnumException(
-                enumType = AwardCriteriaDetails::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.value })
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = AwardCriteriaDetails.orThrow(name)
     }
 }
 
-enum class CriteriaSource(@JsonValue val value: String) {
+enum class CriteriaSource(@JsonValue override val key: String) : EnumElementProvider.Key {
     TENDERER("tenderer"),
     BUYER("buyer"),
     PROCURING_ENTITY("procuringEntity");
 
-    override fun toString(): String {
-        return this.value
-    }
+    override fun toString(): String = key
 
-    companion object {
-        private val elements: Map<String, CriteriaSource> =
-            values().associateBy { it.value.toUpperCase() }
+    companion object : EnumElementProvider<CriteriaSource>(info = info()) {
 
-        fun fromString(value: String): CriteriaSource =
-            elements[value.toUpperCase()] ?: throw EnumException(
-                enumType = CriteriaSource::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.value })
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = CriteriaSource.orThrow(name)
     }
 }
 
-enum class CriteriaRelatesTo(@JsonValue val value: String) {
+enum class CriteriaRelatesTo(@JsonValue override val key: String) : EnumElementProvider.Key {
     TENDERER("tenderer"),
     ITEM("item"),
     LOT("lot"),
     AWARD ("award");
 
-    override fun toString(): String {
-        return this.value
+    override fun toString(): String = key
+
+    companion object : EnumElementProvider<CriteriaRelatesTo>(info = info()) {
+
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = CriteriaRelatesTo.orThrow(name)
     }
 }
 
-enum class ConversionsRelatesTo(@JsonValue val value: String) {
+enum class ConversionsRelatesTo(@JsonValue override val key: String) : EnumElementProvider.Key {
     REQUIREMENT("requirement");
 
-    override fun toString(): String {
-        return this.value
+    override fun toString(): String = key
+
+    companion object : EnumElementProvider<ConversionsRelatesTo>(info = info()) {
+
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = ConversionsRelatesTo.orThrow(name)
     }
 }
 
-enum class RequirementDataType(private val value: String) {
+enum class RequirementDataType(@JsonValue override val key: String) : EnumElementProvider.Key {
 
     NUMBER("number"),
     BOOLEAN("boolean"),
     STRING("string"),
     INTEGER("integer");
 
-    @JsonValue
-    fun value(): String {
-        return this.value
-    }
+    override fun toString(): String = key
 
-    override fun toString(): String {
-        return this.value
-    }
+    companion object : EnumElementProvider<RequirementDataType>(info = info()) {
 
-    companion object {
-        private val elements: Map<String, RequirementDataType> =
-            values().associateBy { it.value.toUpperCase() }
-
-        fun fromString(value: String): RequirementDataType =
-            elements[value.toUpperCase()] ?: throw EnumException(
-                enumType = RequirementDataType::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.value })
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = RequirementDataType.orThrow(name)
     }
 }
 
-enum class MainProcurementCategory(@JsonValue val value: String) {
+enum class MainProcurementCategory(@JsonValue override val key: String) : EnumElementProvider.Key {
     GOODS("goods"),
     WORKS("works"),
     SERVICES("services");
 
-    override fun toString(): String {
-        return this.value
+    override fun toString(): String = key
+
+    companion object : EnumElementProvider<MainProcurementCategory>(info = info()) {
+
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = MainProcurementCategory.orThrow(name)
     }
 }
 
@@ -160,7 +145,7 @@ enum class ProcurementMethod(@JsonValue val value: String) {
     }
 }
 
-enum class Operation(val value: String) {
+enum class Operation(@JsonValue override val key: String) : EnumElementProvider.Key {
     CREATE_CN("createCN"),
     CREATE_PN("createPN"),
     CREATE_PIN("createPIN"),
@@ -169,20 +154,15 @@ enum class Operation(val value: String) {
     CREATE_CN_ON_PN("createCNonPN"),
     CREATE_CN_ON_PIN("createCNonPIN"),
     CREATE_PIN_ON_PN("createPINonPN"),
-    CREATE_NEGOTIATION_CN_ON_PN("createNegotiationCnOnPn");
+    CREATE_NEGOTIATION_CN_ON_PN("createNegotiationCnOnPn"),
+    START_SECOND_STAGE("startSecondStage");
 
-    companion object {
-        private val CONSTANTS = HashMap<String, Operation>()
+    override fun toString(): String = key
 
-        init {
-            for (c in Operation.values()) {
-                CONSTANTS[c.value] = c
-            }
-        }
+    companion object : EnumElementProvider<Operation>(info = info()) {
 
+        @JvmStatic
         @JsonCreator
-        fun fromValue(value: String): Operation {
-            return CONSTANTS[value] ?: throw IllegalArgumentException(value)
-        }
+        fun creator(name: String) = Operation.orThrow(name)
     }
 }
