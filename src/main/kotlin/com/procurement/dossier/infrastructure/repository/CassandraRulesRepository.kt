@@ -39,6 +39,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
         private const val PERIOD_DURATION_PARAMETER = "minSubmissionPeriodDuration"
         private const val SUBMISSIONS_MINIMUM_PARAMETER = "minQtySubmissionsForReturning"
         private const val EXTENSION_PARAMETER = "extensionAfterUnsuspended"
+        private const val VALID_STATES_PARAMETER = "validStates"
         private const val OPERATION_TYPE_ALL = "all"
     }
 
@@ -120,7 +121,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
                 setString(columnCountry, country)
                 setString(columnPmd, pmd.name)
                 setString(columnOperationType, operationType.key)
-                setString(columnParameter, PERIOD_DURATION_PARAMETER)
+                setString(columnParameter, VALID_STATES_PARAMETER)
             }
         return executeRead(query).one()
             ?.getString(columnValue)
