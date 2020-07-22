@@ -4,7 +4,6 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.access.lib.toList
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
@@ -321,7 +320,7 @@ internal class SubmissionServiceTest {
                 listOf(submission).asSuccess()
             )
             val actual = submissionService.getOrganizations(params).get
-            val expected = submission.candidates.map { it.toGetOrganizationsResult() }.toList()
+            val expected = submission.candidates.map { it.toGetOrganizationsResult() }
 
             assertEquals(expected, actual)
         }
@@ -340,7 +339,7 @@ internal class SubmissionServiceTest {
                 submissions.asSuccess()
             )
             val actual = submissionService.getOrganizations(params).get
-            val expected = submissions.flatMap { it.candidates }.map { it.toGetOrganizationsResult() }.toList()
+            val expected = submissions.flatMap { it.candidates }.map { it.toGetOrganizationsResult() }
 
             assertEquals(expected, actual)
         }
@@ -586,7 +585,7 @@ internal class SubmissionServiceTest {
             whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
                 .thenReturn(validStatus.asSuccess())
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
-                .thenReturn(submission.toList().asSuccess())
+                .thenReturn(listOf(submission).asSuccess())
 
             val actual = submissionService.findSubmissionsForOpening(params).get
 
