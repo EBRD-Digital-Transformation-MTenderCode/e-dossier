@@ -1,11 +1,11 @@
 package com.procurement.dossier.infrastructure.model.dto.submission.find
 
 import com.procurement.dossier.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.dossier.infrastructure.model.dto.request.submission.FindSubmissionsForOpeningRequest
+import com.procurement.dossier.infrastructure.model.dto.request.submission.FindSubmissionsRequest
 import org.junit.jupiter.api.Test
 
-internal class FindSubmissionsForOpeningRequestTest : AbstractDTOTestBase<FindSubmissionsForOpeningRequest>(
-    FindSubmissionsForOpeningRequest::class.java
+internal class FindSubmissionsRequestTest : AbstractDTOTestBase<FindSubmissionsRequest>(
+    FindSubmissionsRequest::class.java
 ) {
 
     @Test

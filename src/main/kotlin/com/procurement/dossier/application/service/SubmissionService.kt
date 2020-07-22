@@ -4,7 +4,7 @@ import com.procurement.dossier.application.model.data.submission.check.CheckAcce
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
-import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsResult
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
@@ -509,12 +509,12 @@ class SubmissionService(
             }
         )
 
-    fun findSubmissionsForOpening(params: FindSubmissionsForOpeningParams): Result<List<FindSubmissionsForOpeningResult>, Fail> {
+    fun findSubmissionsForOpening(params: FindSubmissionsForOpeningParams): Result<List<FindSubmissionsResult>, Fail> {
         val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
 
         if (submissions.isEmpty())
-            return emptyList<FindSubmissionsForOpeningResult>().asSuccess()
+            return emptyList<FindSubmissionsResult>().asSuccess()
 
         val validStatus = rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType)
             .orForwardFail { fail -> return fail }
@@ -533,24 +533,24 @@ class SubmissionService(
                 .map { submission -> submission.toFindSubmissionsForOpeningResult() }
                 .asSuccess()
         else
-            emptyList<FindSubmissionsForOpeningResult>().asSuccess()
+            emptyList<FindSubmissionsResult>().asSuccess()
     }
 
-    private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsForOpeningResult(
+    private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsResult(
         id = id,
         date = date,
         status = status,
         requirementResponses = requirementResponses.map { requirementResponse ->
-            FindSubmissionsForOpeningResult.RequirementResponse(
+            FindSubmissionsResult.RequirementResponse(
                 id = requirementResponse.id,
                 relatedCandidate = requirementResponse.relatedCandidate.let { relatedCandidate ->
-                    FindSubmissionsForOpeningResult.RequirementResponse.RelatedCandidate(
+                    FindSubmissionsResult.RequirementResponse.RelatedCandidate(
                         id = relatedCandidate.id,
                         name = relatedCandidate.name
                     )
                 },
                 requirement = requirementResponse.requirement.let { requirement ->
-                    FindSubmissionsForOpeningResult.RequirementResponse.Requirement(
+                    FindSubmissionsResult.RequirementResponse.Requirement(
                         id = requirement.id
                     )
                 },
@@ -558,7 +558,7 @@ class SubmissionService(
             )
         },
         documents = documents.map { document ->
-            FindSubmissionsForOpeningResult.Document(
+            FindSubmissionsResult.Document(
                 id = document.id,
                 description = document.description,
                 documentType = document.documentType,
@@ -566,11 +566,11 @@ class SubmissionService(
             )
         },
         candidates = candidates.map { candidate ->
-            FindSubmissionsForOpeningResult.Candidate(
+            FindSubmissionsResult.Candidate(
                 id = candidate.id,
                 name = candidate.name,
                 additionalIdentifiers = candidate.additionalIdentifiers.map { additionalIdentifier ->
-                    FindSubmissionsForOpeningResult.Candidate.AdditionalIdentifier(
+                    FindSubmissionsResult.Candidate.AdditionalIdentifier(
                         id = additionalIdentifier.id,
                         legalName = additionalIdentifier.legalName,
                         scheme = additionalIdentifier.scheme,
@@ -578,13 +578,13 @@ class SubmissionService(
                     )
                 },
                 address = candidate.address.let { address ->
-                    FindSubmissionsForOpeningResult.Candidate.Address(
+                    FindSubmissionsResult.Candidate.Address(
                         streetAddress = address.streetAddress,
                         postalCode = address.postalCode,
                         addressDetails = address.addressDetails.let { addressDetails ->
-                            FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails(
+                            FindSubmissionsResult.Candidate.Address.AddressDetails(
                                 country = addressDetails.country.let { country ->
-                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Country(
+                                    FindSubmissionsResult.Candidate.Address.AddressDetails.Country(
                                         id = country.id,
                                         scheme = country.scheme,
                                         description = country.description,
@@ -592,7 +592,7 @@ class SubmissionService(
                                     )
                                 },
                                 locality = addressDetails.locality.let { locality ->
-                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Locality(
+                                    FindSubmissionsResult.Candidate.Address.AddressDetails.Locality(
                                         id = locality.id,
                                         scheme = locality.scheme,
                                         description = locality.description,
@@ -600,7 +600,7 @@ class SubmissionService(
                                     )
                                 },
                                 region = addressDetails.region.let { region ->
-                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Region(
+                                    FindSubmissionsResult.Candidate.Address.AddressDetails.Region(
                                         id = region.id,
                                         scheme = region.scheme,
                                         description = region.description,
@@ -613,7 +613,7 @@ class SubmissionService(
 
                 },
                 contactPoint = candidate.contactPoint.let { contactPoint ->
-                    FindSubmissionsForOpeningResult.Candidate.ContactPoint(
+                    FindSubmissionsResult.Candidate.ContactPoint(
                         name = contactPoint.name,
                         email = contactPoint.email,
                         faxNumber = contactPoint.faxNumber,
@@ -622,33 +622,33 @@ class SubmissionService(
                     )
                 },
                 details = candidate.details.let { details ->
-                    FindSubmissionsForOpeningResult.Candidate.Details(
+                    FindSubmissionsResult.Candidate.Details(
                         typeOfSupplier = details.typeOfSupplier,
                         bankAccounts = details.bankAccounts.map { bankAccount ->
-                            FindSubmissionsForOpeningResult.Candidate.Details.BankAccount(
+                            FindSubmissionsResult.Candidate.Details.BankAccount(
                                 description = bankAccount.description,
                                 address = bankAccount.address.let { address ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address(
                                         streetAddress = address.streetAddress,
                                         postalCode = address.postalCode,
                                         addressDetails = address.addressDetails.let { addressDetails ->
-                                            FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails(
+                                            FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails(
                                                 country = addressDetails.country.let { country ->
-                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Country(
+                                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Country(
                                                         id = country.id,
                                                         scheme = country.scheme,
                                                         description = country.description
                                                     )
                                                 },
                                                 locality = addressDetails.locality.let { locality ->
-                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
+                                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
                                                         id = locality.id,
                                                         scheme = locality.scheme,
                                                         description = locality.description
                                                     )
                                                 },
                                                 region = addressDetails.region.let { region ->
-                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Region(
+                                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Region(
                                                         id = region.id,
                                                         scheme = region.scheme,
                                                         description = region.description
@@ -659,20 +659,20 @@ class SubmissionService(
                                     )
                                 },
                                 accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AccountIdentification(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.AccountIdentification(
                                         id = accountIdentification.id,
                                         scheme = accountIdentification.scheme
                                     )
                                 },
                                 additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
                                         id = additionalAccountIdentifier.id,
                                         scheme = additionalAccountIdentifier.scheme
                                     )
                                 },
                                 bankName = bankAccount.bankName,
                                 identifier = bankAccount.identifier.let { identifier ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Identifier(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.Identifier(
                                         id = identifier.id,
                                         scheme = identifier.scheme
                                     )
@@ -680,7 +680,7 @@ class SubmissionService(
                             )
                         },
                         legalForm = details.legalForm?.let { legalForm ->
-                            FindSubmissionsForOpeningResult.Candidate.Details.LegalForm(
+                            FindSubmissionsResult.Candidate.Details.LegalForm(
                                 id = legalForm.id,
                                 scheme = legalForm.scheme,
                                 description = legalForm.description,
@@ -688,7 +688,7 @@ class SubmissionService(
                             )
                         },
                         mainEconomicActivities = details.mainEconomicActivities.map { mainEconomicActivity ->
-                            FindSubmissionsForOpeningResult.Candidate.Details.MainEconomicActivity(
+                            FindSubmissionsResult.Candidate.Details.MainEconomicActivity(
                                 id = mainEconomicActivity.id,
                                 uri = mainEconomicActivity.uri,
                                 description = mainEconomicActivity.description,
@@ -699,7 +699,7 @@ class SubmissionService(
                     )
                 },
                 identifier = candidate.identifier.let { identifier ->
-                    FindSubmissionsForOpeningResult.Candidate.Identifier(
+                    FindSubmissionsResult.Candidate.Identifier(
                         id = identifier.id,
                         scheme = identifier.scheme,
                         uri = identifier.uri,
@@ -707,11 +707,11 @@ class SubmissionService(
                     )
                 },
                 persones = candidate.persones.map { person ->
-                    FindSubmissionsForOpeningResult.Candidate.Person(
+                    FindSubmissionsResult.Candidate.Person(
                         id = person.id,
                         title = person.title,
                         identifier = person.identifier.let { identifier ->
-                            FindSubmissionsForOpeningResult.Candidate.Person.Identifier(
+                            FindSubmissionsResult.Candidate.Person.Identifier(
                                 id = identifier.id,
                                 uri = identifier.uri,
                                 scheme = identifier.scheme
@@ -719,10 +719,10 @@ class SubmissionService(
                         },
                         name = person.name,
                         businessFunctions = person.businessFunctions.map { businessFunction ->
-                            FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction(
+                            FindSubmissionsResult.Candidate.Person.BusinessFunction(
                                 id = businessFunction.id,
                                 documents = businessFunction.documents.map { document ->
-                                    FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Document(
+                                    FindSubmissionsResult.Candidate.Person.BusinessFunction.Document(
                                         id = document.id,
                                         title = document.title,
                                         description = document.description,
@@ -731,7 +731,7 @@ class SubmissionService(
                                 },
                                 jobTitle = businessFunction.jobTitle,
                                 period = businessFunction.period.let { period ->
-                                    FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Period(
+                                    FindSubmissionsResult.Candidate.Person.BusinessFunction.Period(
                                         startDate = period.startDate
                                     )
                                 },

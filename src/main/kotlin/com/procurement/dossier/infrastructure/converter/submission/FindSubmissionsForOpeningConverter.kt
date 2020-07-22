@@ -1,9 +1,9 @@
 package com.procurement.dossier.infrastructure.converter.submission
 
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
-import com.procurement.dossier.infrastructure.model.dto.request.submission.FindSubmissionsForOpeningRequest
+import com.procurement.dossier.infrastructure.model.dto.request.submission.FindSubmissionsRequest
 
-fun FindSubmissionsForOpeningRequest.convert() = FindSubmissionsForOpeningParams.tryCreate(
+fun FindSubmissionsRequest.convert() = FindSubmissionsForOpeningParams.tryCreate(
     cpid = cpid,
     ocid = ocid,
     country = country,

@@ -5,7 +5,7 @@ import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.handler.historical.submission.CreateSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.historical.submission.SetStateForSubmissionHandler
-import com.procurement.dossier.infrastructure.handler.query.FindSubmissionsForOpeningHandler
+import com.procurement.dossier.infrastructure.handler.query.FindSubmissionsHandler
 import com.procurement.dossier.infrastructure.handler.query.GetOrganizationsHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionPeriodEndDateHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionStateByIdsHandler
@@ -35,7 +35,7 @@ class Command2Service(
     private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler,
     private val getOrganizationsHandler: GetOrganizationsHandler,
     private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
-    private val findSubmissionsForOpeningHandler: FindSubmissionsForOpeningHandler,
+    private val findSubmissionsHandler: FindSubmissionsHandler,
     private val getSubmissionsByQualificationIdsHandler: GetSubmissionsByQualificationIdsHandler
 ) {
 
@@ -69,7 +69,7 @@ class Command2Service(
             Command2Type.VERIFY_SUBMISSION_PERIOD_END -> verifySubmissionPeriodEndHandler.handle(node = request)
             Command2Type.GET_ORGANIZATIONS -> getOrganizationsHandler.handle(node = request)
             Command2Type.GET_SUBMISSION_PERIOD_END_DATE -> getSubmissionPeriodEndDateHandler.handle(node = request)
-            Command2Type.FIND_SUBMISSIONS -> findSubmissionsForOpeningHandler.handle(node = request)
+            Command2Type.FIND_SUBMISSIONS -> findSubmissionsHandler.handle(node = request)
             Command2Type.GET_SUBMISSIONS_BY_QUALIFICATION_IDS -> getSubmissionsByQualificationIdsHandler.handle(node = request)
         }
 
