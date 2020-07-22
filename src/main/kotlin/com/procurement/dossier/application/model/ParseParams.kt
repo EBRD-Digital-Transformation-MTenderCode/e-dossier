@@ -27,6 +27,7 @@ import com.procurement.dossier.domain.model.tryToken
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.tryParseLocalDateTime
+import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import java.time.LocalDateTime
 
@@ -194,6 +195,11 @@ fun parseSubmissionStatus(
     value: String, allowedEnums: List<SubmissionStatus>, attributeName: String
 ): Result<SubmissionStatus, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SubmissionStatus)
+
+fun parseOperationType(
+    value: String, allowedEnums: List<Operation>, attributeName: String = "operationType"
+): Result<Operation, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Operation)
 
 private fun <T> parseEnum(
     value: String, allowedEnums: Collection<T>, attributeName: String, target: EnumElementProvider<T>
