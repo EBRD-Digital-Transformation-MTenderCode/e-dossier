@@ -15,7 +15,7 @@ sealed class ValidationErrors(
     numberError: String,
     override val description: String,
     val entityId: String? = null
-) : Fail.Error(prefix = "VR-") {
+) : Fail.Error(prefix = "VR.COM-") {
 
     override val code: String = prefix + numberError
 
@@ -52,14 +52,26 @@ sealed class ValidationErrors(
         description = "Period date '${requestDate.format()}' must precede stored period end date '${endDate.format()}'."
     )
 
-    sealed class SubmissionNotFoundFor(id: SubmissionId, numberError: String) : ValidationErrors(
-        numberError = numberError,
-        description = "Submission id(s) '$id' not found."
-    ) {
+    sealed class SubmissionNotFoundFor : ValidationErrors {
+
+        constructor(numberError: String, id: SubmissionId) :
+            super(numberError = numberError, description = "Submission id(s) '$id' not found.")
+
+        constructor(numberError: String, ids: List<SubmissionId>) :
+            super(numberError = numberError, description = "Submission id(s) '${ids.joinToString()}' not found.")
+
         class GetSubmissionStateByIds(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.10.1")
         class SetStateForSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.11.1")
         class CheckAccessToSubmission(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.9.3")
+        class SubmissionsByQualificationIds(ids: List<SubmissionId>) : SubmissionNotFoundFor(
+            ids = ids, numberError = "5.17.1"
+        )
     }
+
+    class PeriodNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(
+        numberError = "5.6.1",
+        description = "Record of a period by cpid: '$cpid' and ocid: '$ocid' not found."
+    )
 
     class InvalidToken() : ValidationErrors(
         numberError = "5.9.1",
@@ -93,11 +105,6 @@ sealed class ValidationErrors(
         class GetSubmissionPeriodEndDate(cpid: Cpid, ocid: Ocid) :
             PeriodEndDateNotFoundFor(cpid, ocid, numberError = "5.14.1")
     }
-
-    class InvalidSubmissionQuantity(actualQuantity: String, minimumQuantity: String) : ValidationErrors(
-        numberError = "5.13.2",
-        description = "Submission quantity must be greater or equal to '$minimumQuantity'. Actual quantity: '$actualQuantity'."
-    )
 
     sealed class Duplicate(value: String, entityName: String, numberError: String) : ValidationErrors(
         numberError = numberError,

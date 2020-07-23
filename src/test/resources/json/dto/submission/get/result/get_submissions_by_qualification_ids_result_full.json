@@ -1,0 +1,172 @@
+{
+  "submissions": {
+    "details": [
+      {
+        "id": "84e5d262-9f13-45e0-a539-779cfbdb225e",
+        "date": "2020-07-10T10:01:50Z",
+        "status": "pending",
+        "requirementResponses": [
+          {
+            "id": "string",
+            "value": "Unknown Type: string,number,integer,boolean",
+            "requirement": {
+              "id": "string"
+            },
+            "relatedCandidate": {
+              "id": "string",
+              "name": "string"
+            }
+          }
+        ],
+        "candidates": [
+          {
+            "id": "string",
+            "name": "string",
+            "identifier": {
+              "id": "string",
+              "legalName": "string",
+              "scheme": "string",
+              "uri": "string"
+            },
+            "additionalIdentifiers": [
+              {
+                "id": "string",
+                "legalName": "string",
+                "scheme": "string",
+                "uri": "string"
+              }
+            ],
+            "address": {
+              "streetAddress": "string",
+              "postalCode": "string",
+              "addressDetails": {
+                "country": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string",
+                  "uri": "string"
+                },
+                "region": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string",
+                  "uri": "string"
+                },
+                "locality": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string",
+                  "uri": "string"
+                }
+              }
+            },
+            "contactPoint": {
+              "name": "string",
+              "email": "string",
+              "telephone": "string",
+              "faxNumber": "string",
+              "url": "string"
+            },
+            "persones": [
+              {
+                "id": "string",
+                "title": "Mr.",
+                "name": "string",
+                "identifier": {
+                  "scheme": "string",
+                  "id": "string",
+                  "uri": "string"
+                },
+                "businessFunctions": [
+                  {
+                    "id": "string",
+                    "type": "authority",
+                    "jobTitle": "string",
+                    "period": {
+                      "startDate": "2020-07-10T10:01:50Z"
+                    },
+                    "documents": [
+                      {
+                        "id": "string",
+                        "documentType": "regulatoryDocument",
+                        "title": "string",
+                        "description": "string"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "details": {
+              "typeOfSupplier": "company",
+              "mainEconomicActivities": [
+                {
+                  "scheme": "MD-CAEM",
+                  "id": "string",
+                  "description": "string",
+                  "uri": "string"
+                }
+              ],
+              "scale": "micro",
+              "bankAccounts": [
+                {
+                  "description": "string",
+                  "bankName": "string",
+                  "address": {
+                    "streetAddress": "string",
+                    "postalCode": "string",
+                    "addressDetails": {
+                      "country": {
+                        "id": "string",
+                        "description": "string",
+                        "scheme": "string"
+                      },
+                      "region": {
+                        "id": "string",
+                        "description": "string",
+                        "scheme": "string"
+                      },
+                      "locality": {
+                        "id": "string",
+                        "description": "string",
+                        "scheme": "string"
+                      }
+                    }
+                  },
+                  "identifier": {
+                    "scheme": "UA-MFO",
+                    "id": "string"
+                  },
+                  "accountIdentification": {
+                    "scheme": "IBAN",
+                    "id": "string"
+                  },
+                  "additionalAccountIdentifiers": [
+                    {
+                      "scheme": "fiscal",
+                      "id": "string"
+                    }
+                  ]
+                }
+              ],
+              "legalForm": {
+                "scheme": "MD-CFOJ",
+                "id": "string",
+                "description": "string",
+                "uri": "string"
+              }
+            }
+          }
+        ],
+        "documents": [
+          {
+            "documentType": "illustration",
+            "id": "string",
+            "title": "string",
+            "description": "string"
+          }
+        ]
+      }
+    ]
+  }
+}

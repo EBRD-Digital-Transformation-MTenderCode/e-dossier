@@ -227,6 +227,47 @@ class SubmissionRepositoryIT {
     }
 
     @Test
+    fun findBySubmissionIds_success() {
+        val firstExpectedSubmission = stubSubmission()
+        val secondExpectedSubmission = stubSubmission()
+        val additionalSubmission = stubSubmission()
+
+        insertSubmission(cpid = CPID, ocid = OCID, submission = firstExpectedSubmission)
+        insertSubmission(cpid = CPID, ocid = OCID, submission = secondExpectedSubmission)
+        insertSubmission(cpid = CPID, ocid = OCID, submission = additionalSubmission)
+
+        val expectedSubmissions = setOf(firstExpectedSubmission, secondExpectedSubmission)
+
+        val actualSubmissions = submissionRepository.findBy(
+            cpid = CPID, ocid = OCID, submissionIds = expectedSubmissions.map { it.id }
+        ).get
+
+        assertEquals(expectedSubmissions, actualSubmissions.toSet())
+        assertTrue(actualSubmissions.size == 2)
+    }
+    @Test
+    fun findBySubmissionIds_submissionNotFound_success() {
+        val actualSubmission = submissionRepository.findBy(
+            cpid = CPID, ocid = OCID, submissionIds = listOf(UUID.randomUUID())
+        ).get
+
+        assertTrue(actualSubmission.isEmpty())
+    }
+
+    @Test
+    fun findBySubmissionIds_executeException_fail() {
+        doThrow(RuntimeException())
+            .whenever(session)
+            .execute(any<BoundStatement>())
+
+        val expected = submissionRepository.findBy(
+            cpid = CPID, ocid = OCID, submissionIds = listOf(UUID.randomUUID())
+        ).error
+
+        assertTrue(expected is Fail.Incident.Database.Interaction)
+    }
+
+    @Test
     fun updateSubmission_SubmissionNotFound() {
         val isUpdated = submissionRepository.updateSubmission(
             cpid = CPID,

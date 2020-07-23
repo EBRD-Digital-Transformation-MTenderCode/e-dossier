@@ -1,0 +1,74 @@
+{
+  "submissions": {
+    "details": [
+      {
+        "id": "84e5d262-9f13-45e0-a539-779cfbdb225e",
+        "date": "2020-07-10T10:01:50Z",
+        "status": "pending",
+        "candidates": [
+          {
+            "id": "string",
+            "name": "string",
+            "identifier": {
+              "id": "string",
+              "legalName": "string",
+              "scheme": "string",
+              "uri": "string"
+            },
+            "address": {
+              "streetAddress": "string",
+              "addressDetails": {
+                "country": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string",
+                  "uri": "string"
+                },
+                "region": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string",
+                  "uri": "string"
+                },
+                "locality": {
+                  "id": "string",
+                  "description": "string",
+                  "scheme": "string"
+                }
+              }
+            },
+            "contactPoint": {
+              "name": "string",
+              "email": "string",
+              "telephone": "string"
+            },
+            "persones": [
+              {
+                "id": "string",
+                "title": "Mr.",
+                "name": "string",
+                "identifier": {
+                  "scheme": "string",
+                  "id": "string"
+                },
+                "businessFunctions": [
+                  {
+                    "id": "string",
+                    "type": "authority",
+                    "jobTitle": "string",
+                    "period": {
+                      "startDate": "2020-07-10T10:01:50Z"
+                    }
+                  }
+                ]
+              }
+            ],
+            "details": {
+              "scale": "micro"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
