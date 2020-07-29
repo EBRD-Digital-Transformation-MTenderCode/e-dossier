@@ -3,7 +3,6 @@ package com.procurement.dossier.application.model.data.submission.check
 import com.procurement.dossier.application.model.parseCpid
 import com.procurement.dossier.application.model.parseOcid
 import com.procurement.dossier.application.model.parseOwner
-import com.procurement.dossier.application.model.parseSubmissionId
 import com.procurement.dossier.application.model.parseToken
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
@@ -30,8 +29,7 @@ class CheckAccessToSubmissionParams private constructor(
         ): Result<CheckAccessToSubmissionParams, DataErrors> {
             val cpidParsed = parseCpid(cpid).orForwardFail { error -> return error }
             val ocidParsed = parseOcid(ocid).orForwardFail { error -> return error }
-            val submissionIdsParsed = parseSubmissionId(submissionId, SUBMISSION_ID_ATTRIBUTE_NAME)
-                .orForwardFail { error -> return error }
+            val submissionIdsParsed = SubmissionId.create(submissionId)
             val tokenParsed = parseToken(token).orForwardFail { error -> return error }
             val ownerParsed = parseOwner(owner).orForwardFail { error -> return error }
 

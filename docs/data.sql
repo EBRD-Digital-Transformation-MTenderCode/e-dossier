@@ -64,3 +64,18 @@ INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 
 
 INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'GPA', 'extensionAfterUnsuspended', '604800');
 INSERT INTO dossier.rules (country, pmd, parameter, value) VALUES ('MD', 'TEST_GPA', 'extensionAfterUnsuspended', '120');
+
+DROP TABLE IF EXISTS dossier.submission;
+
+CREATE TABLE IF NOT EXISTS dossier.submission
+(
+    cpid text,
+    ocid text,
+    id text,
+    status text,
+    token_entity uuid,
+    owner uuid,
+    json_data text,
+    primary key (cpid, ocid, id)
+);
+

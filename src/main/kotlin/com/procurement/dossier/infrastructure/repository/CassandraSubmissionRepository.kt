@@ -1,5 +1,6 @@
 package com.procurement.dossier.infrastructure.repository
 
+import com.datastax.driver.core.BatchStatement
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.procurement.dossier.application.repository.SubmissionRepository
@@ -123,7 +124,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             .apply {
                 setString(columnCpid, cpid.toString())
                 setString(columnOcid, ocid.toString())
-                setUUID(columnId, submission.id)
+                setString(columnId, submission.id.toString())
                 setString(columnStatus, submission.status.key)
                 setUUID(columnToken, submission.token)
                 setUUID(columnOwner, submission.owner)
@@ -134,9 +135,38 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         return MaybeFail.none()
     }
 
+    override fun saveAll(cpid: Cpid, ocid: Ocid, submissions: List<Submission>): MaybeFail<Fail.Incident> {
+
+        val statement = BatchStatement()
+
+        submissions.forEach { submission ->
+            val entity = submission.convert()
+            val data = tryToJson(entity)
+                .doReturn { incident -> return MaybeFail.fail(incident) }
+
+            statement.add(
+                preparedSaveSubmissionCQL.bind()
+                    .apply {
+                        setString(columnCpid, cpid.toString())
+                        setString(columnOcid, ocid.toString())
+                        setString(columnId, submission.id.toString())
+                        setString(columnStatus, submission.status.key)
+                        setUUID(columnToken, submission.token)
+                        setUUID(columnOwner, submission.owner)
+                        setString(columnJsonData, data)
+                    }
+            )
+        }
+
+        statement.tryExecute(session)
+            .doOnError { fail -> return MaybeFail.fail(fail) }
+
+        return MaybeFail.none()
+    }
+
     private fun Submission.convert() =
         SubmissionDataEntity(
-            id = id,
+            id = id.toString(),
             date = date,
             status = status,
             token = token,
@@ -349,7 +379,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>
     ): Result<List<SubmissionState>, Fail.Incident> {
         val query = preparedGetSubmissionStatusCQL.bind()
-            .setList(idValues, submissionIds)
+            .setList(idValues, submissionIds.map { it.toString() })
             .setString(columnCpid, cpid.toString())
             .setString(columnOcid, ocid.toString())
 
@@ -360,11 +390,11 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     }
 
     private fun convertToState(row: Row): Result<SubmissionState, Fail.Incident.Database.Parsing> {
-        val id = row.getUUID(columnId)
+        val id = row.getString(columnId)
         val status = row.getString(columnStatus)
         val statusParsed = SubmissionStatus.orNull(row.getString(columnStatus))
             ?: return Fail.Incident.Database.Parsing(column = columnStatus, value = status).asFailure()
-        return SubmissionState(id = id, status = statusParsed).asSuccess()
+        return SubmissionState(id = SubmissionId.create(id), status = statusParsed).asSuccess()
     }
 
     override fun updateSubmission(cpid: Cpid, ocid: Ocid, submission: Submission): Result<Boolean, Fail.Incident> {
@@ -375,7 +405,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
             .apply {
                 setString(columnCpid, cpid.toString())
                 setString(columnOcid, ocid.toString())
-                setUUID(columnId, submission.id)
+                setString(columnId, submission.id.toString())
                 setString(columnStatus, submission.status.key)
                 setString(columnJsonData, jsonData)
             }
@@ -391,7 +421,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         id: SubmissionId
     ): Result<SubmissionCredentials?, Fail.Incident> {
         val query = preparedGetSubmissionCredentialsCQL.bind()
-            .setUUID(columnId, id)
+            .setString(columnId, id.toString())
             .setString(columnCpid, cpid.toString())
             .setString(columnOcid, ocid.toString())
 
@@ -403,15 +433,15 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     }
 
     private fun convertToCredentials(row: Row): SubmissionCredentials {
-        val id = row.getUUID(columnId)
+        val id = row.getString(columnId)
         val token = row.getUUID(columnToken)
         val owner = row.getUUID(columnOwner)
-        return SubmissionCredentials(id = id, token = token, owner = owner)
+        return SubmissionCredentials(id = SubmissionId.create(id), token = token, owner = owner)
     }
 
     override fun findSubmission(cpid: Cpid, ocid: Ocid, id: SubmissionId): Result<Submission?, Fail.Incident> {
         val query = preparedFindSubmissionCQL.bind()
-            .setUUID(columnId, id)
+            .setString(columnId, id.toString())
             .setString(columnCpid, cpid.toString())
             .setString(columnOcid, ocid.toString())
 
@@ -427,7 +457,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
         cpid: Cpid, ocid: Ocid, submissionIds: List<SubmissionId>
     ): Result<List<Submission>, Fail.Incident> {
         val query = preparedFindSubmissionsByIdsCQL.bind()
-            .setList(idValues, submissionIds)
+            .setList(idValues, submissionIds.map { it.toString() })
             .setString(columnCpid, cpid.toString())
             .setString(columnOcid, ocid.toString())
 
@@ -449,7 +479,7 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
     private fun createSubmission(
         submissionEntity: SubmissionDataEntity
     ) = Submission(
-        id = submissionEntity.id,
+        id = SubmissionId.create(submissionEntity.id),
         date = submissionEntity.date,
         status = submissionEntity.status,
         token = submissionEntity.token,

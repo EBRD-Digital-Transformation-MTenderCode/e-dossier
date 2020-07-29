@@ -33,6 +33,7 @@ import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.qualification.QualificationId
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
+import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.SubmissionState
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
@@ -1451,7 +1452,7 @@ internal class SubmissionServiceTest {
 
     private fun stubSubmission() =
         Submission(
-            id = UUID.randomUUID(),
+            id = SubmissionId.create(UUID.randomUUID().toString()),
             status = SubmissionStatus.PENDING,
             owner = UUID.randomUUID(),
             token = UUID.randomUUID(),
