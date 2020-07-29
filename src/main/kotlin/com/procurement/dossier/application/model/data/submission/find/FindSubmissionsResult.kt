@@ -19,7 +19,7 @@ import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueDese
 import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueSerializer
 import java.time.LocalDateTime
 
-data class FindSubmissionsForOpeningResult(
+data class FindSubmissionsResult(
     @param:JsonProperty("id") @field:JsonProperty("id") val id: SubmissionId,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

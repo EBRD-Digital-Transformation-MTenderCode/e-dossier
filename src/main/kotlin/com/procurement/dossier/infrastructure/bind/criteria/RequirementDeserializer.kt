@@ -28,7 +28,7 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
                 val id: String = requirement.get("id").asText()
                 val title: String = requirement.get("title").asText()
                 val description: String? = requirement.takeIf { it.has("description") }?.get("description")?.asText()
-                val dataType: RequirementDataType = RequirementDataType.fromString(requirement.get("dataType").asText())
+                val dataType: RequirementDataType = RequirementDataType.creator(requirement.get("dataType").asText())
                 val period: Requirement.Period? = requirement.takeIf { it.has("period") }
                     ?.let {
                         val period = it.get("period")
@@ -57,7 +57,7 @@ class RequirementDeserializer : JsonDeserializer<List<Requirement>>() {
                 message = "Requirement.dataType mismatch with datatype in expectedValue || minValue || maxValue."
             )
 
-            val dataType = RequirementDataType.fromString(requirementNode.get("dataType").asText())
+            val dataType = RequirementDataType.creator(requirementNode.get("dataType").asText())
             return when {
                 isExpectedValue(requirementNode) -> {
                     when (dataType) {

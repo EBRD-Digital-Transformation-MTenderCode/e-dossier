@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-internal class ParseParamsKtTest {
+internal class ParseParamsTest {
 
     companion object {
         private const val GPA_NAME = "GPA"

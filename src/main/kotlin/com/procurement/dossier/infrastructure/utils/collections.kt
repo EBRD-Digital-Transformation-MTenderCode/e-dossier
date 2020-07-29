@@ -1,4 +1,4 @@
-package com.procurement.access.lib
+package com.procurement.dossier.infrastructure.utils
 
 inline fun <T, V> Collection<T>.uniqueBy(selector: (T) -> V): Boolean {
     val unique = HashSet<V>()

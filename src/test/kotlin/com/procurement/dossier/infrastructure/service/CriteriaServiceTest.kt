@@ -30,10 +30,6 @@ import com.procurement.dossier.infrastructure.generator.CommandMessageGenerator
 import com.procurement.dossier.infrastructure.generator.ContextGenerator
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandMessage
 import com.procurement.dossier.infrastructure.model.dto.bpe.CommandType
-import com.procurement.dossier.infrastructure.model.dto.request.CheckCriteriaRequest
-import com.procurement.dossier.infrastructure.model.dto.request.CheckResponsesRequest
-import com.procurement.dossier.infrastructure.model.dto.request.CreateCriteriaRequest
-import com.procurement.dossier.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteria
 import com.procurement.dossier.infrastructure.model.dto.ocds.AwardCriteriaDetails
 import com.procurement.dossier.infrastructure.model.dto.ocds.ConversionsRelatesTo
@@ -41,6 +37,10 @@ import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaSource
 import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
+import com.procurement.dossier.infrastructure.model.dto.request.CheckCriteriaRequest
+import com.procurement.dossier.infrastructure.model.dto.request.CheckResponsesRequest
+import com.procurement.dossier.infrastructure.model.dto.request.CreateCriteriaRequest
+import com.procurement.dossier.infrastructure.model.dto.response.CreateCriteriaResponse
 import com.procurement.dossier.json.getArray
 import com.procurement.dossier.json.getObject
 import com.procurement.dossier.json.loadJson
@@ -123,7 +123,7 @@ class CriteriaServiceTest {
                 val requestNode = json.toNode()
 
                 requestNode.getObject("tender")
-                    .put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
+                    .put("awardCriteria", AwardCriteria.creator(awardCriteria).key)
                     .remove("awardCriteriaDetails")
 
                 val cm = commandMessage(
@@ -149,7 +149,7 @@ class CriteriaServiceTest {
                 val tenderCriteria = criteria.deepCopy()
                 tenderCriteria.putAttribute("relatesTo", "tenderer")
 
-                tenderNode.put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
+                tenderNode.put("awardCriteria", AwardCriteria.creator(awardCriteria).key)
                     .remove("awardCriteriaDetails")
 
                 tenderNode.remove("conversions")
@@ -180,8 +180,8 @@ class CriteriaServiceTest {
                 val tenderCriteria = criteria.deepCopy()
                 tenderCriteria.putAttribute("relatesTo", "tenderer")
 
-                tenderNode.put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
-                    .put("awardCriteriaDetails", AwardCriteriaDetails.fromString(awardCriteriaDetails).value)
+                tenderNode.put("awardCriteria", AwardCriteria.creator(awardCriteria).key)
+                    .put("awardCriteriaDetails", AwardCriteriaDetails.creator(awardCriteriaDetails).key)
                     .remove("conversions")
                 tenderNode.putArray("criteria")
                     .add(tenderCriteria)
@@ -216,8 +216,8 @@ class CriteriaServiceTest {
 
                 val requestNode = json.toNode()
                 requestNode.getObject("tender")
-                    .put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
-                    .put("awardCriteriaDetails", AwardCriteriaDetails.fromString(awardCriteriaDetails).value)
+                    .put("awardCriteria", AwardCriteria.creator(awardCriteria).key)
+                    .put("awardCriteriaDetails", AwardCriteriaDetails.creator(awardCriteriaDetails).key)
                     .remove(fieldname)
 
                 val cm = commandMessage(
@@ -244,8 +244,8 @@ class CriteriaServiceTest {
 
                 val requestNode = json.toNode()
                 requestNode.getObject("tender")
-                    .put("awardCriteria", AwardCriteria.fromString(awardCriteria).value)
-                    .put("awardCriteriaDetails", AwardCriteriaDetails.fromString(awardCriteriaDetails).value)
+                    .put("awardCriteria", AwardCriteria.creator(awardCriteria).key)
+                    .put("awardCriteriaDetails", AwardCriteriaDetails.creator(awardCriteriaDetails).key)
                     .remove(listOf("criteria", "conversions"))
 
                 val cm = commandMessage(
@@ -985,7 +985,7 @@ class CriteriaServiceTest {
                 document.set("$.tender.criteria[2].requirementGroups[0].requirements[0].id", UNIQUE_ID)
                 document.set(
                     "$.tender.criteria[2].requirementGroups[0].requirements[0].dataType",
-                    RequirementDataType.NUMBER.value()
+                    RequirementDataType.NUMBER.key
                 )
                 document.set("$.tender.criteria[2].requirementGroups[0].requirements[0].expectedValue", .50)
                 document.set("$.tender.conversions[1].relatedItem", UNIQUE_ID)
@@ -1776,7 +1776,7 @@ fun commandMessage(
         token = token,
         owner = owner,
         pmd = pmd,
-        operationType = Operation.CREATE_CN_ON_PN.value,
+        operationType = Operation.CREATE_CN_ON_PN.key,
         startDate = startDate
     )
 
