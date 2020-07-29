@@ -5,7 +5,6 @@ import com.procurement.dossier.application.model.notEmptyRule
 import com.procurement.dossier.application.model.parseCpid
 import com.procurement.dossier.application.model.parseOcid
 import com.procurement.dossier.application.model.parseQualificationId
-import com.procurement.dossier.application.model.parseSubmissionId
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
@@ -61,9 +60,7 @@ class GetSubmissionsByQualificationIdsParams private constructor(
                 val parsedId = parseQualificationId(value = id, attributeName = QUALIFICATIONS_ID_ATTRIBUTE_NAME)
                     .orForwardFail { error -> return error }
 
-                val parsedRelatedSubmission = parseSubmissionId(
-                    value = relatedSubmission, attributeName = QUALIFICATIONS_RELATED_SUBMISSION_ATTRIBUTE_NAME
-                ).orForwardFail { error -> return error }
+                val parsedRelatedSubmission = SubmissionId.create(relatedSubmission)
 
                 return Qualification(id = parsedId, relatedSubmission = parsedRelatedSubmission).asSuccess()
             }

@@ -60,7 +60,7 @@ sealed class ValidationErrors(
         constructor(numberError: String, id: SubmissionId) :
             super(numberError = numberError, description = "Submission id(s) '$id' not found.")
 
-        constructor(numberError: String, ids: List<SubmissionId>) :
+        constructor(numberError: String, ids: Collection<SubmissionId>) :
             super(numberError = numberError, description = "Submission id(s) '${ids.joinToString()}' not found.")
 
         class GetSubmissionStateByIds(id: SubmissionId) : SubmissionNotFoundFor(id = id, numberError = "5.10.1")
@@ -69,6 +69,15 @@ sealed class ValidationErrors(
         class SubmissionsByQualificationIds(ids: List<SubmissionId>) : SubmissionNotFoundFor(
             ids = ids, numberError = "5.17.1"
         )
+        class FinalizeSubmission(ids: Collection<SubmissionId>) : SubmissionNotFoundFor(ids = ids, numberError = "5.18.2")
+    }
+
+    sealed class SubmissionsNotFoundFor(cpid: Cpid, ocid: Ocid, numberError: String) : ValidationErrors(
+        numberError = numberError,
+        description = "No submissions found by cpid '$cpid' and ocid '$ocid'."
+    ) {
+        class FinalizeSubmissions(cpid: Cpid, ocid: Ocid) :
+            SubmissionsNotFoundFor(cpid, ocid, numberError = "5.18.1")
     }
 
     class PeriodNotFound(cpid: Cpid, ocid: Ocid) : ValidationErrors(

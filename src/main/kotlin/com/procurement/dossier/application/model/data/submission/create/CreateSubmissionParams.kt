@@ -11,7 +11,6 @@ import com.procurement.dossier.application.model.parseOwner
 import com.procurement.dossier.application.model.parsePersonTitle
 import com.procurement.dossier.application.model.parseRequirementResponseId
 import com.procurement.dossier.application.model.parseScale
-import com.procurement.dossier.application.model.parseSubmissionId
 import com.procurement.dossier.application.model.parseSupplierType
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
@@ -96,8 +95,7 @@ class CreateSubmissionParams private constructor(
                 if (requirementResponses != null && requirementResponses.isEmpty())
                     return failure(DataErrors.Validation.EmptyArray(name = REQUIREMENT_RS_ATTRIBUTE_NAME))
 
-                val idParsed = parseSubmissionId(id, ID_ATTRIBUTE_NAME)
-                    .doReturn { error -> return failure(error = error) }
+                val idParsed = SubmissionId.create(id)
 
                 return Submission(
                     id = idParsed,
