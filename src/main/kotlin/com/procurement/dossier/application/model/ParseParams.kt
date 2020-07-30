@@ -3,6 +3,7 @@ package com.procurement.dossier.application.model
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.dossier.domain.fail.error.DataErrors
+import com.procurement.dossier.domain.fail.error.DataTimeError
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.Owner
@@ -206,17 +207,17 @@ private fun <T> parseEnum(
             )
         )
 
-fun parseDate(
-    value: String,
-    attributeName: String
-): Result<LocalDateTime, DataErrors.Validation.DataFormatMismatch> =
+fun parseDate(value: String, attributeName: String): Result<LocalDateTime, DataErrors.Validation> =
     value.tryParseLocalDateTime()
-        .doReturn { pattern ->
-            return Result.failure(
-                DataErrors.Validation.DataFormatMismatch(
+        .mapError { fail ->
+            when (fail) {
+                is DataTimeError.InvalidFormat -> DataErrors.Validation.DataFormatMismatch(
                     name = attributeName,
                     actualValue = value,
-                    expectedFormat = pattern
+                    expectedFormat = fail.pattern
                 )
-            )
-        }.asSuccess()
+
+                is DataTimeError.InvalidDateTime ->
+                    DataErrors.Validation.InvalidDateTime(name = attributeName, actualValue = value)
+            }
+        }
