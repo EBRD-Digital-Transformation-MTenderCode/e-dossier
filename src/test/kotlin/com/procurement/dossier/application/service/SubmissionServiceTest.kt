@@ -562,7 +562,13 @@ internal class SubmissionServiceTest {
             val secondSubmission = stubSubmission().copy(status = validStatus)
             val submissions = listOf(firstSubmission, secondSubmission)
 
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
                 .thenReturn(SUBMISSION_QUANTITY.asSuccess())
             whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
                 .thenReturn(validStatus.asSuccess())
@@ -581,7 +587,13 @@ internal class SubmissionServiceTest {
             val validStatus = SubmissionStatus.PENDING
             val submission = stubSubmission().copy(status = validStatus)
 
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
                 .thenReturn(SUBMISSION_QUANTITY.asSuccess())
             whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
                 .thenReturn(validStatus.asSuccess())
@@ -601,7 +613,13 @@ internal class SubmissionServiceTest {
             val secondSubmission = stubSubmission().copy(status = SubmissionStatus.WITHDRAWN)
             val submissions = listOf(firstSubmission, secondSubmission)
 
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
                 .thenReturn(SUBMISSION_QUANTITY.asSuccess())
             whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
                 .thenReturn(validStatus.asSuccess())
@@ -632,7 +650,13 @@ internal class SubmissionServiceTest {
             val secondSubmission = stubSubmission().copy(status = validStatus)
             val submissions = listOf(firstSubmission, secondSubmission)
 
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
                 .thenReturn(null.asSuccess())
             whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
                 .thenReturn(validStatus.asSuccess())
@@ -656,7 +680,13 @@ internal class SubmissionServiceTest {
             val secondSubmission = stubSubmission().copy(status = validStatus)
             val submissions = listOf(firstSubmission, secondSubmission)
 
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
                 .thenReturn(SUBMISSION_QUANTITY.asSuccess())
             whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
                 .thenReturn(null.asSuccess())

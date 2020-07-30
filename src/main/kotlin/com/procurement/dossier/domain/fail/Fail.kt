@@ -36,35 +36,35 @@ sealed class Fail {
             }
         }
 
-        sealed class Database(val number: String, override val description: String) :
+        sealed class Database(val number: String, override val description: String, val exception: Exception? = null) :
             Incident(level = Level.ERROR, number = number, description = description) {
 
-            class Interaction(private val exception: Exception) : Database(
-                number = "1.1",
-                description = "Database incident."
-            ) {
-                override fun logging(logger: Logger) {
-                    logger.error(message = message, exception = exception)
-                }
+            override fun logging(logger: Logger) {
+                logger.error(message = message, exception = exception)
             }
 
-            class RecordDoesNotExist(override val description: String) : Database(
-                number = "1.2",
-                description = description
-            )
+            class Interaction(exception: Exception) :
+                Database(number = "1.1", description = "Database incident.", exception = exception)
 
-            class Consistency(message: String) : Database(
-                number = "1.3",
-                description = "Database consistency incident. $message"
-            )
+            class RecordDoesNotExist(override val description: String) :
+                Database(number = "1.2", description = description)
 
-            class Parsing(val column: String, val value: String, val exception: Exception? = null) :
+            class Consistency(message: String) :
+                Database(number = "1.3", description = "Database consistency incident. $message")
+
+            class Parsing(val column: String, val value: String, exception: Exception? = null) :
                 Database(
                     number = "1.4",
-                    description = "Could not parse data stored in database."
+                    description = "Could not parse data stored in database.",
+                    exception = exception
                 ) {
+
                 override fun logging(logger: Logger) {
-                    logger.error(message = message, mdc = mapOf("column" to column, "value" to value), exception = exception)
+                    logger.error(
+                        message = message,
+                        mdc = mapOf("column" to column, "value" to value),
+                        exception = exception
+                    )
                 }
             }
         }
@@ -78,7 +78,6 @@ sealed class Fail {
 
             class Parsing(className: String, exception: Exception? = null) :
                 Transform(number = "2.1", description = "Error parsing to $className.", exception = exception)
-
         }
 
         enum class Level(override val key: String) : EnumElementProvider.Key {
