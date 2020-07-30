@@ -162,7 +162,12 @@ class RulesRepositoryIT {
 
         @Test
         fun ruleNotFound() {
-            val actualValue = rulesRepository.findSubmissionsMinimumQuantity(pmd = PMD, country = COUNTRY).get
+            val actualValue =
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    pmd = PMD,
+                    country = COUNTRY,
+                    operationType = Operation.CREATE_CN
+                ).get
 
             assertTrue(actualValue == null)
         }
@@ -173,7 +178,12 @@ class RulesRepositoryIT {
                 .whenever(session)
                 .execute(any<BoundStatement>())
 
-            val result = rulesRepository.findSubmissionsMinimumQuantity(pmd = PMD, country = COUNTRY).error
+            val result =
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    pmd = PMD,
+                    country = COUNTRY,
+                    operationType = Operation.CREATE_CN
+                ).error
             assertTrue(result is Fail.Incident.Database.Interaction)
         }
 
