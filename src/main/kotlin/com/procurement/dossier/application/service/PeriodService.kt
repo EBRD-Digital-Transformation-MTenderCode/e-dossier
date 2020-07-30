@@ -52,7 +52,7 @@ class PeriodService(
         val expectedDuration = rulesRepository.findPeriodDuration(country = context.country, pmd = context.pmd)
             ?: throw ErrorException(
                 error = ErrorType.PERIOD_RULE_NOT_FOUND,
-                message = "No period duration rule found for country '${context.country}' and pmd '${context.pmd}'."
+                message = "No period duration rule found for country '${context.country}' and pmd '${context.pmd.name}'."
             )
 
         val actualDuration = Duration.between(period.startDate, period.endDate)
