@@ -20,9 +20,9 @@ import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
+import com.procurement.dossier.domain.fail.error.ValidationErrors.EntityNotFound
 import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionNotFoundFor
 import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionsNotFoundFor
-import com.procurement.dossier.domain.fail.error.ValidationErrors.EntityNotFound
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.qualification.QualificationStatus
 import com.procurement.dossier.domain.model.submission.Submission
@@ -583,10 +583,15 @@ class SubmissionService(
 
         val validSubmissions = submissions.filter { submission -> submission.status == validStatus }
 
-        val minimumQuantity = rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd)
-            .orForwardFail { return it }
-            ?: return EntityNotFound.SubmissionMinimumQuantityRule(params.country, params.pmd, params.operationType)
-                .asFailure()
+        val minimumQuantity =
+            rulesRepository.findSubmissionsMinimumQuantity(
+                country = params.country,
+                pmd = params.pmd,
+                operationType = params.operationType
+            )
+                .orForwardFail { return it }
+                ?: return EntityNotFound.SubmissionMinimumQuantityRule(params.country, params.pmd, params.operationType)
+                    .asFailure()
 
         return if (validSubmissions.size >= minimumQuantity)
             validSubmissions
