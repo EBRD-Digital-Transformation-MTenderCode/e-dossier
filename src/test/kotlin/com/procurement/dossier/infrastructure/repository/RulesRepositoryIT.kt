@@ -39,7 +39,7 @@ class RulesRepositoryIT {
         private const val TABLE_NAME = "rules"
         private const val COLUMN_COUNTRY = "country"
         private const val COLUMN_PMD = "pmd"
-        private const val COLUMN_OPERATION_TYPE = "operationType"
+        private const val COLUMN_OPERATION_TYPE = "operation_type"
         private const val COLUMN_VALUE = "value"
         private const val COLUMN_PARAMETER = "parameter"
 

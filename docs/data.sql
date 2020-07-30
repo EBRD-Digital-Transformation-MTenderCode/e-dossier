@@ -84,7 +84,7 @@ DROP TABLE IF EXISTS dossier.rules;
 CREATE TABLE IF NOT EXISTS dossier.rules (
     country text,
     pmd text,
-    operationType test,
+    operation_type text,
     parameter text,
     value text,
     primary key (country, pmd, operation_type, parameter)

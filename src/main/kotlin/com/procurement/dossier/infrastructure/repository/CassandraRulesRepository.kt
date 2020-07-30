@@ -23,7 +23,7 @@ class CassandraRulesRepository(private val session: Session) : RulesRepository {
         private const val tableName = "rules"
         private const val columnCountry = "country"
         private const val columnPmd = "pmd"
-        private const val columnOperationType = "operationType"
+        private const val columnOperationType = "operation_type"
         private const val columnParameter = "parameter"
         private const val columnValue = "value"
 
