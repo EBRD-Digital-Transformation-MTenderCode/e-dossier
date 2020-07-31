@@ -15,13 +15,12 @@ import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
-import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueDeserializer
 import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueSerializer
 import java.time.LocalDateTime
 
 data class SubmissionDataEntity(
-    @param:JsonProperty("id") @field:JsonProperty("id") val id: SubmissionId,
+    @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
     @param:JsonProperty("date") @field:JsonProperty("date") val date: LocalDateTime,
     @param:JsonProperty("candidates") @field:JsonProperty("candidates") val candidates: List<Candidate>,
     @param:JsonProperty("status") @field:JsonProperty("status") val status: SubmissionStatus,

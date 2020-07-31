@@ -11,7 +11,6 @@ import com.procurement.dossier.application.model.parseOwner
 import com.procurement.dossier.application.model.parsePersonTitle
 import com.procurement.dossier.application.model.parseRequirementResponseId
 import com.procurement.dossier.application.model.parseScale
-import com.procurement.dossier.application.model.parseSubmissionId
 import com.procurement.dossier.application.model.parseSupplierType
 import com.procurement.dossier.domain.fail.error.DataErrors
 import com.procurement.dossier.domain.model.Cpid
@@ -96,8 +95,7 @@ class CreateSubmissionParams private constructor(
                 if (requirementResponses != null && requirementResponses.isEmpty())
                     return failure(DataErrors.Validation.EmptyArray(name = REQUIREMENT_RS_ATTRIBUTE_NAME))
 
-                val idParsed = parseSubmissionId(id, ID_ATTRIBUTE_NAME)
-                    .doReturn { error -> return failure(error = error) }
+                val idParsed = SubmissionId.create(id)
 
                 return Submission(
                     id = idParsed,
@@ -225,7 +223,7 @@ class CreateSubmissionParams private constructor(
                         val parsedPersonTitle = parsePersonTitle(
                             value = title,
                             attributeName = TITLE_ATTRIBUTE_NAME,
-                            allowedEnums = PersonTitle.allowedElements
+                            allowedEnums = PersonTitle.allowedElements.toSet()
                         ).orForwardFail { fail -> return fail }
 
                         return Person(
@@ -267,7 +265,7 @@ class CreateSubmissionParams private constructor(
                                     BusinessFunctionType.TECHNICAL_EVALUATOR,
                                     BusinessFunctionType.TECHNICAL_OPENER -> false
                                 }
-                            }
+                            }.toSet()
 
                         fun tryCreate(
                             id: String, type: String, jobTitle: String, period: Period, documents: List<Document>?
@@ -327,7 +325,7 @@ class CreateSubmissionParams private constructor(
                                         DocumentType.X_QUALIFICATION_DOCUMENTS,
                                         DocumentType.X_TECHNICAL_DOCUMENTS -> false
                                     }
-                                }
+                                }.toSet()
 
                             fun tryCreate(
                                 id: String, documentType: String, title: String, description: String?
@@ -371,7 +369,7 @@ class CreateSubmissionParams private constructor(
                                 SupplierType.COMPANY,
                                 SupplierType.INDIVIDUAL -> true
                             }
-                        }
+                        }.toSet()
 
                     private val allowedScales = Scale.allowedElements
                         .filter { value ->
@@ -380,7 +378,7 @@ class CreateSubmissionParams private constructor(
                                 Scale.MICRO,
                                 Scale.SME -> true
                             }
-                        }
+                        }.toSet()
 
                     fun tryCreate(
                         typeOfSupplier: String?,
@@ -532,7 +530,7 @@ class CreateSubmissionParams private constructor(
                             DocumentType.REGULATORY_DOCUMENT -> false
 
                         }
-                    }
+                    }.toSet()
 
                 fun tryCreate(
                     id: String, documentType: String, title: String, description: String?

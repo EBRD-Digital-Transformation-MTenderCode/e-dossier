@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.JsonNodeType
 import com.fasterxml.jackson.databind.node.NullNode
-import com.procurement.access.lib.toList
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.dossier.domain.fail.Fail
@@ -23,23 +22,25 @@ import com.procurement.dossier.infrastructure.dto.ApiErrorResponse2
 import com.procurement.dossier.infrastructure.dto.ApiIncidentResponse2
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.dto.ApiVersion
+import com.procurement.dossier.infrastructure.utils.toList
 import com.procurement.dossier.infrastructure.utils.tryToObject
 import java.time.LocalDateTime
 import java.util.*
 
 enum class Command2Type(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
-    VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse"),
-    VALIDATE_SUBMISSION("validateSubmission"),
-    CREATE_SUBMISSION("createSubmission"),
-    CHECK_PERIOD_2("checkPeriod"),
-    GET_SUBMISSION_STATE_BY_IDS("getSubmissionStateByIds"),
-    SET_STATE_FOR_SUBMISSION("setStateForSubmission"),
     CHECK_ACCESS_TO_SUBMISSION("checkAccessToSubmission"),
-    VERIFY_SUBMISSION_PERIOD_END("verifySubmissionPeriodEnd"),
+    CHECK_PERIOD_2("checkPeriod"),
+    CREATE_SUBMISSION("createSubmission"),
+    FINALIZE_SUBMISSIONS("finalizeSubmissions"),
+    FIND_SUBMISSIONS("findSubmissions"),
     GET_ORGANIZATIONS("getOrganizations"),
     GET_SUBMISSION_PERIOD_END_DATE("getSubmissionPeriodEndDate"),
-    FIND_SUBMISSIONS_FOR_OPENING("findSubmissionsForOpening"),
-    GET_SUBMISSIONS_BY_QUALIFICATION_IDS("getSubmissionsByQualificationIds");
+    GET_SUBMISSION_STATE_BY_IDS("getSubmissionStateByIds"),
+    GET_SUBMISSIONS_BY_QUALIFICATION_IDS("getSubmissionsByQualificationIds"),
+    SET_STATE_FOR_SUBMISSION("setStateForSubmission"),
+    VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse"),
+    VALIDATE_SUBMISSION("validateSubmission"),
+    VERIFY_SUBMISSION_PERIOD_END("verifySubmissionPeriodEnd");
 
     override fun toString(): String = key
 

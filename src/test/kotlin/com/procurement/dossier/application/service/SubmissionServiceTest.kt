@@ -6,8 +6,8 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
-import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
-import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsParams
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsResult
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
@@ -33,6 +33,7 @@ import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.qualification.QualificationId
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
+import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.SubmissionState
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.ValidationResult
@@ -40,6 +41,7 @@ import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.format
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
+import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -319,7 +321,7 @@ internal class SubmissionServiceTest {
                 listOf(submission).asSuccess()
             )
             val actual = submissionService.getOrganizations(params).get
-            val expected = submission.candidates.map { it.toGetOrganizationsResult() }.toList()
+            val expected = submission.candidates.map { it.toGetOrganizationsResult() }
 
             assertEquals(expected, actual)
         }
@@ -338,7 +340,7 @@ internal class SubmissionServiceTest {
                 submissions.asSuccess()
             )
             val actual = submissionService.getOrganizations(params).get
-            val expected = submissions.flatMap { it.candidates }.map { it.toGetOrganizationsResult() }.toList()
+            val expected = submissions.flatMap { it.candidates }.map { it.toGetOrganizationsResult() }
 
             assertEquals(expected, actual)
         }
@@ -550,47 +552,180 @@ internal class SubmissionServiceTest {
     }
 
     @Nested
-    inner class FindSubmissionsForOpening {
+    inner class FindSubmissions {
 
         @Test
         fun success() {
             val params = getParams()
-            val firstSubmission = stubSubmission()
-            val secondSubmission = stubSubmission()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = validStatus)
             val submissions = listOf(firstSubmission, secondSubmission)
-            whenever(rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd))
+
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
                 .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
             whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
                 .thenReturn(submissions.asSuccess())
 
-            val actual = submissionService.findSubmissionsForOpening(params).get
+            val actual = submissionService.findSubmissions(params).get
             val expected = submissions.map { it.toFindSubmissionsForOpeningResult() }
 
             assertEquals(expected, actual)
         }
 
-        private fun getParams() = FindSubmissionsForOpeningParams.tryCreate(
+        @Test
+        fun submissiomsLessThanMinimumQuantity_success() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val submission = stubSubmission().copy(status = validStatus)
+
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
+                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(listOf(submission).asSuccess())
+
+            val actual = submissionService.findSubmissions(params).get
+
+            assertTrue(actual.isEmpty())
+        }
+
+        @Test
+        fun submissionsWithCorrectStatusLessThenMinimumQuantity_success() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = SubmissionStatus.WITHDRAWN)
+            val submissions = listOf(firstSubmission, secondSubmission)
+
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
+                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(submissions.asSuccess())
+
+            val actual = submissionService.findSubmissions(params).get
+
+            assertTrue(actual.isEmpty())
+        }
+
+        @Test
+        fun submissionsNotFound_success() {
+            val params = getParams()
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(emptyList<Submission>().asSuccess())
+
+            val actual = submissionService.findSubmissions(params).get
+
+            assertTrue(actual.isEmpty())
+        }
+
+        @Test
+        fun quantityRuleNotFound_fail() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = validStatus)
+            val submissions = listOf(firstSubmission, secondSubmission)
+
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
+                .thenReturn(null.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(validStatus.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(submissions.asSuccess())
+
+            val actual = submissionService.findSubmissions(params).error
+
+            val expectedErrorCode = "VR-17"
+            val expectedDescription = "Rule for submission minimum quantity not found by country 'MD', pmd 'GPA', operationType 'startSecondStage'."
+
+            assertEquals(expectedErrorCode, actual.code)
+            assertEquals(expectedDescription, actual.description)
+        }
+
+        @Test
+        fun validStateRuleNotFound_fail() {
+            val params = getParams()
+            val validStatus = SubmissionStatus.PENDING
+            val firstSubmission = stubSubmission().copy(status = validStatus)
+            val secondSubmission = stubSubmission().copy(status = validStatus)
+            val submissions = listOf(firstSubmission, secondSubmission)
+
+            whenever(
+                rulesRepository.findSubmissionsMinimumQuantity(
+                    country = params.country,
+                    pmd = params.pmd,
+                    operationType = params.operationType
+                )
+            )
+                .thenReturn(SUBMISSION_QUANTITY.asSuccess())
+            whenever(rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType))
+                .thenReturn(null.asSuccess())
+            whenever(submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid))
+                .thenReturn(submissions.asSuccess())
+
+            val actual = submissionService.findSubmissions(params).error
+
+            val expectedErrorCode = "VR-17"
+            val expectedDescription = "Rule for submission state not found by country 'MD', pmd 'GPA', operationType 'startSecondStage'."
+
+            assertEquals(expectedErrorCode, actual.code)
+            assertEquals(expectedDescription, actual.description)
+        }
+
+
+        private fun getParams() = FindSubmissionsParams.tryCreate(
             cpid = CPID.toString(),
             ocid = OCID.toString(),
             country = COUNTRY,
-            pmd = PMD.name
+            pmd = PMD.name,
+            operationType = Operation.START_SECOND_STAGE.toString()
         ).get
 
-        private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsForOpeningResult(
+        private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsResult(
             id = id,
             date = date,
             status = status,
             requirementResponses = requirementResponses.map { requirementResponse ->
-                FindSubmissionsForOpeningResult.RequirementResponse(
+                FindSubmissionsResult.RequirementResponse(
                     id = requirementResponse.id,
                     relatedCandidate = requirementResponse.relatedCandidate.let { relatedCandidate ->
-                        FindSubmissionsForOpeningResult.RequirementResponse.RelatedCandidate(
+                        FindSubmissionsResult.RequirementResponse.RelatedCandidate(
                             id = relatedCandidate.id,
                             name = relatedCandidate.name
                         )
                     },
                     requirement = requirementResponse.requirement.let { requirement ->
-                        FindSubmissionsForOpeningResult.RequirementResponse.Requirement(
+                        FindSubmissionsResult.RequirementResponse.Requirement(
                             id = requirement.id
                         )
                     },
@@ -598,7 +733,7 @@ internal class SubmissionServiceTest {
                 )
             },
             documents = documents.map { document ->
-                FindSubmissionsForOpeningResult.Document(
+                FindSubmissionsResult.Document(
                     id = document.id,
                     description = document.description,
                     documentType = document.documentType,
@@ -606,11 +741,11 @@ internal class SubmissionServiceTest {
                 )
             },
             candidates = candidates.map { candidate ->
-                FindSubmissionsForOpeningResult.Candidate(
+                FindSubmissionsResult.Candidate(
                     id = candidate.id,
                     name = candidate.name,
                     additionalIdentifiers = candidate.additionalIdentifiers.map { additionalIdentifier ->
-                        FindSubmissionsForOpeningResult.Candidate.AdditionalIdentifier(
+                        FindSubmissionsResult.Candidate.AdditionalIdentifier(
                             id = additionalIdentifier.id,
                             legalName = additionalIdentifier.legalName,
                             scheme = additionalIdentifier.scheme,
@@ -618,13 +753,13 @@ internal class SubmissionServiceTest {
                         )
                     },
                     address = candidate.address.let { address ->
-                        FindSubmissionsForOpeningResult.Candidate.Address(
+                        FindSubmissionsResult.Candidate.Address(
                             streetAddress = address.streetAddress,
                             postalCode = address.postalCode,
                             addressDetails = address.addressDetails.let { addressDetails ->
-                                FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails(
+                                FindSubmissionsResult.Candidate.Address.AddressDetails(
                                     country = addressDetails.country.let { country ->
-                                        FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Country(
+                                        FindSubmissionsResult.Candidate.Address.AddressDetails.Country(
                                             id = country.id,
                                             scheme = country.scheme,
                                             description = country.description,
@@ -632,7 +767,7 @@ internal class SubmissionServiceTest {
                                         )
                                     },
                                     locality = addressDetails.locality.let { locality ->
-                                        FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Locality(
+                                        FindSubmissionsResult.Candidate.Address.AddressDetails.Locality(
                                             id = locality.id,
                                             scheme = locality.scheme,
                                             description = locality.description,
@@ -640,7 +775,7 @@ internal class SubmissionServiceTest {
                                         )
                                     },
                                     region = addressDetails.region.let { region ->
-                                        FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Region(
+                                        FindSubmissionsResult.Candidate.Address.AddressDetails.Region(
                                             id = region.id,
                                             scheme = region.scheme,
                                             description = region.description,
@@ -653,7 +788,7 @@ internal class SubmissionServiceTest {
 
                     },
                     contactPoint = candidate.contactPoint.let { contactPoint ->
-                        FindSubmissionsForOpeningResult.Candidate.ContactPoint(
+                        FindSubmissionsResult.Candidate.ContactPoint(
                             name = contactPoint.name,
                             email = contactPoint.email,
                             faxNumber = contactPoint.faxNumber,
@@ -662,33 +797,33 @@ internal class SubmissionServiceTest {
                         )
                     },
                     details = candidate.details.let { details ->
-                        FindSubmissionsForOpeningResult.Candidate.Details(
+                        FindSubmissionsResult.Candidate.Details(
                             typeOfSupplier = details.typeOfSupplier,
                             bankAccounts = details.bankAccounts.map { bankAccount ->
-                                FindSubmissionsForOpeningResult.Candidate.Details.BankAccount(
+                                FindSubmissionsResult.Candidate.Details.BankAccount(
                                     description = bankAccount.description,
                                     address = bankAccount.address.let { address ->
-                                        FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address(
+                                        FindSubmissionsResult.Candidate.Details.BankAccount.Address(
                                             streetAddress = address.streetAddress,
                                             postalCode = address.postalCode,
                                             addressDetails = address.addressDetails.let { addressDetails ->
-                                                FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails(
+                                                FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails(
                                                     country = addressDetails.country.let { country ->
-                                                        FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Country(
+                                                        FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Country(
                                                             id = country.id,
                                                             scheme = country.scheme,
                                                             description = country.description
                                                         )
                                                     },
                                                     locality = addressDetails.locality.let { locality ->
-                                                        FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
+                                                        FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
                                                             id = locality.id,
                                                             scheme = locality.scheme,
                                                             description = locality.description
                                                         )
                                                     },
                                                     region = addressDetails.region.let { region ->
-                                                        FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Region(
+                                                        FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Region(
                                                             id = region.id,
                                                             scheme = region.scheme,
                                                             description = region.description
@@ -699,20 +834,20 @@ internal class SubmissionServiceTest {
                                         )
                                     },
                                     accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
-                                        FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AccountIdentification(
+                                        FindSubmissionsResult.Candidate.Details.BankAccount.AccountIdentification(
                                             id = accountIdentification.id,
                                             scheme = accountIdentification.scheme
                                         )
                                     },
                                     additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
-                                        FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
+                                        FindSubmissionsResult.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
                                             id = additionalAccountIdentifier.id,
                                             scheme = additionalAccountIdentifier.scheme
                                         )
                                     },
                                     bankName = bankAccount.bankName,
                                     identifier = bankAccount.identifier.let { identifier ->
-                                        FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Identifier(
+                                        FindSubmissionsResult.Candidate.Details.BankAccount.Identifier(
                                             id = identifier.id,
                                             scheme = identifier.scheme
                                         )
@@ -720,7 +855,7 @@ internal class SubmissionServiceTest {
                                 )
                             },
                             legalForm = details.legalForm?.let { legalForm ->
-                                FindSubmissionsForOpeningResult.Candidate.Details.LegalForm(
+                                FindSubmissionsResult.Candidate.Details.LegalForm(
                                     id = legalForm.id,
                                     scheme = legalForm.scheme,
                                     description = legalForm.description,
@@ -728,7 +863,7 @@ internal class SubmissionServiceTest {
                                 )
                             },
                             mainEconomicActivities = details.mainEconomicActivities.map { mainEconomicActivity ->
-                                FindSubmissionsForOpeningResult.Candidate.Details.MainEconomicActivity(
+                                FindSubmissionsResult.Candidate.Details.MainEconomicActivity(
                                     id = mainEconomicActivity.id,
                                     uri = mainEconomicActivity.uri,
                                     description = mainEconomicActivity.description,
@@ -739,7 +874,7 @@ internal class SubmissionServiceTest {
                         )
                     },
                     identifier = candidate.identifier.let { identifier ->
-                        FindSubmissionsForOpeningResult.Candidate.Identifier(
+                        FindSubmissionsResult.Candidate.Identifier(
                             id = identifier.id,
                             scheme = identifier.scheme,
                             uri = identifier.uri,
@@ -747,11 +882,11 @@ internal class SubmissionServiceTest {
                         )
                     },
                     persones = candidate.persones.map { person ->
-                        FindSubmissionsForOpeningResult.Candidate.Person(
+                        FindSubmissionsResult.Candidate.Person(
                             id = person.id,
                             title = person.title,
                             identifier = person.identifier.let { identifier ->
-                                FindSubmissionsForOpeningResult.Candidate.Person.Identifier(
+                                FindSubmissionsResult.Candidate.Person.Identifier(
                                     id = identifier.id,
                                     uri = identifier.uri,
                                     scheme = identifier.scheme
@@ -759,10 +894,10 @@ internal class SubmissionServiceTest {
                             },
                             name = person.name,
                             businessFunctions = person.businessFunctions.map { businessFunction ->
-                                FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction(
+                                FindSubmissionsResult.Candidate.Person.BusinessFunction(
                                     id = businessFunction.id,
                                     documents = businessFunction.documents.map { document ->
-                                        FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Document(
+                                        FindSubmissionsResult.Candidate.Person.BusinessFunction.Document(
                                             id = document.id,
                                             title = document.title,
                                             description = document.description,
@@ -771,7 +906,7 @@ internal class SubmissionServiceTest {
                                     },
                                     jobTitle = businessFunction.jobTitle,
                                     period = businessFunction.period.let { period ->
-                                        FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Period(
+                                        FindSubmissionsResult.Candidate.Person.BusinessFunction.Period(
                                             startDate = period.startDate
                                         )
                                     },
@@ -1451,7 +1586,7 @@ internal class SubmissionServiceTest {
 
     private fun stubSubmission() =
         Submission(
-            id = UUID.randomUUID(),
+            id = SubmissionId.create(UUID.randomUUID().toString()),
             status = SubmissionStatus.PENDING,
             owner = UUID.randomUUID(),
             token = UUID.randomUUID(),

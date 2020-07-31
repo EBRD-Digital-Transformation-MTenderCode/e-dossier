@@ -1,5 +1,6 @@
 package com.procurement.dossier.domain.util.extension
 
+import com.procurement.dossier.domain.fail.error.DataTimeError
 import com.procurement.dossier.domain.util.Result
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -25,8 +26,11 @@ fun String.parseLocalDateTime(): LocalDateTime = LocalDateTime.parse(this, forma
 
 fun nowDefaultUTC(): LocalDateTime = LocalDateTime.now(ZoneOffset.UTC)
 
-fun String.tryParseLocalDateTime(): Result<LocalDateTime, String> = try {
-    Result.success(this.parseLocalDateTime())
-} catch (ignore: Exception) {
-    Result.failure(FORMAT_PATTERN)
+fun String.tryParseLocalDateTime(): Result<LocalDateTime, DataTimeError> = try {
+    Result.success(parseLocalDateTime())
+} catch (expected: Exception) {
+    if (expected.cause == null)
+        Result.failure(DataTimeError.InvalidFormat(value = this, pattern = FORMAT_PATTERN, exception = expected))
+    else
+        Result.failure(DataTimeError.InvalidDateTime(value = this, exception = expected))
 }

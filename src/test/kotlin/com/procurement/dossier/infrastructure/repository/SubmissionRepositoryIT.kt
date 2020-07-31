@@ -24,6 +24,7 @@ import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
+import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.model.submission.SubmissionState
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.dossier.infrastructure.bind.databinding.JsonDateTimeSerializer
@@ -107,7 +108,7 @@ class SubmissionRepositoryIT {
     @Test
     fun findSubmission_submissionNotFound_fail() {
         val actualSubmission = submissionRepository.findSubmission(
-            cpid = CPID, ocid = OCID, id = UUID.randomUUID()
+            cpid = CPID, ocid = OCID, id = SubmissionId.create(UUID.randomUUID().toString())
         ).get
 
         assertTrue(actualSubmission == null)
@@ -119,7 +120,7 @@ class SubmissionRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        val expected = submissionRepository.findSubmission(cpid = CPID, ocid = OCID, id = UUID.randomUUID()).error
+        val expected = submissionRepository.findSubmission(cpid = CPID, ocid = OCID, id = SubmissionId.create(UUID.randomUUID().toString())).error
 
         assertTrue(expected is Fail.Incident.Database.Interaction)
     }
@@ -133,6 +134,23 @@ class SubmissionRepositoryIT {
         ).get
 
         assertEquals(expectedSubmission, actualSubmission)
+    }
+
+    @Test
+    fun saveSubmissionsBatch_success() {
+        val expectedSubmission1 = stubSubmission()
+        val expectedSubmission2 = stubSubmission()
+
+        submissionRepository.saveAll(cpid = CPID, ocid = OCID, submissions = listOf(expectedSubmission1, expectedSubmission2))
+
+        val actualSubmission1 = submissionRepository
+            .findSubmission(cpid = CPID, ocid = OCID, id = expectedSubmission1.id).get
+
+        val actualSubmission2 = submissionRepository
+            .findSubmission(cpid = CPID, ocid = OCID, id = expectedSubmission2.id).get
+
+        assertEquals(expectedSubmission1, actualSubmission1)
+        assertEquals(expectedSubmission2, actualSubmission2)
     }
 
     @Test
@@ -150,7 +168,7 @@ class SubmissionRepositoryIT {
     @Test
     fun getSubmissionsStates_success() {
         val firstSubmission = stubSubmission()
-        val secondSubmission = stubSubmission().copy(id = UUID.randomUUID(), status = SubmissionStatus.WITHDRAWN)
+        val secondSubmission = stubSubmission().copy(id = SubmissionId.create(UUID.randomUUID().toString()), status = SubmissionStatus.WITHDRAWN)
 
         insertSubmission(cpid = CPID, ocid = OCID, submission = firstSubmission)
         insertSubmission(cpid = CPID, ocid = OCID, submission = secondSubmission)
@@ -170,7 +188,12 @@ class SubmissionRepositoryIT {
     @Test
     fun getSubmissionsStates_submissionNotFound_success() {
         val actual = submissionRepository.getSubmissionsStates(
-            cpid = CPID, ocid = OCID, submissionIds = listOf(UUID.randomUUID(), UUID.randomUUID())
+            cpid = CPID,
+            ocid = OCID,
+            submissionIds = listOf(
+                SubmissionId.create(UUID.randomUUID().toString()),
+                SubmissionId.create(UUID.randomUUID().toString())
+            )
         ).get
 
         assertTrue(actual.isEmpty())
@@ -197,7 +220,7 @@ class SubmissionRepositoryIT {
     @Test
     fun getSubmissionCredentials_submissionNotFound_success() {
         val actual = submissionRepository.getSubmissionCredentials(
-            cpid = CPID, ocid = OCID, id = UUID.randomUUID()
+            cpid = CPID, ocid = OCID, id = SubmissionId.create(UUID.randomUUID().toString())
         ).get
 
         assertTrue(actual == null)
@@ -248,7 +271,7 @@ class SubmissionRepositoryIT {
     @Test
     fun findBySubmissionIds_submissionNotFound_success() {
         val actualSubmission = submissionRepository.findBy(
-            cpid = CPID, ocid = OCID, submissionIds = listOf(UUID.randomUUID())
+            cpid = CPID, ocid = OCID, submissionIds = listOf(SubmissionId.create(UUID.randomUUID().toString()))
         ).get
 
         assertTrue(actualSubmission.isEmpty())
@@ -261,7 +284,7 @@ class SubmissionRepositoryIT {
             .execute(any<BoundStatement>())
 
         val expected = submissionRepository.findBy(
-            cpid = CPID, ocid = OCID, submissionIds = listOf(UUID.randomUUID())
+            cpid = CPID, ocid = OCID, submissionIds = listOf(SubmissionId.create(UUID.randomUUID().toString()))
         ).error
 
         assertTrue(expected is Fail.Incident.Database.Interaction)
@@ -296,7 +319,7 @@ class SubmissionRepositoryIT {
                     (
                         $COLUMN_CPID text,
                         $COLUMN_OCID text,
-                        $COLUMN_ID uuid,
+                        $COLUMN_ID text,
                         $COLUMN_STATUS text,
                         $COLUMN_OWNER uuid,
                         $COLUMN_TOKEN uuid,
@@ -311,7 +334,7 @@ class SubmissionRepositoryIT {
         val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
             .value(COLUMN_CPID, cpid.toString())
             .value(COLUMN_OCID, ocid.toString())
-            .value(COLUMN_ID, submission.id)
+            .value(COLUMN_ID, submission.id.toString())
             .value(COLUMN_STATUS, submission.status.key)
             .value(COLUMN_TOKEN, submission.token)
             .value(COLUMN_OWNER, submission.owner)
@@ -321,7 +344,7 @@ class SubmissionRepositoryIT {
 
     private fun Submission.convertToEntity() =
         SubmissionDataEntity(
-            id = id,
+            id = id.toString(),
             date = date,
             status = status,
             token = token,
@@ -532,7 +555,7 @@ class SubmissionRepositoryIT {
 
     private fun stubSubmission() =
         Submission(
-            id = UUID.randomUUID(),
+            id = SubmissionId.create(UUID.randomUUID().toString()),
             status = SubmissionStatus.PENDING,
             owner = UUID.randomUUID(),
             token = UUID.randomUUID(),

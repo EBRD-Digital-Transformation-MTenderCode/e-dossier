@@ -3,6 +3,7 @@ package com.procurement.dossier.application.model
 import com.procurement.dossier.domain.EnumElementProvider
 import com.procurement.dossier.domain.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.dossier.domain.fail.error.DataErrors
+import com.procurement.dossier.domain.fail.error.DataTimeError
 import com.procurement.dossier.domain.model.Cpid
 import com.procurement.dossier.domain.model.Ocid
 import com.procurement.dossier.domain.model.Owner
@@ -16,17 +17,17 @@ import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.qualification.QualificationId
+import com.procurement.dossier.domain.model.qualification.QualificationStatus
 import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.requirement.response.tryRequirementResponseId
 import com.procurement.dossier.domain.model.requirement.tryRequirementId
-import com.procurement.dossier.domain.model.submission.SubmissionId
-import com.procurement.dossier.domain.model.submission.trySubmissionId
 import com.procurement.dossier.domain.model.tryOwner
 import com.procurement.dossier.domain.model.tryToken
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.tryParseLocalDateTime
+import com.procurement.dossier.infrastructure.model.dto.ocds.Operation
 import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import java.time.LocalDateTime
 
@@ -137,20 +138,6 @@ fun parseDocumentId(
             )
         }.asSuccess()
 
-fun parseSubmissionId(
-    value: String, attributeName: String
-): Result<SubmissionId, DataErrors.Validation.DataFormatMismatch> =
-    value.trySubmissionId()
-        .doReturn {
-            return Result.failure(
-                DataErrors.Validation.DataFormatMismatch(
-                    name = attributeName,
-                    expectedFormat = "uuid",
-                    actualValue = value
-                )
-            )
-        }.asSuccess()
-
 fun parseQualificationId(
     value: String, attributeName: String
 ): Result<QualificationId, DataErrors.Validation.DataMismatchToPattern> {
@@ -166,63 +153,71 @@ fun parseQualificationId(
 }
 
 fun parsePersonTitle(
-    value: String, allowedEnums: List<PersonTitle>, attributeName: String
+    value: String, allowedEnums: Set<PersonTitle>, attributeName: String
 ): Result<PersonTitle, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = PersonTitle)
 
 fun parseBusinessFunctionType(
-    value: String, allowedEnums: List<BusinessFunctionType>, attributeName: String
+    value: String, allowedEnums: Set<BusinessFunctionType>, attributeName: String
 ): Result<BusinessFunctionType, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = BusinessFunctionType)
 
 fun parseDocumentType(
-    value: String, allowedEnums: List<DocumentType>, attributeName: String
+    value: String, allowedEnums: Set<DocumentType>, attributeName: String
 ): Result<DocumentType, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = DocumentType)
 
 fun parseSupplierType(
-    value: String, allowedEnums: List<SupplierType>, attributeName: String
+    value: String, allowedEnums: Set<SupplierType>, attributeName: String
 ): Result<SupplierType, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SupplierType)
 
 fun parseScale(
-    value: String, allowedEnums: List<Scale>, attributeName: String
+    value: String, allowedEnums: Set<Scale>, attributeName: String
 ): Result<Scale, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Scale)
 
 fun parseSubmissionStatus(
-    value: String, allowedEnums: List<SubmissionStatus>, attributeName: String
+    value: String, allowedEnums: Set<SubmissionStatus>, attributeName: String
 ): Result<SubmissionStatus, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = SubmissionStatus)
 
+fun parseQualificationStatus(
+    value: String, allowedEnums: Set<QualificationStatus>, attributeName: String
+): Result<QualificationStatus, DataErrors.Validation.UnknownValue> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = QualificationStatus)
+
+fun parseOperationType(
+    value: String, allowedEnums: Set<Operation>, attributeName: String = "operationType"
+): Result<Operation, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Operation)
+
 private fun <T> parseEnum(
-    value: String, allowedEnums: Collection<T>, attributeName: String, target: EnumElementProvider<T>
+    value: String, allowedEnums: Set<T>, attributeName: String, target: EnumElementProvider<T>
 ): Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,
-                                                       T : EnumElementProvider.Key {
-    val allowed = allowedEnums.toSet()
-    return target.orNull(value)
-        ?.takeIf { it in allowed }
+                                                       T : EnumElementProvider.Key =
+    target.orNull(value)
+        ?.takeIf { it in allowedEnums }
         ?.asSuccess()
         ?: Result.failure(
             DataErrors.Validation.UnknownValue(
                 name = attributeName,
-                expectedValues = allowed.keysAsStrings(),
+                expectedValues = allowedEnums.keysAsStrings(),
                 actualValue = value
             )
         )
-}
 
-fun parseDate(
-    value: String,
-    attributeName: String
-): Result<LocalDateTime, DataErrors.Validation.DataFormatMismatch> =
+fun parseDate(value: String, attributeName: String): Result<LocalDateTime, DataErrors.Validation> =
     value.tryParseLocalDateTime()
-        .doReturn { pattern ->
-            return Result.failure(
-                DataErrors.Validation.DataFormatMismatch(
+        .mapError { fail ->
+            when (fail) {
+                is DataTimeError.InvalidFormat -> DataErrors.Validation.DataFormatMismatch(
                     name = attributeName,
                     actualValue = value,
-                    expectedFormat = pattern
+                    expectedFormat = fail.pattern
                 )
-            )
-        }.asSuccess()
+
+                is DataTimeError.InvalidDateTime ->
+                    DataErrors.Validation.InvalidDateTime(name = attributeName, actualValue = value)
+            }
+        }

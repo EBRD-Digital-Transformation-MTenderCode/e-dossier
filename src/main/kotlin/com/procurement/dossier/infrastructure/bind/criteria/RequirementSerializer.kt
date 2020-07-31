@@ -28,7 +28,7 @@ class RequirementSerializer : JsonSerializer<List<Requirement>>() {
 
                 requirementNode.put("id", requirement.id)
                 requirementNode.put("title", requirement.title)
-                requirementNode.put("dataType", requirement.dataType.value())
+                requirementNode.put("dataType", requirement.dataType.key)
 
                 requirement.description?.let { requirementNode.put("description", it) }
 

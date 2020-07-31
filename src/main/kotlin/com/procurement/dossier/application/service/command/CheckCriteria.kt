@@ -1,6 +1,5 @@
 package com.procurement.dossier.application.service.command
 
-import com.procurement.access.lib.toSetBy
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.data.CheckCriteriaData
@@ -18,6 +17,7 @@ import com.procurement.dossier.infrastructure.model.dto.ocds.ConversionsRelatesT
 import com.procurement.dossier.infrastructure.model.dto.ocds.CriteriaRelatesTo
 import com.procurement.dossier.infrastructure.model.dto.ocds.MainProcurementCategory
 import com.procurement.dossier.infrastructure.model.dto.ocds.RequirementDataType
+import com.procurement.dossier.infrastructure.utils.toSetBy
 import java.math.BigDecimal
 import java.util.*
 
@@ -731,7 +731,7 @@ fun CheckCriteriaData.checkCoefficientRelatedOption(): CheckCriteriaData {
                         if (coefficient.relatedOption == null)
                             throw ErrorException(
                                 error = ErrorType.INVALID_COEFFICIENT,
-                                message = "The coefficient '${coefficient.id}' which is related to the requirement '${conversion.relatedItem}' of data type '${requirement.dataType.value()}' does not contain attribute 'relatedOption'."
+                                message = "The coefficient '${coefficient.id}' which is related to the requirement '${conversion.relatedItem}' of data type '${requirement.dataType}' does not contain attribute 'relatedOption'."
                             )
                     }
             }

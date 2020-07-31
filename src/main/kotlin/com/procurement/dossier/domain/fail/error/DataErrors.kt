@@ -1,7 +1,8 @@
 package com.procurement.dossier.domain.fail.error
 
-import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.application.service.Logger
+import com.procurement.dossier.domain.fail.Fail
+
 sealed class DataErrors(numberError: String, override val description: String) : Fail.Error("DR-") {
 
     override val code: String = prefix + numberError
@@ -76,5 +77,8 @@ sealed class DataErrors(numberError: String, override val description: String) :
 
         class UnexpectedAttribute(name: String) :
             Validation(numberError = "12", description = "Unexpected attribute.", name = name)
+
+        class InvalidDateTime(name: String, actualValue: String) :
+            Validation(numberError = "13", description = "Invalid date-time: '$actualValue'.", name = name)
     }
 }

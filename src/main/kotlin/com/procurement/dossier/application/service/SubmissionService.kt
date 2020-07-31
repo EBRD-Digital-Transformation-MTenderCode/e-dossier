@@ -3,8 +3,10 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
-import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningParams
-import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsForOpeningResult
+import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsParams
+import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsResult
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsParams
+import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsResult
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
@@ -18,10 +20,16 @@ import com.procurement.dossier.application.repository.RulesRepository
 import com.procurement.dossier.application.repository.SubmissionRepository
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.fail.error.ValidationErrors
+import com.procurement.dossier.domain.fail.error.ValidationErrors.EntityNotFound
+import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionNotFoundFor
+import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionsNotFoundFor
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
+import com.procurement.dossier.domain.model.qualification.QualificationStatus
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.Result.Companion.failure
+import com.procurement.dossier.domain.util.Result.Companion.success
 import com.procurement.dossier.domain.util.ValidationResult
 import com.procurement.dossier.domain.util.asFailure
 import com.procurement.dossier.domain.util.asSuccess
@@ -42,6 +50,59 @@ class SubmissionService(
         submissionRepository.saveSubmission(cpid = params.cpid, ocid = params.ocid, submission = submission)
             .doOnFail { incident -> return incident.asFailure() }
         return submission.toCreateSubmissionResult().asSuccess()
+    }
+
+    fun finalizeSubmissions(params: FinalizeSubmissionsParams): Result<FinalizeSubmissionsResult, Fail> {
+
+        val submissionsFromDb = submissionRepository
+            .findBy(cpid = params.cpid, ocid = params.ocid)
+            .map { submissions -> submissions.takeIf { it.isNotEmpty() } }
+            .orForwardFail { fail -> return fail }
+            ?: return failure(SubmissionsNotFoundFor.FinalizeSubmissions(params.cpid, params.ocid))
+
+        val submissionFromDbById = submissionsFromDb.associateBy { it.id }
+
+        val receivedRelatedSubmission = params.qualifications.map { it.relatedSubmission }
+        val missingSubmissions = submissionFromDbById.keys.getUnknownElements(receivedRelatedSubmission)
+        if (missingSubmissions.isNotEmpty())
+            return failure(SubmissionNotFoundFor.FinalizeSubmission(missingSubmissions))
+
+        checkMissingSubmission(available = submissionFromDbById.keys, received = receivedRelatedSubmission)
+            .orForwardFail { error -> return error }
+
+        val receivedQualificationById = params.qualifications.associateBy { it.relatedSubmission }
+
+        val updatedSubmissions = submissionsFromDb
+            .filter { it.status == SubmissionStatus.PENDING }
+            .map { submission ->
+                val definedStatus = defineStatusToUpdate(receivedQualificationById[submission.id]?.status)
+                submission.copy(status = definedStatus)
+            }
+
+        val result = FinalizeSubmissionsResult(
+            submissions = FinalizeSubmissionsResult.Submissions(
+                details = updatedSubmissions.map { FinalizeSubmissionsResult.fromDomain(it) }
+            )
+        )
+
+        submissionRepository.saveAll(params.cpid, params.ocid, updatedSubmissions)
+
+        return success(result)
+    }
+
+    fun checkMissingSubmission(available: Collection<SubmissionId>, received: Collection<SubmissionId>)
+    : Result<Collection<SubmissionId>, SubmissionNotFoundFor.FinalizeSubmission> {
+        val missingSubmissions = received.getUnknownElements(received)
+        return if (missingSubmissions.isNotEmpty())
+            failure(SubmissionNotFoundFor.FinalizeSubmission(missingSubmissions))
+        else
+            success(missingSubmissions)
+    }
+
+    fun defineStatusToUpdate(status: QualificationStatus?): SubmissionStatus = when (status) {
+        QualificationStatus.ACTIVE -> SubmissionStatus.VALID
+        QualificationStatus.UNSUCCESSFUL -> SubmissionStatus.DISQUALIFIED
+        null -> SubmissionStatus.WITHDRAWN
     }
 
     private fun CreateSubmissionParams.convert() =
@@ -268,10 +329,10 @@ class SubmissionService(
 
     private fun checkForUnknownElements(
         received: List<SubmissionId>, known: List<SubmissionId>
-    ): ValidationResult<ValidationErrors.SubmissionNotFoundFor> {
+    ): ValidationResult<SubmissionNotFoundFor> {
         val unknownElements = known.getUnknownElements(received = received)
         return if (unknownElements.isNotEmpty())
-            ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.first()))
+            ValidationResult.error(SubmissionNotFoundFor.GetSubmissionStateByIds(unknownElements.first()))
         else ValidationResult.ok()
     }
 
@@ -282,7 +343,7 @@ class SubmissionService(
             cpid = params.cpid, ocid = params.ocid, id = requestSubmission.id
         )
             .orForwardFail { fail -> return fail }
-            ?: return ValidationErrors.SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id)
+            ?: return SubmissionNotFoundFor.SetStateForSubmission(id = requestSubmission.id)
                 .asFailure()
 
         val updatedSubmission = storedSubmission.copy(status = requestSubmission.status)
@@ -301,7 +362,7 @@ class SubmissionService(
         val credentials = submissionRepository.getSubmissionCredentials(
             cpid = params.cpid, ocid = params.ocid, id = params.submissionId
         ).doReturn { incident -> return ValidationResult.error(incident) }
-            ?: return ValidationResult.error(ValidationErrors.SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId))
+            ?: return ValidationResult.error(SubmissionNotFoundFor.CheckAccessToSubmission(id = params.submissionId))
 
         if (params.token != credentials.token)
             return ValidationResult.error(ValidationErrors.InvalidToken())
@@ -508,40 +569,53 @@ class SubmissionService(
             }
         )
 
-    fun findSubmissionsForOpening(params: FindSubmissionsForOpeningParams): Result<List<FindSubmissionsForOpeningResult>, Fail> {
+    fun findSubmissions(params: FindSubmissionsParams): Result<List<FindSubmissionsResult>, Fail> {
         val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { fail -> return fail }
+
         if (submissions.isEmpty())
-            return emptyList<FindSubmissionsForOpeningResult>().asSuccess()
+            return emptyList<FindSubmissionsResult>().asSuccess()
 
-        val pendingSubmissions = submissions.filter { submission -> submission.status == SubmissionStatus.PENDING }
+        val validStatus = rulesRepository.findSubmissionValidState(params.country, params.pmd, params.operationType)
+            .orForwardFail { fail -> return fail }
+            ?: return EntityNotFound.SubmissionValidStateRule(params.country, params.pmd, params.operationType)
+                .asFailure()
 
-        val minimumQuantity = rulesRepository.findSubmissionsMinimumQuantity(country = params.country, pmd = params.pmd)
-            .orForwardFail { return it }
+        val validSubmissions = submissions.filter { submission -> submission.status == validStatus }
 
-        return if (pendingSubmissions.size >= minimumQuantity!!)
-            pendingSubmissions
+        val minimumQuantity =
+            rulesRepository.findSubmissionsMinimumQuantity(
+                country = params.country,
+                pmd = params.pmd,
+                operationType = params.operationType
+            )
+                .orForwardFail { return it }
+                ?: return EntityNotFound.SubmissionMinimumQuantityRule(params.country, params.pmd, params.operationType)
+                    .asFailure()
+
+        return if (validSubmissions.size >= minimumQuantity)
+            validSubmissions
                 .map { submission -> submission.toFindSubmissionsForOpeningResult() }
                 .asSuccess()
         else
-            emptyList<FindSubmissionsForOpeningResult>().asSuccess()
+            emptyList<FindSubmissionsResult>().asSuccess()
     }
 
-    private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsForOpeningResult(
+    private fun Submission.toFindSubmissionsForOpeningResult() = FindSubmissionsResult(
         id = id,
         date = date,
         status = status,
         requirementResponses = requirementResponses.map { requirementResponse ->
-            FindSubmissionsForOpeningResult.RequirementResponse(
+            FindSubmissionsResult.RequirementResponse(
                 id = requirementResponse.id,
                 relatedCandidate = requirementResponse.relatedCandidate.let { relatedCandidate ->
-                    FindSubmissionsForOpeningResult.RequirementResponse.RelatedCandidate(
+                    FindSubmissionsResult.RequirementResponse.RelatedCandidate(
                         id = relatedCandidate.id,
                         name = relatedCandidate.name
                     )
                 },
                 requirement = requirementResponse.requirement.let { requirement ->
-                    FindSubmissionsForOpeningResult.RequirementResponse.Requirement(
+                    FindSubmissionsResult.RequirementResponse.Requirement(
                         id = requirement.id
                     )
                 },
@@ -549,7 +623,7 @@ class SubmissionService(
             )
         },
         documents = documents.map { document ->
-            FindSubmissionsForOpeningResult.Document(
+            FindSubmissionsResult.Document(
                 id = document.id,
                 description = document.description,
                 documentType = document.documentType,
@@ -557,11 +631,11 @@ class SubmissionService(
             )
         },
         candidates = candidates.map { candidate ->
-            FindSubmissionsForOpeningResult.Candidate(
+            FindSubmissionsResult.Candidate(
                 id = candidate.id,
                 name = candidate.name,
                 additionalIdentifiers = candidate.additionalIdentifiers.map { additionalIdentifier ->
-                    FindSubmissionsForOpeningResult.Candidate.AdditionalIdentifier(
+                    FindSubmissionsResult.Candidate.AdditionalIdentifier(
                         id = additionalIdentifier.id,
                         legalName = additionalIdentifier.legalName,
                         scheme = additionalIdentifier.scheme,
@@ -569,13 +643,13 @@ class SubmissionService(
                     )
                 },
                 address = candidate.address.let { address ->
-                    FindSubmissionsForOpeningResult.Candidate.Address(
+                    FindSubmissionsResult.Candidate.Address(
                         streetAddress = address.streetAddress,
                         postalCode = address.postalCode,
                         addressDetails = address.addressDetails.let { addressDetails ->
-                            FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails(
+                            FindSubmissionsResult.Candidate.Address.AddressDetails(
                                 country = addressDetails.country.let { country ->
-                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Country(
+                                    FindSubmissionsResult.Candidate.Address.AddressDetails.Country(
                                         id = country.id,
                                         scheme = country.scheme,
                                         description = country.description,
@@ -583,7 +657,7 @@ class SubmissionService(
                                     )
                                 },
                                 locality = addressDetails.locality.let { locality ->
-                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Locality(
+                                    FindSubmissionsResult.Candidate.Address.AddressDetails.Locality(
                                         id = locality.id,
                                         scheme = locality.scheme,
                                         description = locality.description,
@@ -591,7 +665,7 @@ class SubmissionService(
                                     )
                                 },
                                 region = addressDetails.region.let { region ->
-                                    FindSubmissionsForOpeningResult.Candidate.Address.AddressDetails.Region(
+                                    FindSubmissionsResult.Candidate.Address.AddressDetails.Region(
                                         id = region.id,
                                         scheme = region.scheme,
                                         description = region.description,
@@ -604,7 +678,7 @@ class SubmissionService(
 
                 },
                 contactPoint = candidate.contactPoint.let { contactPoint ->
-                    FindSubmissionsForOpeningResult.Candidate.ContactPoint(
+                    FindSubmissionsResult.Candidate.ContactPoint(
                         name = contactPoint.name,
                         email = contactPoint.email,
                         faxNumber = contactPoint.faxNumber,
@@ -613,33 +687,33 @@ class SubmissionService(
                     )
                 },
                 details = candidate.details.let { details ->
-                    FindSubmissionsForOpeningResult.Candidate.Details(
+                    FindSubmissionsResult.Candidate.Details(
                         typeOfSupplier = details.typeOfSupplier,
                         bankAccounts = details.bankAccounts.map { bankAccount ->
-                            FindSubmissionsForOpeningResult.Candidate.Details.BankAccount(
+                            FindSubmissionsResult.Candidate.Details.BankAccount(
                                 description = bankAccount.description,
                                 address = bankAccount.address.let { address ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address(
                                         streetAddress = address.streetAddress,
                                         postalCode = address.postalCode,
                                         addressDetails = address.addressDetails.let { addressDetails ->
-                                            FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails(
+                                            FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails(
                                                 country = addressDetails.country.let { country ->
-                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Country(
+                                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Country(
                                                         id = country.id,
                                                         scheme = country.scheme,
                                                         description = country.description
                                                     )
                                                 },
                                                 locality = addressDetails.locality.let { locality ->
-                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
+                                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Locality(
                                                         id = locality.id,
                                                         scheme = locality.scheme,
                                                         description = locality.description
                                                     )
                                                 },
                                                 region = addressDetails.region.let { region ->
-                                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Address.AddressDetails.Region(
+                                                    FindSubmissionsResult.Candidate.Details.BankAccount.Address.AddressDetails.Region(
                                                         id = region.id,
                                                         scheme = region.scheme,
                                                         description = region.description
@@ -650,20 +724,20 @@ class SubmissionService(
                                     )
                                 },
                                 accountIdentification = bankAccount.accountIdentification.let { accountIdentification ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AccountIdentification(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.AccountIdentification(
                                         id = accountIdentification.id,
                                         scheme = accountIdentification.scheme
                                     )
                                 },
                                 additionalAccountIdentifiers = bankAccount.additionalAccountIdentifiers.map { additionalAccountIdentifier ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.AdditionalAccountIdentifier(
                                         id = additionalAccountIdentifier.id,
                                         scheme = additionalAccountIdentifier.scheme
                                     )
                                 },
                                 bankName = bankAccount.bankName,
                                 identifier = bankAccount.identifier.let { identifier ->
-                                    FindSubmissionsForOpeningResult.Candidate.Details.BankAccount.Identifier(
+                                    FindSubmissionsResult.Candidate.Details.BankAccount.Identifier(
                                         id = identifier.id,
                                         scheme = identifier.scheme
                                     )
@@ -671,7 +745,7 @@ class SubmissionService(
                             )
                         },
                         legalForm = details.legalForm?.let { legalForm ->
-                            FindSubmissionsForOpeningResult.Candidate.Details.LegalForm(
+                            FindSubmissionsResult.Candidate.Details.LegalForm(
                                 id = legalForm.id,
                                 scheme = legalForm.scheme,
                                 description = legalForm.description,
@@ -679,7 +753,7 @@ class SubmissionService(
                             )
                         },
                         mainEconomicActivities = details.mainEconomicActivities.map { mainEconomicActivity ->
-                            FindSubmissionsForOpeningResult.Candidate.Details.MainEconomicActivity(
+                            FindSubmissionsResult.Candidate.Details.MainEconomicActivity(
                                 id = mainEconomicActivity.id,
                                 uri = mainEconomicActivity.uri,
                                 description = mainEconomicActivity.description,
@@ -690,7 +764,7 @@ class SubmissionService(
                     )
                 },
                 identifier = candidate.identifier.let { identifier ->
-                    FindSubmissionsForOpeningResult.Candidate.Identifier(
+                    FindSubmissionsResult.Candidate.Identifier(
                         id = identifier.id,
                         scheme = identifier.scheme,
                         uri = identifier.uri,
@@ -698,11 +772,11 @@ class SubmissionService(
                     )
                 },
                 persones = candidate.persones.map { person ->
-                    FindSubmissionsForOpeningResult.Candidate.Person(
+                    FindSubmissionsResult.Candidate.Person(
                         id = person.id,
                         title = person.title,
                         identifier = person.identifier.let { identifier ->
-                            FindSubmissionsForOpeningResult.Candidate.Person.Identifier(
+                            FindSubmissionsResult.Candidate.Person.Identifier(
                                 id = identifier.id,
                                 uri = identifier.uri,
                                 scheme = identifier.scheme
@@ -710,10 +784,10 @@ class SubmissionService(
                         },
                         name = person.name,
                         businessFunctions = person.businessFunctions.map { businessFunction ->
-                            FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction(
+                            FindSubmissionsResult.Candidate.Person.BusinessFunction(
                                 id = businessFunction.id,
                                 documents = businessFunction.documents.map { document ->
-                                    FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Document(
+                                    FindSubmissionsResult.Candidate.Person.BusinessFunction.Document(
                                         id = document.id,
                                         title = document.title,
                                         description = document.description,
@@ -722,7 +796,7 @@ class SubmissionService(
                                 },
                                 jobTitle = businessFunction.jobTitle,
                                 period = businessFunction.period.let { period ->
-                                    FindSubmissionsForOpeningResult.Candidate.Person.BusinessFunction.Period(
+                                    FindSubmissionsResult.Candidate.Person.BusinessFunction.Period(
                                         startDate = period.startDate
                                     )
                                 },
@@ -789,7 +863,7 @@ class SubmissionService(
             .getUnknownElements(received = submissionIds)
 
         if (unknownSubmissions.isNotEmpty())
-            return ValidationErrors.SubmissionNotFoundFor.SubmissionsByQualificationIds(ids = unknownSubmissions.toList())
+            return SubmissionNotFoundFor.SubmissionsByQualificationIds(ids = unknownSubmissions.toList())
                 .asFailure()
 
         return GetSubmissionsByQualificationIdsResult(
