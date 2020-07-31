@@ -55,7 +55,7 @@ sealed class Fail {
             class Parsing(val column: String, val value: String, exception: Exception? = null) :
                 Database(
                     number = "1.4",
-                    description = "Could not parse data stored in database.",
+                    description = "Could not parse data stored in database (column: '$column', value: '$value').",
                     exception = exception
                 ) {
 
