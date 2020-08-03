@@ -61,18 +61,14 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(classes = [ObjectMapperConfiguration::class])
 class CriteriaServiceTest {
 
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper = ObjectMapperConfiguration().objectMapper()
 
     private val generationService: Generable = mock()
     private val criteriaRepository: CriteriaRepository = mock()
@@ -185,7 +181,6 @@ class CriteriaServiceTest {
                     .remove("conversions")
                 tenderNode.putArray("criteria")
                     .add(tenderCriteria)
-
 
                 val cm = commandMessage(
                     CommandType.CHECK_CRITERIA,
@@ -1209,7 +1204,6 @@ class CriteriaServiceTest {
                 UUID.fromString("8f6c268a-b1e4-4c12-a218-144dd1ba3882")
             )
 
-
             val expectedCoefficientIds = listOf(
                 UUID.fromString("099bc62e-2192-4c45-b5ed-8a840f9955b1"),
                 UUID.fromString("099bc62e-2192-4c45-b5ed-8a840f9955b2"),
@@ -1420,7 +1414,6 @@ class CriteriaServiceTest {
                 .get("id").asText()
         }
 
-
         private fun getSampleRequirementResponse(requestNode: JsonNode): ObjectNode {
             return requestNode.getObject("bid")
                 .getArray("requirementResponses").get(0).toObjectNode()
@@ -1552,7 +1545,7 @@ class CriteriaServiceTest {
                     .putAttribute("id", FIRST_ID)
 
                 val duplicatedTenderRequirementResponse = tenderRequirementResponse.deepCopy()
-                    .putAttribute("id" , "ANOTHER_ID")
+                    .putAttribute("id", "ANOTHER_ID")
 
                 requestNode.getObject("bid")
                     .putArray("requirementResponses")
@@ -1739,7 +1732,7 @@ class CriteriaServiceTest {
                     .putAttribute("id", FIRST_ID)
 
                 val duplicatedTenderRequirementResponse = tenderRequirementResponse.deepCopy()
-                    .putAttribute("id" , FIRST_ID)
+                    .putAttribute("id", FIRST_ID)
 
                 requestNode.getObject("bid")
                     .putArray("requirementResponses")

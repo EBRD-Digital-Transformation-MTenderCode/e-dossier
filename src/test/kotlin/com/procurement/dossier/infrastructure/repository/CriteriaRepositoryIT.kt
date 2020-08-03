@@ -21,12 +21,14 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class CassandraACRepositoryIT {
@@ -46,8 +48,9 @@ class CassandraACRepositoryIT {
     private lateinit var container: CassandraTestContainer
 
     private lateinit var session: Session
-    private lateinit var criteriaRepository: CriteriaRepository
+    private lateinit var cassandraCluster: Cluster
 
+    private lateinit var criteriaRepository: CriteriaRepository
     @BeforeEach
     fun init() {
         val poolingOptions = PoolingOptions()
@@ -60,6 +63,7 @@ class CassandraACRepositoryIT {
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
 
+        cassandraCluster = cluster
         session = spy(cluster.connect())
 
         createKeyspace()
@@ -71,6 +75,9 @@ class CassandraACRepositoryIT {
     @AfterEach
     fun clean() {
         dropKeyspace()
+
+        session.close()
+        cassandraCluster.closeAsync()
     }
 
     @Test
