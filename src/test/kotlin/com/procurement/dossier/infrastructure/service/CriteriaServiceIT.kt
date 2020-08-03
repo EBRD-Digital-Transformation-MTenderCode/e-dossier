@@ -30,16 +30,15 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension::class)
-@SpringBootTest(classes = [
-    DatabaseTestConfiguration::class,
-    ObjectMapperConfiguration::class
-])
+@ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class CriteriaServiceIT {
     companion object {
         private const val KEYSPACE = "dossier"
@@ -49,13 +48,14 @@ class CriteriaServiceIT {
         private const val COLUMN_JSONDATA = "json_data"
     }
 
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper = ObjectMapperConfiguration().objectMapper()
 
     @Autowired
     private lateinit var container: CassandraTestContainer
 
     private lateinit var session: Session
+    private lateinit var cassandraCluster: Cluster
+
     private lateinit var criteriaService: CriteriaService
     private lateinit var generationService: GenerationService
     private lateinit var criteriaRepository: CriteriaRepository
@@ -79,6 +79,7 @@ class CriteriaServiceIT {
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
 
+        cassandraCluster = cluster
         session = spy(cluster.connect())
 
         createKeyspace()
@@ -97,6 +98,9 @@ class CriteriaServiceIT {
     @AfterEach
     fun clean() {
         dropKeyspace()
+
+        session.close()
+        cassandraCluster.closeAsync()
     }
 
     @Test
@@ -142,9 +146,7 @@ class CriteriaServiceIT {
 
         assertEquals(AwardCriteriaDetails.MANUAL, pre_response.awardCriteriaDetails)
         assertEquals(AwardCriteriaDetails.AUTOMATED, post_response.awardCriteriaDetails)
-
     }
-
 
     private fun createKeyspace() {
         session.execute("CREATE KEYSPACE $KEYSPACE WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
@@ -166,6 +168,4 @@ class CriteriaServiceIT {
             """
         )
     }
-
-
 }

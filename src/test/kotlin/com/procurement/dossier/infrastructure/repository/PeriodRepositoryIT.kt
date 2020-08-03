@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,6 +34,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class PeriodRepositoryIT {
@@ -54,6 +56,8 @@ class PeriodRepositoryIT {
     private lateinit var container: CassandraTestContainer
 
     private lateinit var session: Session
+    private lateinit var cassandraCluster: Cluster
+
     private lateinit var periodRepository: PeriodRepository
 
     @BeforeEach
@@ -68,6 +72,7 @@ class PeriodRepositoryIT {
             .withAuthProvider(PlainTextAuthProvider(container.username, container.password))
             .build()
 
+        cassandraCluster = cluster
         session = spy(cluster.connect())
 
         createKeyspace()
@@ -79,6 +84,9 @@ class PeriodRepositoryIT {
     @AfterEach
     fun clean() {
         dropKeyspace()
+
+        session.close()
+        cassandraCluster.closeAsync()
     }
 
     @Test
