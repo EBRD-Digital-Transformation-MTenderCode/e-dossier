@@ -67,6 +67,9 @@ class CommandService(
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         throw ErrorException(ErrorType.INVALID_PMD)
                     }
@@ -93,6 +96,9 @@ class CommandService(
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         throw ErrorException(ErrorType.INVALID_PMD)
                     }
@@ -116,6 +122,9 @@ class CommandService(
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         throw ErrorException(ErrorType.INVALID_PMD)
                     }
@@ -144,6 +153,9 @@ class CommandService(
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         throw ErrorException(ErrorType.INVALID_PMD)
                     }
@@ -155,6 +167,7 @@ class CommandService(
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         val context = EvPanelsContext(cpid = cm.cpid, owner = cm.owner)
                         criteriaService.createRequestsForEvPanels(context = context)
@@ -165,10 +178,12 @@ class CommandService(
                             .toResponseDto()
                     }
 
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> {
                         throw ErrorException(ErrorType.INVALID_PMD)
                     }
@@ -177,6 +192,7 @@ class CommandService(
             }
             CommandType.VALIDATE_PERIOD -> {
                 when (cm.pmd) {
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         val context = ValidatePeriodContext(country = cm.country, pmd = cm.pmd)
                         val data = toObject(ValidatePeriodRequest::class.java, cm.data).convert()
@@ -189,16 +205,19 @@ class CommandService(
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
 
                 }
             }
             CommandType.CHECK_PERIOD -> {
                 when (cm.pmd) {
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         val context = CheckPeriodContext(cpid = cm.cpidParsed(), ocid = cm.ocidParsed())
                         val data = toObject(CheckPeriodRequest::class.java, cm.data).convert()
@@ -211,15 +230,18 @@ class CommandService(
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
             CommandType.SAVE_PERIOD -> {
                 when (cm.pmd) {
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
                         if (historyEntity != null) Unit
@@ -241,16 +263,19 @@ class CommandService(
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
 
             CommandType.EXTEND_SUBMISSION_PERIOD -> {
                 when (cm.pmd) {
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> {
                         val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
                         if (historyEntity != null) historyEntity
@@ -273,10 +298,12 @@ class CommandService(
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP -> throw ErrorException(ErrorType.INVALID_PMD)
                 }
             }
