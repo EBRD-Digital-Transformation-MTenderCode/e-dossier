@@ -33,9 +33,9 @@ internal class ParseParamsTest {
         fun unallowedEnumValue_fail() {
             val valuesWithoutGpa = ProcurementMethod.allowedElements - ProcurementMethod.GPA
             val actual = parsePmd(value = GPA_NAME, allowedValues = valuesWithoutGpa)
-            val expectedDescription = "Attribute value mismatch with one of enum expected values. Expected values: 'MV, OT, RT, SV, DA, NP, FA, OP, TEST_OT, TEST_SV, TEST_RT, TEST_MV, TEST_DA, TEST_NP, TEST_FA, TEST_OP, TEST_GPA', actual value: 'GPA'."
+            val expectedDescription = "Attribute value mismatch with one of enum expected values."
 
-            assertEquals(expectedDescription, actual.error.description)
+            assertTrue(actual.error.description.contains(expectedDescription))
         }
     }
 }
