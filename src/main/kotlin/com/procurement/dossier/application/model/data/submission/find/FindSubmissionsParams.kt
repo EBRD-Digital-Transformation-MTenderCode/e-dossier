@@ -23,17 +23,19 @@ class FindSubmissionsParams private constructor(
         val allowedPmd = ProcurementMethod.allowedElements
             .filter { value ->
                 when (value) {
-                    ProcurementMethod.RT, ProcurementMethod.TEST_RT,
-                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA -> true
+                    ProcurementMethod.CF, ProcurementMethod.TEST_CF,
+                    ProcurementMethod.GPA, ProcurementMethod.TEST_GPA,
+                    ProcurementMethod.OF, ProcurementMethod.TEST_OF,
+                    ProcurementMethod.RT, ProcurementMethod.TEST_RT -> true
 
+                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
                     ProcurementMethod.DA, ProcurementMethod.TEST_DA,
+                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
                     ProcurementMethod.FA, ProcurementMethod.TEST_FA,
+                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.MV, ProcurementMethod.TEST_MV,
                     ProcurementMethod.NP, ProcurementMethod.TEST_NP,
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
-                    ProcurementMethod.CD, ProcurementMethod.TEST_CD,
-                    ProcurementMethod.DC, ProcurementMethod.TEST_DC,
-                    ProcurementMethod.IP, ProcurementMethod.TEST_IP,
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV -> false
                 }
