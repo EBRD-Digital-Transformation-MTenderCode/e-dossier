@@ -7,6 +7,7 @@ import com.procurement.dossier.domain.EnumElementProvider
 enum class Stage(@JsonValue override val key: String) : EnumElementProvider.Key {
 
     AC("AC"),
+    AP("AP"),
     EI("EI"),
     EV("EV"),
     FE("FE"),

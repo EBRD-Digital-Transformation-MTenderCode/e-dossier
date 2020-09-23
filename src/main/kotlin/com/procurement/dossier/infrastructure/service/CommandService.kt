@@ -250,7 +250,7 @@ class CommandService(
                         val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
                         if (historyEntity != null) Unit
                         else {
-                            val ocid = if (cm.operationType == "createCNonPN")
+                            val ocid = if (cm.operationType == "createCNonPN" || cm.operationType == "createFE")
                                 cm.ocidCnParsed()
                             else
                                 cm.ocidParsed()
