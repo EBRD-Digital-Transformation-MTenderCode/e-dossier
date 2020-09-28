@@ -47,10 +47,12 @@ class FindSubmissionsParams private constructor(
                     Operation.QUALIFICATION,
                     Operation.START_SECOND_STAGE,
                     Operation.SUBMISSION_PERIOD_END -> true
+                    Operation.COMPLETE_QUALIFICATION,
                     Operation.CREATE_CN,
                     Operation.CREATE_CN_ON_PIN,
                     Operation.CREATE_CN_ON_PN,
                     Operation.CREATE_NEGOTIATION_CN_ON_PN,
+                    Operation.CREATE_PCR,
                     Operation.CREATE_PIN,
                     Operation.CREATE_PIN_ON_PN,
                     Operation.CREATE_PN,
