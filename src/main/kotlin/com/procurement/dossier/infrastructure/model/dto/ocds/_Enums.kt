@@ -156,7 +156,9 @@ enum class ProcurementMethod(@JsonValue val value: String) {
 }
 
 enum class Operation(@JsonValue override val key: String) : EnumElementProvider.Key {
+    COMPLETE_QUALIFICATION("completeQualification"),
     CREATE_CN("createCN"),
+    CREATE_PCR("createPcr"),
     CREATE_PN("createPN"),
     CREATE_PIN("createPIN"),
     CREATE_CN_ON_PN("createCNonPN"),
