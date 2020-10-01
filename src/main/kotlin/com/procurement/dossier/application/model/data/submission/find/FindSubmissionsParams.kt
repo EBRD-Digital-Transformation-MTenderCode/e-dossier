@@ -44,10 +44,10 @@ class FindSubmissionsParams private constructor(
         val allowedOperationType = Operation.allowedElements
             .filter { value ->
                 when (value) {
+                    Operation.COMPLETE_QUALIFICATION,
                     Operation.QUALIFICATION,
                     Operation.START_SECOND_STAGE,
                     Operation.SUBMISSION_PERIOD_END -> true
-                    Operation.COMPLETE_QUALIFICATION,
                     Operation.CREATE_CN,
                     Operation.CREATE_CN_ON_PIN,
                     Operation.CREATE_CN_ON_PN,
