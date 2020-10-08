@@ -1058,7 +1058,7 @@ internal class SubmissionServiceTest {
 
             assertTrue(actual is ValidationErrors.Duplicate.PersonBusinessFunction)
             assertEquals(
-                "Value '${businessFunction.id}' is not unique in 'candidates.persons.businessFunctions.id'.",
+                "Value '${businessFunction.id}' is not unique in 'candidates.persones.businessFunctions.id'.",
                 actual.description
             )
         }
@@ -1093,7 +1093,7 @@ internal class SubmissionServiceTest {
 
             assertTrue(actual is ValidationErrors.Duplicate.PersonDocument)
             assertEquals(
-                "Value '${businessFunctionDocumentFirst.id}' is not unique in 'candidates.persons.businessFunctions.documents.id'.",
+                "Value '${businessFunctionDocumentFirst.id}' is not unique in 'candidates.persones.businessFunctions.documents.id'.",
                 actual.description
             )
         }
