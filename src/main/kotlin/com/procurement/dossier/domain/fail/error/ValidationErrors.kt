@@ -136,13 +136,13 @@ sealed class ValidationErrors(
 
         class PersonBusinessFunction(id: String) : Duplicate(
             value = id,
-            entityName = "candidates.persons.businessFunctions.id",
+            entityName = "candidates.persones.businessFunctions.id",
             numberError = "5.7.3"
         )
 
         class PersonDocument(id: DocumentId) : Duplicate(
             value = id,
-            entityName = "candidates.persons.businessFunctions.documents.id",
+            entityName = "candidates.persones.businessFunctions.documents.id",
             numberError = "5.7.4"
         )
     }
