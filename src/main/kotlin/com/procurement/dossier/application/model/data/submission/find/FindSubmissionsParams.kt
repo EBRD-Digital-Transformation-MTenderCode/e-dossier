@@ -45,6 +45,7 @@ class FindSubmissionsParams private constructor(
             .filter { value ->
                 when (value) {
                     Operation.COMPLETE_QUALIFICATION,
+                    Operation.CREATE_PCR,
                     Operation.QUALIFICATION,
                     Operation.START_SECOND_STAGE,
                     Operation.SUBMISSION_PERIOD_END -> true
@@ -52,7 +53,6 @@ class FindSubmissionsParams private constructor(
                     Operation.CREATE_CN_ON_PIN,
                     Operation.CREATE_CN_ON_PN,
                     Operation.CREATE_NEGOTIATION_CN_ON_PN,
-                    Operation.CREATE_PCR,
                     Operation.CREATE_PIN,
                     Operation.CREATE_PIN_ON_PN,
                     Operation.CREATE_PN,
