@@ -36,6 +36,7 @@ import com.procurement.dossier.domain.util.asSuccess
 import com.procurement.dossier.domain.util.extension.doOnFalse
 import com.procurement.dossier.domain.util.extension.getDuplicate
 import com.procurement.dossier.domain.util.extension.getUnknownElements
+import com.procurement.dossier.domain.util.extension.toSetBy
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
 import org.springframework.stereotype.Service
 
@@ -46,10 +47,29 @@ class SubmissionService(
     private val generable: Generable
 ) {
     fun createSubmission(params: CreateSubmissionParams): Result<CreateSubmissionResult, Fail.Incident> {
-        val submission = params.convert()
-        submissionRepository.saveSubmission(cpid = params.cpid, ocid = params.ocid, submission = submission)
+        val storedSubmissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { return it }
+
+        val receivedCandidates = params.submission.candidates.toSetBy { it.id }
+        val submissionsToWithdraw = storedSubmissions
+            .filter { submission ->  submission.status == SubmissionStatus.PENDING }
+            .filter { submission -> isSubmittedByReceivedCandidates(submission, receivedCandidates) }
+            .map { submission -> submission.copy(status = SubmissionStatus.WITHDRAWN) }
+
+        val createdSubmission = params.convert()
+
+        val submissions = submissionsToWithdraw + createdSubmission
+        submissionRepository.saveAll(cpid = params.cpid, ocid = params.ocid, submissions = submissions)
             .doOnFail { incident -> return incident.asFailure() }
-        return submission.toCreateSubmissionResult().asSuccess()
+        return createdSubmission.toCreateSubmissionResult().asSuccess()
+    }
+
+    private fun isSubmittedByReceivedCandidates(
+        submission: Submission,
+        receivedCandidates: Set<String>
+    ): Boolean {
+        val storedCandidates = submission.candidates.toSetBy { it.id }
+        return storedCandidates == receivedCandidates
     }
 
     fun finalizeSubmissions(params: FinalizeSubmissionsParams): Result<FinalizeSubmissionsResult, Fail> {
