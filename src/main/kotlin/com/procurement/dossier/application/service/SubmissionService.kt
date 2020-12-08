@@ -47,14 +47,15 @@ class SubmissionService(
     private val generable: Generable
 ) {
     fun createSubmission(params: CreateSubmissionParams): Result<CreateSubmissionResult, Fail.Incident> {
-        val storedSubmissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
-            .orForwardFail { return it }
-
         val receivedCandidates = params.submission.candidates.toSetBy { it.id }
-        val submissionsToWithdraw = storedSubmissions
+
+        val submissionsToWithdraw = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { return it }
+            .asSequence()
             .filter { submission ->  submission.status == SubmissionStatus.PENDING }
             .filter { submission -> isSubmittedByReceivedCandidates(submission, receivedCandidates) }
             .map { submission -> submission.copy(status = SubmissionStatus.WITHDRAWN) }
+            .toList()
 
         val createdSubmission = params.convert()
 
