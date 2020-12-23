@@ -25,7 +25,7 @@ class GetSubmissionStateByIdsParams private constructor(
             submissionIds
                 .validate(notEmptyRule(SUBMISSION_IDS_ATTRIBUTE_NAME))
                 .orForwardFail { fail -> return fail }
-                .validate(noDuplicatesRule(SUBMISSION_IDS_ATTRIBUTE_NAME))
+                .validate(noDuplicatesRule(SUBMISSION_IDS_ATTRIBUTE_NAME){it})
                 .orForwardFail { fail -> return fail }
 
             val cpidParsed = parseCpid(cpid).orForwardFail { error -> return error }
