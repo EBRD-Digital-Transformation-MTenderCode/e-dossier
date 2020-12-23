@@ -1159,7 +1159,7 @@ internal class SubmissionServiceTest {
             ),
             additionalIdentifiers = listOf(
                 ValidateSubmissionParams.Candidate.AdditionalIdentifier(
-                    id = "additionalIdentifier.id",
+                    id = UUID.randomUUID().toString(),
                     scheme = "additionalIdentifier.scheme",
                     uri = "additionalIdentifier.uri",
                     legalName = "additionalIdentifier.legalName"
@@ -1199,7 +1199,7 @@ internal class SubmissionServiceTest {
                 scale = Scale.LARGE.key,
                 mainEconomicActivities = listOf(
                     ValidateSubmissionParams.Candidate.Details.MainEconomicActivity(
-                        id = "mainEconomicActivities.id",
+                        id = UUID.randomUUID().toString(),
                         scheme = "mainEconomicActivities.scheme",
                         description = "mainEconomicActivities.description",
                         uri = "mainEconomicActivities.uri"
@@ -1257,7 +1257,7 @@ internal class SubmissionServiceTest {
 
         private fun createPerson(businessFunctions: List<ValidateSubmissionParams.Candidate.Person.BusinessFunction>) =
             ValidateSubmissionParams.Candidate.Person.tryCreate(
-                id = "person.id",
+                id = UUID.randomUUID().toString(),
                 title = PersonTitle.MR.key,
                 identifier = ValidateSubmissionParams.Candidate.Person.Identifier(
                     id = "persones.identifier.id",
