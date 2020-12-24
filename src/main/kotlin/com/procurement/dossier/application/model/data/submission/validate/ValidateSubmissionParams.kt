@@ -1,5 +1,7 @@
 package com.procurement.dossier.application.model.data.submission.validate
 
+import com.procurement.dossier.application.model.noDuplicatesRule
+import com.procurement.dossier.application.model.notEmptyRule
 import com.procurement.dossier.application.model.parseBusinessFunctionType
 import com.procurement.dossier.application.model.parseDate
 import com.procurement.dossier.application.model.parseDocumentId
@@ -17,6 +19,7 @@ import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.Result.Companion.failure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.validate
 import java.time.LocalDateTime
 
 class ValidateSubmissionParams private constructor(
@@ -69,8 +72,17 @@ class ValidateSubmissionParams private constructor(
                 if (additionalIdentifiers != null && additionalIdentifiers.isEmpty())
                     return failure(DataErrors.Validation.EmptyArray(name = ADDITIONAL_IDENTIFIER_ATTRIBUTE_NAME))
 
-                if (persones != null && persones.isEmpty())
-                    return failure(DataErrors.Validation.EmptyArray(name = PERSONES_ATTRIBUTE_NAME))
+                additionalIdentifiers
+                    .validate(notEmptyRule(ADDITIONAL_IDENTIFIER_ATTRIBUTE_NAME))
+                    .orForwardFail { fail -> return fail }
+                    .validate(noDuplicatesRule(ADDITIONAL_IDENTIFIER_ATTRIBUTE_NAME) { it.id })
+                    .orForwardFail { fail -> return fail }
+
+                persones
+                    .validate(notEmptyRule(PERSONES_ATTRIBUTE_NAME))
+                    .orForwardFail { fail -> return fail }
+                    .validate(noDuplicatesRule(PERSONES_ATTRIBUTE_NAME) { it.id })
+                    .orForwardFail { fail -> return fail }
 
                 return Candidate(
                     id = id,
@@ -320,8 +332,12 @@ class ValidateSubmissionParams private constructor(
                     bankAccounts: List<BankAccount>?,
                     legalForm: LegalForm?
                 ): Result<Details, DataErrors> {
-                    if (mainEconomicActivities != null && mainEconomicActivities.isEmpty())
-                        return failure(DataErrors.Validation.EmptyArray(name = MAIN_ECONOMIC_ACTIVITY_ATTRIBUTE_NAME))
+
+                    mainEconomicActivities
+                        .validate(notEmptyRule(MAIN_ECONOMIC_ACTIVITY_ATTRIBUTE_NAME))
+                        .orForwardFail { fail -> return fail }
+                        .validate(noDuplicatesRule(MAIN_ECONOMIC_ACTIVITY_ATTRIBUTE_NAME) { it.id })
+                        .orForwardFail { fail -> return fail }
 
                     val parsedTypeOfSupplier = typeOfSupplier?.let {
                         parseSupplierType(
