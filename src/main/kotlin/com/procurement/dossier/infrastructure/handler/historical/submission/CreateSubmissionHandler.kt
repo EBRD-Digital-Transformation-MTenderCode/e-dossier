@@ -7,6 +7,7 @@ import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.application.service.SubmissionService
 import com.procurement.dossier.domain.fail.Fail
 import com.procurement.dossier.domain.util.Result
+import com.procurement.dossier.domain.util.bind
 import com.procurement.dossier.infrastructure.converter.submission.convert
 import com.procurement.dossier.infrastructure.handler.AbstractHistoricalHandler
 import com.procurement.dossier.infrastructure.model.dto.bpe.Command2Type
@@ -30,8 +31,7 @@ class CreateSubmissionHandler(
 
     override fun execute(node: JsonNode): Result<CreateSubmissionResult, Fail> {
         val data = node.tryGetParams(CreateSubmissionRequest::class.java)
-            .orForwardFail { error -> return error }
-            .convert()
+            .bind { it.convert() }
             .orForwardFail { error -> return error }
 
         return submissionService.createSubmission(data)
