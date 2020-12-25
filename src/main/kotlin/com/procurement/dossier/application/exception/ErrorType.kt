@@ -22,4 +22,5 @@ enum class ErrorType constructor(val code: String, val message: String) {
     INVALID_PERIOD_END_DATE("10.80", "Period end date must be equal or greater than previously stored period end date."),
     PERIOD_NOT_FOUND("10.81", "Period not found."),
     EXTENSION_RULE_NOT_FOUND("10.82", "Extension rule not found."),
+    MISSING_ATTRIBUTE("10.83", "Request is missing a required attribute."),
 }
