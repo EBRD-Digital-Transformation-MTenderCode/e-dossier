@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.dossier.application.exception.EnumException
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
@@ -21,16 +22,25 @@ import com.procurement.dossier.infrastructure.model.dto.ocds.ProcurementMethod
 import java.time.LocalDateTime
 import java.util.*
 
-data class CommandMessage @JsonCreator constructor(
+class CommandMessage @JsonCreator constructor(
     @field:JsonProperty("id") @param:JsonProperty("id") val id: String,
     @field:JsonProperty("command") @param:JsonProperty("command") val command: CommandType,
     @field:JsonProperty("context") @param:JsonProperty("context") val context: Context,
-    @field:JsonProperty("data") @param:JsonProperty("data") val data: JsonNode,
+    data: JsonNode,
 
     @JsonDeserialize(using = ApiVersionDeserializer::class)
     @JsonSerialize(using = ApiVersionSerializer::class)
     @field:JsonProperty("version") @param:JsonProperty("version") val version: ApiVersion
-)
+){
+    @field:JsonProperty("data")
+    val data: JsonNode = data
+        get() = if (field is NullNode)
+            throw ErrorException(
+                error = ErrorType.MISSING_ATTRIBUTE,
+                message = "Attribute 'data' not found."
+            )
+        else field
+}
 
 val CommandMessage.cpid: String
     get() = this.context.cpid

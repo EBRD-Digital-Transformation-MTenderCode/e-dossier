@@ -37,9 +37,7 @@ class GetSubmissionsByQualificationIdsParams private constructor(
             qualifications
                 .validate(notEmptyRule(QUALIFICATIONS_ATTRIBUTE_NAME))
                 .orForwardFail { fail -> return fail }
-
-            qualifications.map { it.id }
-                .validate(noDuplicatesRule(QUALIFICATIONS_ID_ATTRIBUTE_NAME))
+                .validate(noDuplicatesRule(QUALIFICATIONS_ID_ATTRIBUTE_NAME) { it.id })
                 .orForwardFail { fail -> return fail }
 
             return GetSubmissionsByQualificationIdsParams(
