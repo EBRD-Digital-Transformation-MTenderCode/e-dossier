@@ -176,6 +176,7 @@ enum class CommandType(private val value: String) {
     CREATE_CRITERIA("createCriteria"),
     CHECK_RESPONSES("checkResponses"),
     GET_CRITERIA("getCriteria"),
+    GET_PRE_QUALIFICATION_PERIOD_END("getPreQualificationPeriodEnd"),
     CREATE_REQUESTS_FOR_EV_PANELS("createRequestsForEvPanels"),
     VALIDATE_PERIOD("validatePeriod"),
     CHECK_PERIOD("checkPeriod"),
