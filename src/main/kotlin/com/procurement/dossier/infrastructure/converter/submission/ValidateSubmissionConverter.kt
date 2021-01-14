@@ -10,7 +10,38 @@ fun ValidateSubmissionRequest.convert(): Result<ValidateSubmissionParams, DataEr
     ValidateSubmissionParams.tryCreate(
         documents = documents?.mapResult { it.convert() }?.orForwardFail { fail -> return fail },
         candidates = candidates.mapResult { it.convert() }.orForwardFail { fail -> return fail },
+        requirementResponses = requirementResponses?.mapResult { it.convert() }?.orForwardFail { fail -> return fail },
         id = id
+    )
+
+private fun ValidateSubmissionRequest.RequirementResponse.convert() =
+    ValidateSubmissionParams.RequirementResponse.tryCreate(
+        id = id,
+        value = value,
+        requirement = requirement
+            .let { requirement ->
+                ValidateSubmissionParams.RequirementResponse.Requirement(
+                    requirement.id
+                )
+            },
+        relatedCandidate = relatedCandidate.let { tenderer ->
+            ValidateSubmissionParams.RequirementResponse.RelatedCandidate(
+                name = tenderer.name,
+                id = tenderer.id
+            )
+        },
+        evidences = evidences?.map { evidence ->
+            ValidateSubmissionParams.RequirementResponse.Evidence(
+                id = evidence.id,
+                description = evidence.description,
+                title = evidence.title,
+                relatedDocument = evidence.relatedDocument?.let { relatedDocument ->
+                    ValidateSubmissionParams.RequirementResponse.Evidence.RelatedDocument(
+                        id = relatedDocument.id
+                    )
+                }
+            )
+        }
     )
 
 private fun ValidateSubmissionRequest.Document.convert() =
