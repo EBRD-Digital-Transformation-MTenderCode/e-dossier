@@ -835,14 +835,54 @@ class SubmissionService(
         if (duplicateCandidate != null)
             return ValidationResult.error(ValidationErrors.Duplicate.Candidate(id = duplicateCandidate.id))
 
-        val duplicateDocument = params.documents.getDuplicate { it.id }
-        if (duplicateDocument != null)
-            return ValidationResult.error(ValidationErrors.Duplicate.OrganizationDocument(id = duplicateDocument.id))
-
         checkDuplicatesWithinPerson(params)
             .doOnError { return ValidationResult.error(it) }
 
+        val responsesByCandidates = params.requirementResponses
+            .groupBy { requirementResponse -> requirementResponse.relatedCandidate.id }
+
+        checkDuplicatesWithinResponses(responsesByCandidates)
+            .doOnError { return ValidationResult.error(it) }
+
+        checkEvidenceDocuments(params)
+            .doOnError { return ValidationResult.error(it) }
+
         return ValidationResult.ok()
+    }
+
+    private fun checkEvidenceDocuments(params: ValidateSubmissionParams): ValidationResult<ValidationErrors.EvidenceDocumentMissing> {
+        val evidenceDocuments = params.requirementResponses
+            .flatMap { requirementResponse -> requirementResponse.evidences }
+            .mapNotNull { it.relatedDocument }
+            .map { it.id }
+
+        val documents = params.documents.map { it.id }
+        val missingDocuments = evidenceDocuments - documents
+        return if (missingDocuments.isNotEmpty())
+            ValidationResult.error(ValidationErrors.EvidenceDocumentMissing(missingDocuments))
+        else ValidationResult.ok()
+    }
+
+    private fun checkDuplicatesWithinResponses(responsesByCandidates: Map<String, List<ValidateSubmissionParams.RequirementResponse>>)
+        : ValidationResult<ValidationErrors.DuplicateRequirementResponseByOrganization> {
+        val duplicateResponseWithCandidate = responsesByCandidates
+            .asSequence()
+            .mapNotNull { entry ->
+                val candidate = entry.key
+                val responses = entry.value
+
+                responses.getDuplicate { it.requirement.id }
+                    ?.let { duplicateResponse -> Pair(duplicateResponse, candidate) }
+            }
+            .firstOrNull()
+        return if (duplicateResponseWithCandidate != null)
+            ValidationResult.error(
+                ValidationErrors.DuplicateRequirementResponseByOrganization(
+                    requirementId = duplicateResponseWithCandidate.first.requirement.id,
+                    candidateId = duplicateResponseWithCandidate.second
+                )
+            )
+        else ValidationResult.ok()
     }
 
     private fun checkDuplicatesWithinPerson(params: ValidateSubmissionParams): ValidationResult<Fail> {

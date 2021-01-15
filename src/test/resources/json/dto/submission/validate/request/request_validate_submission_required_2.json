@@ -60,5 +60,18 @@
         "scale": "micro"
       }
     }
+  ],
+  "requirementResponses": [
+    {
+      "id": "string",
+      "value": "Unknown Type: string,number,integer,boolean",
+      "requirement": {
+        "id": "string"
+      },
+      "relatedCandidate": {
+        "name": "string",
+        "id": "string"
+      }
+    }
   ]
 }

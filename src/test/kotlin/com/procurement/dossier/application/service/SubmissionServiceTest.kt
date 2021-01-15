@@ -31,6 +31,7 @@ import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
 import com.procurement.dossier.domain.model.qualification.QualificationId
+import com.procurement.dossier.domain.model.requirement.RequirementId
 import com.procurement.dossier.domain.model.submission.Submission
 import com.procurement.dossier.domain.model.submission.SubmissionCredentials
 import com.procurement.dossier.domain.model.submission.SubmissionId
@@ -702,7 +703,6 @@ internal class SubmissionServiceTest {
             assertEquals(expectedDescription, actual.description)
         }
 
-
         private fun getParams() = FindSubmissionsParams.tryCreate(
             cpid = CPID.toString(),
             ocid = OCID.toString(),
@@ -925,7 +925,6 @@ internal class SubmissionServiceTest {
 
         @Test
         fun success() {
-
             val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
             val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
             val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
@@ -951,9 +950,13 @@ internal class SubmissionServiceTest {
             val documentFirst = createDocument(id = "document_1")
             val documentSecond = createDocument(id = "document_2")
 
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id1", documentFirst.id)
+            val requirementResponseSecond = createRequirementResponse("candidate.id", "requirement.id2", documentSecond.id)
+
             val params = createValidateSubmissionParams(
                 candidates = listOf(candidateFirst, candidateSecond),
-                documents = listOf(documentFirst, documentSecond)
+                documents = listOf(documentFirst, documentSecond),
+                requirementResponses = listOf(requirementResponse, requirementResponseSecond)
             )
 
             val actual = submissionService.validateSubmission(params)
@@ -984,9 +987,12 @@ internal class SubmissionServiceTest {
             val documentFirst = createDocument(id = "document_1")
             val documentSecond = createDocument(id = "document_2")
 
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id", documentFirst.id)
+
             val params = createValidateSubmissionParams(
                 candidates = listOf(candidate),
-                documents = listOf(documentFirst, documentSecond)
+                documents = listOf(documentFirst, documentSecond),
+                requirementResponses = listOf(requirementResponse)
             )
 
             val actual = submissionService.validateSubmission(params)
@@ -1022,9 +1028,12 @@ internal class SubmissionServiceTest {
             val documentFirst = createDocument(id = "document_1")
             val documentSecond = createDocument(id = "document_2")
 
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id", documentFirst.id)
+
             val params = createValidateSubmissionParams(
                 candidates = listOf(candidate, candidate),
-                documents = listOf(documentFirst, documentSecond)
+                documents = listOf(documentFirst, documentSecond),
+                requirementResponses = listOf(requirementResponse)
             )
 
             val actual = submissionService.validateSubmission(params).error
@@ -1049,9 +1058,12 @@ internal class SubmissionServiceTest {
             val documentFirst = createDocument(id = "document_1")
             val documentSecond = createDocument(id = "document_2")
 
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id", documentFirst.id)
+
             val params = createValidateSubmissionParams(
                 candidates = listOf(candidate),
-                documents = listOf(documentFirst, documentSecond)
+                documents = listOf(documentFirst, documentSecond),
+                requirementResponses = listOf(requirementResponse)
             )
 
             val actual = submissionService.validateSubmission(params).error
@@ -1084,9 +1096,12 @@ internal class SubmissionServiceTest {
             val documentFirst = createDocument(id = "document_1")
             val documentSecond = createDocument(id = "document_2")
 
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id", documentFirst.id)
+
             val params = createValidateSubmissionParams(
                 candidates = listOf(candidate),
-                documents = listOf(documentFirst, documentSecond)
+                documents = listOf(documentFirst, documentSecond),
+                requirementResponses = listOf(requirementResponse)
             )
 
             val actual = submissionService.validateSubmission(params).error
@@ -1099,50 +1114,67 @@ internal class SubmissionServiceTest {
         }
 
         @Test
-        fun duplicateDocuments_fail() {
+        fun severalResponsesToOneRequirementFromOneCandidate_fail() {
+            val businessFunctionDocument = createBusinessFunctionDocument("bf_document_1")
 
-            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
-            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
-            val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
-            val businessFunctionDocumentFourth = createBusinessFunctionDocument("bf_document_4")
-            val businessFunctionDocumentFifth = createBusinessFunctionDocument("bf_document_5")
-
-            val businessFunctionFirst = createBusinessFunction(
-                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
-            )
-            val businessFunctionSecond = createBusinessFunction(
-                id = "bf2", documents = listOf(businessFunctionDocumentThird, businessFunctionDocumentFourth)
-            )
-            val businessFunctionThird = createBusinessFunction(
-                id = "bf3", documents = listOf(businessFunctionDocumentFifth)
-            )
-
-            val personFirst = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
-            val personSecond = createPerson(listOf(businessFunctionThird))
-
-            val candidateFirst = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst, personSecond))
-            val candidateSecond = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst))
-
+            val businessFunction = createBusinessFunction(id = "bf1", documents = listOf(businessFunctionDocument))
+            val person = createPerson(listOf(businessFunction))
+            val candidate = createCandidate(id = UUID.randomUUID(), persones = listOf(person))
             val document = createDocument(id = "document_1")
 
+            val requirementResponseFirst = createRequirementResponse("candidate.id", "requirement.id", document.id)
+            val requirementResponseSecond = createRequirementResponse("candidate.id", "requirement.id", document.id)
+
             val params = createValidateSubmissionParams(
-                candidates = listOf(candidateFirst, candidateSecond),
-                documents = listOf(document, document)
+                candidates = listOf(candidate),
+                documents = listOf(document),
+                requirementResponses = listOf(requirementResponseFirst, requirementResponseSecond)
             )
 
             val actual = submissionService.validateSubmission(params).error
 
-            assertTrue(actual is ValidationErrors.Duplicate.OrganizationDocument)
-            assertEquals("Value '${document.id}' is not unique in 'documents.id'.", actual.description)
+            val expectedError = "VR.COM-5.7.6"
+            val expectedErrorMessage = "Candidate 'candidate.id' forwarded duplicate responses to requirement 'requirement.id'."
+
+            assertEquals(expectedError, actual.code)
+            assertEquals(expectedErrorMessage, actual.description)
+        }
+
+        @Test
+        fun missingEvidenceDocuments_fail() {
+            val businessFunctionDocument = createBusinessFunctionDocument("bf_document_1")
+
+            val businessFunction = createBusinessFunction(id = "bf1", documents = listOf(businessFunctionDocument))
+            val person = createPerson(listOf(businessFunction))
+            val candidate = createCandidate(id = UUID.randomUUID(), persones = listOf(person))
+            val document = createDocument(id = "document_1")
+
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id", "wrong.id")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidate),
+                documents = listOf(document),
+                requirementResponses = listOf(requirementResponse)
+            )
+
+            val actual = submissionService.validateSubmission(params).error
+
+            val expectedError = "VR.COM-5.7.8"
+            val expectedErrorMessage = "Document(s) by id(s) 'wrong.id' stored in evidences has not been received."
+
+            assertEquals(expectedError, actual.code)
+            assertEquals(expectedErrorMessage, actual.description)
         }
 
         private fun createValidateSubmissionParams(
             documents: List<ValidateSubmissionParams.Document>,
-            candidates: List<ValidateSubmissionParams.Candidate>
+            candidates: List<ValidateSubmissionParams.Candidate>,
+            requirementResponses: List<ValidateSubmissionParams.RequirementResponse>
         ) = ValidateSubmissionParams.tryCreate(
             id = UUID.randomUUID().toString(),
             documents = documents,
-            candidates = candidates
+            candidates = candidates,
+            requirementResponses = requirementResponses
         ).get
 
         private fun createCandidate(
@@ -1295,6 +1327,25 @@ internal class SubmissionServiceTest {
             description = "document.description",
             title = "document.title"
         ).get
+
+        private fun createRequirementResponse(candidateId: String, requirementId: RequirementId, documentId: DocumentId) =
+            ValidateSubmissionParams.RequirementResponse.tryCreate(
+                id = UUID.randomUUID().toString(),
+                evidences = listOf(
+                    ValidateSubmissionParams.RequirementResponse.Evidence(
+                        id = "evidence.id",
+                        title = "evidence.title",
+                        description = "evidence.description",
+                        relatedDocument = ValidateSubmissionParams.RequirementResponse.Evidence.RelatedDocument(id = documentId)
+                    )
+                ),
+                value = RequirementRsValue.AsBoolean(true),
+                relatedCandidate = ValidateSubmissionParams.RequirementResponse.RelatedCandidate(
+                    name = "relatedCandidate.name",
+                    id = candidateId
+                ),
+                requirement = ValidateSubmissionParams.RequirementResponse.Requirement(id = requirementId)
+            ).get
     }
 
     @Nested
