@@ -1114,47 +1114,6 @@ internal class SubmissionServiceTest {
         }
 
         @Test
-        fun duplicateDocuments_fail() {
-
-            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
-            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
-            val businessFunctionDocumentThird = createBusinessFunctionDocument("bf_document_3")
-            val businessFunctionDocumentFourth = createBusinessFunctionDocument("bf_document_4")
-            val businessFunctionDocumentFifth = createBusinessFunctionDocument("bf_document_5")
-
-            val businessFunctionFirst = createBusinessFunction(
-                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
-            )
-            val businessFunctionSecond = createBusinessFunction(
-                id = "bf2", documents = listOf(businessFunctionDocumentThird, businessFunctionDocumentFourth)
-            )
-            val businessFunctionThird = createBusinessFunction(
-                id = "bf3", documents = listOf(businessFunctionDocumentFifth)
-            )
-
-            val personFirst = createPerson(listOf(businessFunctionFirst, businessFunctionSecond))
-            val personSecond = createPerson(listOf(businessFunctionThird))
-
-            val candidateFirst = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst, personSecond))
-            val candidateSecond = createCandidate(id = UUID.randomUUID(), persones = listOf(personFirst))
-
-            val document = createDocument(id = "document_1")
-
-            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id", document.id)
-
-            val params = createValidateSubmissionParams(
-                candidates = listOf(candidateFirst, candidateSecond),
-                documents = listOf(document, document),
-                requirementResponses = listOf(requirementResponse)
-            )
-
-            val actual = submissionService.validateSubmission(params).error
-
-            assertTrue(actual is ValidationErrors.Duplicate.OrganizationDocument)
-            assertEquals("Value '${document.id}' is not unique in 'documents.id'.", actual.description)
-        }
-
-        @Test
         fun severalResponsesToOneRequirementFromOneCandidate_fail() {
             val businessFunctionDocument = createBusinessFunctionDocument("bf_document_1")
 
@@ -1371,7 +1330,7 @@ internal class SubmissionServiceTest {
 
         private fun createRequirementResponse(candidateId: String, requirementId: RequirementId, documentId: DocumentId) =
             ValidateSubmissionParams.RequirementResponse.tryCreate(
-                id = "requirementResponse.id",
+                id = UUID.randomUUID().toString(),
                 evidences = listOf(
                     ValidateSubmissionParams.RequirementResponse.Evidence(
                         id = "evidence.id",
