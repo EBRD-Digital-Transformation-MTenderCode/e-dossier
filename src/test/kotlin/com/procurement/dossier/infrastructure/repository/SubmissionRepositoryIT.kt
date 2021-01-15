@@ -371,7 +371,21 @@ class SubmissionRepositoryIT {
                             id = requirement.id
                         )
                     },
-                    value = requirementResponse.value
+                    value = requirementResponse.value,
+                    evidences = requirementResponse.evidences
+                        .map { evidence ->
+                            SubmissionDataEntity.RequirementResponse.Evidence(
+                                id = evidence.id,
+                                description = evidence.description,
+                                title = evidence.title,
+                                relatedDocument = evidence.relatedDocument
+                                    ?.let { relatedDocument ->
+                                        SubmissionDataEntity.RequirementResponse.Evidence.RelatedDocument(
+                                            id = relatedDocument.id
+                                        )
+                                    }
+                            )
+                        }
                 )
             },
             documents = documents.map { document ->
@@ -584,6 +598,14 @@ class SubmissionRepositoryIT {
                     relatedCandidate = Submission.RequirementResponse.RelatedCandidate(
                         id = "relatedCandidate.id",
                         name = "relatedCandidate.name"
+                    ),
+                    evidences = listOf(
+                        Submission.RequirementResponse.Evidence(
+                            id = "evidence.id",
+                            title = "evidence.title",
+                            description = "evidence.description",
+                            relatedDocument = Submission.RequirementResponse.Evidence.RelatedDocument(id = "document.id")
+                        )
                     )
                 )
             ),

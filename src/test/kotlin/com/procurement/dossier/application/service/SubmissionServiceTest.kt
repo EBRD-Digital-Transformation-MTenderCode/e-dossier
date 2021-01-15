@@ -61,6 +61,7 @@ internal class SubmissionServiceTest {
         private val SUBMISSION_QUANTITY = 2L
         private val SUBMISSION_ID_1 = UUID.randomUUID()
         private val SUBMISSION_ID_2 = UUID.randomUUID()
+        private val DOCUMENT_ID = UUID.randomUUID().toString()
 
         private val submissionRepository: SubmissionRepository = mock()
         private val rulesRepository: RulesRepository = mock()
@@ -1607,6 +1608,14 @@ internal class SubmissionServiceTest {
                     relatedCandidate = Submission.RequirementResponse.RelatedCandidate(
                         id = "relatedCandidate.id",
                         name = "relatedCandidate.name"
+                    ),
+                    evidences = listOf(
+                        Submission.RequirementResponse.Evidence(
+                            id = "evidence.id",
+                            title = "evidence.title",
+                            description = "evidence.description",
+                            relatedDocument = Submission.RequirementResponse.Evidence.RelatedDocument(id = DOCUMENT_ID)
+                        )
                     )
                 )
             ),
