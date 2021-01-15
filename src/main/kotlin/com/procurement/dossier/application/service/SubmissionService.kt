@@ -835,10 +835,6 @@ class SubmissionService(
         if (duplicateCandidate != null)
             return ValidationResult.error(ValidationErrors.Duplicate.Candidate(id = duplicateCandidate.id))
 
-        val duplicateDocument = params.documents.getDuplicate { it.id }
-        if (duplicateDocument != null)
-            return ValidationResult.error(ValidationErrors.Duplicate.OrganizationDocument(id = duplicateDocument.id))
-
         checkDuplicatesWithinPerson(params)
             .doOnError { return ValidationResult.error(it) }
 

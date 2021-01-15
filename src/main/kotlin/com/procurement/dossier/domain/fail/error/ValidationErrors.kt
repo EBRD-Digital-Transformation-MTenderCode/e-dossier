@@ -128,12 +128,6 @@ sealed class ValidationErrors(
             numberError = "5.7.1"
         )
 
-        class OrganizationDocument(id: DocumentId) : Duplicate(
-            value = id,
-            entityName = "documents.id",
-            numberError = "5.7.2"
-        )
-
         class PersonBusinessFunction(id: String) : Duplicate(
             value = id,
             entityName = "candidates.persones.businessFunctions.id",
