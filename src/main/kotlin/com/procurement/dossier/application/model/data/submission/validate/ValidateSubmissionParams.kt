@@ -35,14 +35,22 @@ class ValidateSubmissionParams private constructor(
     companion object {
         private const val DOCUMENTS_ATTRIBUTE_NAME = "documents"
         private const val CANDIDATES_ATTRIBUTE_NAME = "candidates"
+        private const val REQUIREMENT_RESPONSES_ATTRIBUTE_NAME = "requirementResponses"
         fun tryCreate(
             id: String,
             candidates: List<Candidate>,
             documents: List<Document>?,
             requirementResponses: List<RequirementResponse>?
         ): Result<ValidateSubmissionParams, DataErrors> {
-            if (documents != null && documents.isEmpty())
-                return failure(DataErrors.Validation.EmptyArray(name = DOCUMENTS_ATTRIBUTE_NAME))
+            documents.validate(notEmptyRule(DOCUMENTS_ATTRIBUTE_NAME))
+                .orForwardFail { return it }
+                .validate(noDuplicatesRule(DOCUMENTS_ATTRIBUTE_NAME, { it.id }))
+                .orForwardFail { return it }
+
+            requirementResponses.validate(notEmptyRule(REQUIREMENT_RESPONSES_ATTRIBUTE_NAME))
+                .orForwardFail { return it }
+                .validate(noDuplicatesRule(REQUIREMENT_RESPONSES_ATTRIBUTE_NAME, { it.id }))
+                .orForwardFail { return it }
 
             if (candidates.isEmpty())
                 return failure(DataErrors.Validation.EmptyArray(name = CANDIDATES_ATTRIBUTE_NAME))
