@@ -14,6 +14,7 @@ import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
+import com.procurement.dossier.domain.model.evidence.EvidenceId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueDeserializer
 import com.procurement.dossier.infrastructure.bind.criteria.RequirementValueSerializer
@@ -251,7 +252,11 @@ data class SubmissionDataEntity(
         @JsonSerialize(using = RequirementValueSerializer::class)
         @param:JsonProperty("value") @field:JsonProperty("value") val value: RequirementRsValue,
         @param:JsonProperty("requirement") @field:JsonProperty("requirement") val requirement: Requirement,
-        @param:JsonProperty("relatedCandidate") @field:JsonProperty("relatedCandidate") val relatedCandidate: RelatedCandidate
+        @param:JsonProperty("relatedCandidate") @field:JsonProperty("relatedCandidate") val relatedCandidate: RelatedCandidate,
+
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        @param:JsonProperty("evidences") @field:JsonProperty("evidences") val evidences: List<Evidence> = emptyList()
+
     ) {
         data class Requirement(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String
@@ -261,6 +266,21 @@ data class SubmissionDataEntity(
             @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
             @param:JsonProperty("name") @field:JsonProperty("name") val name: String
         )
+
+        data class Evidence(
+            @param:JsonProperty("id") @field:JsonProperty("id") val id: EvidenceId,
+            @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
+
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @param:JsonProperty("relatedDocument") @field:JsonProperty("relatedDocument") val relatedDocument: RelatedDocument?
+        ) {
+            data class RelatedDocument(
+                @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId
+            )
+        }
     }
 
     data class Document(
