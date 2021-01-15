@@ -1,6 +1,8 @@
 package com.procurement.dossier.application.model.data.submission.create
 
 import com.procurement.dossier.application.model.data.RequirementRsValue
+import com.procurement.dossier.application.model.noDuplicatesRule
+import com.procurement.dossier.application.model.notEmptyRule
 import com.procurement.dossier.application.model.parseBusinessFunctionType
 import com.procurement.dossier.application.model.parseCpid
 import com.procurement.dossier.application.model.parseDate
@@ -22,11 +24,13 @@ import com.procurement.dossier.domain.model.enums.DocumentType
 import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SupplierType
+import com.procurement.dossier.domain.model.evidence.EvidenceId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.model.submission.SubmissionId
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.Result.Companion.failure
 import com.procurement.dossier.domain.util.asSuccess
+import com.procurement.dossier.domain.util.validate
 import java.time.LocalDateTime
 
 class CreateSubmissionParams private constructor(
@@ -215,7 +219,11 @@ class CreateSubmissionParams private constructor(
                     private const val TITLE_ATTRIBUTE_NAME = "submission.candidates.persones.title"
                     private const val BUSINESS_FUNCTIONS_ATTRIBUTE_NAME = "submission.candidates.persones.businessFunctions"
                     fun tryCreate(
-                        id: String, title: String, name: String, identifier: Identifier, businessFunctions: List<BusinessFunction>
+                        id: String,
+                        title: String,
+                        name: String,
+                        identifier: Identifier,
+                        businessFunctions: List<BusinessFunction>
                     ): Result<Person, DataErrors> {
                         if (businessFunctions.isEmpty())
                             return failure(DataErrors.Validation.EmptyArray(name = BUSINESS_FUNCTIONS_ATTRIBUTE_NAME))
@@ -558,22 +566,33 @@ class CreateSubmissionParams private constructor(
             val id: RequirementResponseId,
             val value: RequirementRsValue,
             val requirement: Requirement,
-            val relatedCandidate: RelatedCandidate
+            val relatedCandidate: RelatedCandidate,
+            val evidences: List<Evidence>
         ) {
             companion object {
+                private const val EVIDENCE_ATTRIBUTE_NAME = "submission.evidences"
+
                 fun tryCreate(
                     id: String,
                     value: RequirementRsValue,
                     requirement: Requirement,
-                    relatedCandidate: RelatedCandidate
+                    relatedCandidate: RelatedCandidate,
+                    evidences: List<Evidence>?
                 ): Result<RequirementResponse, DataErrors> {
                     val parsedRequirementResponseId = parseRequirementResponseId(id)
                         .orForwardFail { fail -> return fail }
+
+                    evidences.validate(notEmptyRule(EVIDENCE_ATTRIBUTE_NAME))
+                        .orForwardFail { return it }
+                        .validate(noDuplicatesRule(EVIDENCE_ATTRIBUTE_NAME, { it.id }))
+                        .orForwardFail { return it }
+
                     return RequirementResponse(
                         id = parsedRequirementResponseId,
                         relatedCandidate = relatedCandidate,
                         requirement = requirement,
-                        value = value
+                        value = value,
+                        evidences = evidences ?: emptyList()
                     ).asSuccess()
                 }
             }
@@ -586,6 +605,17 @@ class CreateSubmissionParams private constructor(
                 val id: String,
                 val name: String
             )
+
+            data class Evidence(
+                val id: EvidenceId,
+                val title: String,
+                val description: String?,
+                val relatedDocument: RelatedDocument?
+            ) {
+                data class RelatedDocument(
+                    val id: DocumentId
+                )
+            }
         }
     }
 }
