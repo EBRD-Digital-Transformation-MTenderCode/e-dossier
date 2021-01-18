@@ -730,7 +730,21 @@ internal class SubmissionServiceTest {
                             id = requirement.id
                         )
                     },
-                    value = requirementResponse.value
+                    value = requirementResponse.value,
+                    evidences = requirementResponse.evidences
+                        .map { evidence ->
+                            FindSubmissionsResult.RequirementResponse.Evidence(
+                                id = evidence.id,
+                                description = evidence.description,
+                                title = evidence.title,
+                                relatedDocument = evidence.relatedDocument
+                                    ?.let { relatedDocument ->
+                                        FindSubmissionsResult.RequirementResponse.Evidence.RelatedDocument(
+                                            id = relatedDocument.id
+                                        )
+                                    }
+                            )
+                        }
                 )
             },
             documents = documents.map { document ->
