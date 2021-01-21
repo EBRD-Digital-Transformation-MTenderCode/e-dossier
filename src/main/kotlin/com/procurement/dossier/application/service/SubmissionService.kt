@@ -976,7 +976,19 @@ class SubmissionService(
                                         id = requirement.id
                                     )
                                 },
-                                value = requirementResponse.value
+                                value = requirementResponse.value,
+                                evidences = requirementResponse.evidences.map { evidence ->
+                                    GetSubmissionsByQualificationIdsResult.Submissions.Detail.RequirementResponse.Evidence(
+                                        id = evidence.id,
+                                        title = evidence.title,
+                                        description = evidence.description,
+                                        relatedDocument = evidence.relatedDocument?.let { relatedDocument ->
+                                            GetSubmissionsByQualificationIdsResult.Submissions.Detail.RequirementResponse.Evidence.RelatedDocument(
+                                                id = relatedDocument.id
+                                            )
+                                        }
+                                    )
+                                }
                             )
                         },
                         documents = submission.documents.map { document ->
