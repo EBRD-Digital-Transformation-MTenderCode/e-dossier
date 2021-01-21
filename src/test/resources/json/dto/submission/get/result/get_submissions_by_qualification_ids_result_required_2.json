@@ -5,6 +5,25 @@
         "id": "84e5d262-9f13-45e0-a539-779cfbdb225e",
         "date": "2020-07-10T10:01:50Z",
         "status": "pending",
+        "requirementResponses": [
+          {
+            "id": "string",
+            "value": "Unknown Type: string,number,integer,boolean",
+            "requirement": {
+              "id": "string"
+            },
+            "relatedCandidate": {
+              "id": "string",
+              "name": "string"
+            },
+            "evidences": [
+              {
+                "id": "string",
+                "title": "string"
+              }
+            ]
+          }
+        ],
         "candidates": [
           {
             "id": "string",
