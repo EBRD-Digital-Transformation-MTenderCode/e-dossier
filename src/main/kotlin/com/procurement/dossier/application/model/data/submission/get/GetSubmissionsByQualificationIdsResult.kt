@@ -1,6 +1,5 @@
 package com.procurement.dossier.application.model.data.submission.get
 
-
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -44,7 +43,10 @@ data class GetSubmissionsByQualificationIdsResult(
                 @JsonSerialize(using = RequirementValueSerializer::class)
                 @param:JsonProperty("value") @field:JsonProperty("value") val value: RequirementRsValue,
                 @param:JsonProperty("requirement") @field:JsonProperty("requirement") val requirement: Requirement,
-                @param:JsonProperty("relatedCandidate") @field:JsonProperty("relatedCandidate") val relatedCandidate: RelatedCandidate
+                @param:JsonProperty("relatedCandidate") @field:JsonProperty("relatedCandidate") val relatedCandidate: RelatedCandidate,
+
+                @JsonInclude(JsonInclude.Include.NON_EMPTY)
+                @param:JsonProperty("evidences") @field:JsonProperty("evidences") val evidences: List<Evidence>?
             ) {
                 data class Requirement(
                     @param:JsonProperty("id") @field:JsonProperty("id") val id: RequirementId
@@ -54,6 +56,21 @@ data class GetSubmissionsByQualificationIdsResult(
                     @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
                     @param:JsonProperty("name") @field:JsonProperty("name") val name: String
                 )
+
+                data class Evidence(
+                    @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+                    @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+
+                    @JsonInclude(JsonInclude.Include.NON_NULL)
+                    @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
+
+                    @JsonInclude(JsonInclude.Include.NON_NULL)
+                    @param:JsonProperty("relatedDocument") @field:JsonProperty("relatedDocument") val relatedDocument: RelatedDocument?
+                ) {
+                    data class RelatedDocument(
+                        @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId
+                    )
+                }
             }
 
             data class Candidate(
