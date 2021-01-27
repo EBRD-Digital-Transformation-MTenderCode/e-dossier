@@ -10,6 +10,8 @@ import com.procurement.dossier.application.model.data.period.extend.ExtendSubmis
 import com.procurement.dossier.application.model.data.period.extend.ExtendSubmissionPeriodResult
 import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateParams
 import com.procurement.dossier.application.model.data.period.get.GetSubmissionPeriodEndDateResult
+import com.procurement.dossier.application.model.data.period.get.v1.GetPreQualificationPeriodEndContext
+import com.procurement.dossier.application.model.data.period.get.v1.GetPreQualificationPeriodEndResult
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
 import com.procurement.dossier.application.model.data.period.save.SavePeriodData
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
@@ -176,6 +178,20 @@ class PeriodService(
             ExtendSubmissionPeriodResult.Period(
                 startDate = updatedPeriod.startDate,
                 endDate = updatedPeriod.endDate
+            )
+        )
+    }
+
+    fun getPreQualificationPeriodEnd(context: GetPreQualificationPeriodEndContext): GetPreQualificationPeriodEndResult {
+        val period = periodRepository.findBy(context.cpid, context.ocid)
+            ?: throw ErrorException(
+                error = ErrorType.PERIOD_NOT_FOUND,
+                message = "No period found by cpid '${context.cpid}' and ocid '${context.ocid}'."
+            )
+
+        return GetPreQualificationPeriodEndResult(
+            GetPreQualificationPeriodEndResult.PreQualification(
+                GetPreQualificationPeriodEndResult.PreQualification.Period(period.endDate)
             )
         )
     }

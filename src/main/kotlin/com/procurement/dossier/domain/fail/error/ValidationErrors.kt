@@ -128,12 +128,6 @@ sealed class ValidationErrors(
             numberError = "5.7.1"
         )
 
-        class OrganizationDocument(id: DocumentId) : Duplicate(
-            value = id,
-            entityName = "documents.id",
-            numberError = "5.7.2"
-        )
-
         class PersonBusinessFunction(id: String) : Duplicate(
             value = id,
             entityName = "candidates.persones.businessFunctions.id",
@@ -161,4 +155,14 @@ sealed class ValidationErrors(
             operationType: Operation
         ) : EntityNotFound("Rule for submission minimum quantity not found by country '$country', pmd '${pmd.name}', operationType '$operationType'.")
     }
+
+    class DuplicateRequirementResponseByOrganization(requirementId: RequirementId, candidateId: String): ValidationErrors(
+        numberError = "5.7.6",
+        description = "Candidate '$candidateId' forwarded duplicate responses to requirement '$requirementId'."
+    )
+
+    class EvidenceDocumentMissing(documentIds: List<DocumentId>): ValidationErrors(
+        numberError = "5.7.8",
+        description = "Document(s) by id(s) '${documentIds.joinToString()}' stored in evidences has not been received."
+    )
 }

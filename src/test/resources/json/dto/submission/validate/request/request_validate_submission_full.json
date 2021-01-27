@@ -144,5 +144,28 @@
       "title": "string",
       "description": "string"
     }
+  ],
+  "requirementResponses": [
+    {
+      "id": "string",
+      "value": "Unknown Type: string,number,integer,boolean",
+      "requirement": {
+        "id": "string"
+      },
+      "relatedCandidate": {
+        "name": "string",
+        "id": "string"
+      },
+      "evidences": [
+        {
+          "id": "string",
+          "title": "string",
+          "description": "string",
+          "relatedDocument": {
+            "id": "string"
+          }
+        }
+      ]
+    }
   ]
 }

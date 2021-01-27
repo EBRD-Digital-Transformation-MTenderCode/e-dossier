@@ -23,7 +23,6 @@ class GetSubmissionsByQualificationIdsParams private constructor(
 
         private const val QUALIFICATIONS_ATTRIBUTE_NAME = "qualifications"
         private const val QUALIFICATIONS_ID_ATTRIBUTE_NAME = "qualifications.id"
-        private const val QUALIFICATIONS_RELATED_SUBMISSION_ATTRIBUTE_NAME = "qualifications.relatedSubmission"
 
         fun tryCreate(
             cpid: String,

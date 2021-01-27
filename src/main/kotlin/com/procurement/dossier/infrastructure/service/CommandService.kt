@@ -6,6 +6,7 @@ import com.procurement.dossier.application.model.data.CreatedCriteria
 import com.procurement.dossier.application.model.data.GetCriteriaData
 import com.procurement.dossier.application.model.data.period.check.CheckPeriodContext
 import com.procurement.dossier.application.model.data.period.extend.ExtendSubmissionPeriodContext
+import com.procurement.dossier.application.model.data.period.get.v1.GetPreQualificationPeriodEndContext
 import com.procurement.dossier.application.model.data.period.save.SavePeriodContext
 import com.procurement.dossier.application.model.data.period.validate.ValidatePeriodContext
 import com.procurement.dossier.application.repository.history.HistoryDao
@@ -313,6 +314,23 @@ class CommandService(
                     ProcurementMethod.OP, ProcurementMethod.TEST_OP,
                     ProcurementMethod.OT, ProcurementMethod.TEST_OT,
                     ProcurementMethod.SV, ProcurementMethod.TEST_SV -> throw ErrorException(ErrorType.INVALID_PMD)
+                }
+            }
+
+            CommandType.GET_PRE_QUALIFICATION_PERIOD_END -> {
+                val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
+                if (historyEntity != null) historyEntity
+                else {
+                    val context = GetPreQualificationPeriodEndContext(
+                        cpid = cm.cpidParsed(),
+                        ocid = cm.ocidParsed()
+                    )
+                    periodService.getPreQualificationPeriodEnd(context = context)
+                        .also {
+                            historyDao.saveHistory(cm.id, cm.command.value(), it)
+                            if (log.isDebugEnabled)
+                                log.debug("Getting prequalification period completed successfully")
+                        }
                 }
             }
         }

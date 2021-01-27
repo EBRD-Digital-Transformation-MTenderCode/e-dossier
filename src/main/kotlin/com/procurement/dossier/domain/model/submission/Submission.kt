@@ -10,6 +10,7 @@ import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
+import com.procurement.dossier.domain.model.evidence.EvidenceId
 import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import java.time.LocalDateTime
 
@@ -201,7 +202,8 @@ data class Submission(
         val id: RequirementResponseId,
         val value: RequirementRsValue,
         val requirement: Requirement,
-        val relatedCandidate: RelatedCandidate
+        val relatedCandidate: RelatedCandidate,
+        val evidences: List<Evidence>
     ) {
         data class Requirement(
             val id: String
@@ -211,6 +213,17 @@ data class Submission(
             val id: String,
             val name: String
         )
+
+        data class Evidence(
+            val id: EvidenceId,
+            val title: String,
+            val description: String?,
+            val relatedDocument: RelatedDocument?
+        ) {
+            data class RelatedDocument(
+                val id: DocumentId
+            )
+        }
     }
 
     data class Document(

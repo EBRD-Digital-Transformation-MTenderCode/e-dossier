@@ -1,5 +1,6 @@
 package com.procurement.dossier.application.model.data.submission.validate
 
+import com.procurement.dossier.application.model.data.RequirementRsValue
 import com.procurement.dossier.application.model.noDuplicatesRule
 import com.procurement.dossier.application.model.notEmptyRule
 import com.procurement.dossier.application.model.parseBusinessFunctionType
@@ -16,6 +17,9 @@ import com.procurement.dossier.domain.model.enums.DocumentType
 import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SupplierType
+import com.procurement.dossier.domain.model.evidence.EvidenceId
+import com.procurement.dossier.domain.model.requirement.RequirementId
+import com.procurement.dossier.domain.model.requirement.response.RequirementResponseId
 import com.procurement.dossier.domain.util.Result
 import com.procurement.dossier.domain.util.Result.Companion.failure
 import com.procurement.dossier.domain.util.asSuccess
@@ -25,22 +29,37 @@ import java.time.LocalDateTime
 class ValidateSubmissionParams private constructor(
     val id: String,
     val candidates: List<Candidate>,
-    val documents: List<Document>
+    val documents: List<Document>,
+    val requirementResponses: List<RequirementResponse>
 ) {
     companion object {
         private const val DOCUMENTS_ATTRIBUTE_NAME = "documents"
         private const val CANDIDATES_ATTRIBUTE_NAME = "candidates"
+        private const val REQUIREMENT_RESPONSES_ATTRIBUTE_NAME = "requirementResponses"
         fun tryCreate(
-            id: String, candidates: List<Candidate>, documents: List<Document>?
+            id: String,
+            candidates: List<Candidate>,
+            documents: List<Document>?,
+            requirementResponses: List<RequirementResponse>?
         ): Result<ValidateSubmissionParams, DataErrors> {
-            if (documents != null && documents.isEmpty())
-                return failure(DataErrors.Validation.EmptyArray(name = DOCUMENTS_ATTRIBUTE_NAME))
+            documents.validate(notEmptyRule(DOCUMENTS_ATTRIBUTE_NAME))
+                .orForwardFail { return it }
+                .validate(noDuplicatesRule(DOCUMENTS_ATTRIBUTE_NAME, { it.id }))
+                .orForwardFail { return it }
+
+            requirementResponses.validate(notEmptyRule(REQUIREMENT_RESPONSES_ATTRIBUTE_NAME))
+                .orForwardFail { return it }
+                .validate(noDuplicatesRule(REQUIREMENT_RESPONSES_ATTRIBUTE_NAME, { it.id }))
+                .orForwardFail { return it }
 
             if (candidates.isEmpty())
                 return failure(DataErrors.Validation.EmptyArray(name = CANDIDATES_ATTRIBUTE_NAME))
 
             return ValidateSubmissionParams(
-                id = id, candidates = candidates, documents = documents ?: emptyList()
+                id = id,
+                candidates = candidates,
+                documents = documents ?: emptyList(),
+                requirementResponses = requirementResponses ?: emptyList()
             ).asSuccess()
         }
     }
@@ -160,7 +179,11 @@ class ValidateSubmissionParams private constructor(
                 private const val TITLE_ATTRIBUTE_NAME = "candidates.persones.title"
                 private const val BUSINESS_FUNCTIONS_ATTRIBUTE_NAME = "candidates.persones.businessFunctions"
                 fun tryCreate(
-                    id: String, title: String, name: String, identifier: Identifier, businessFunctions: List<BusinessFunction>
+                    id: String,
+                    title: String,
+                    name: String,
+                    identifier: Identifier,
+                    businessFunctions: List<BusinessFunction>
                 ): Result<Person, DataErrors> {
                     if (businessFunctions.isEmpty())
                         return failure(DataErrors.Validation.EmptyArray(name = BUSINESS_FUNCTIONS_ATTRIBUTE_NAME))
@@ -500,6 +523,59 @@ class ValidateSubmissionParams private constructor(
                     title = title
                 ).asSuccess()
             }
+        }
+    }
+
+    class RequirementResponse private constructor(
+        val id: RequirementResponseId,
+        val value: RequirementRsValue,
+        val requirement: Requirement,
+        val relatedCandidate: RelatedCandidate,
+        val evidences: List<Evidence>
+    ) {
+        companion object {
+            private const val EVIDENCE_ATTRIBUTE_NAME = "requirementResponses.evidences"
+
+            fun tryCreate(
+                id: String,
+                value: RequirementRsValue,
+                requirement: Requirement,
+                relatedCandidate: RelatedCandidate,
+                evidences: List<Evidence>?
+            ): Result<RequirementResponse, DataErrors> {
+                evidences.validate(notEmptyRule(EVIDENCE_ATTRIBUTE_NAME))
+                    .orForwardFail { return it }
+                    .validate(noDuplicatesRule(EVIDENCE_ATTRIBUTE_NAME, { it.id }))
+                    .orForwardFail { return it }
+
+                return RequirementResponse(
+                    id = id,
+                    requirement = requirement,
+                    value = value,
+                    evidences = evidences ?: emptyList(),
+                    relatedCandidate = relatedCandidate
+                ).asSuccess()
+            }
+        }
+
+        data class Requirement(
+            val id: RequirementId
+        )
+
+        data class RelatedCandidate(
+            val name: String,
+            val id: String
+        )
+
+        data class Evidence(
+            val id: EvidenceId,
+            val title: String,
+            val description: String?,
+            val relatedDocument: RelatedDocument?
+        ) {
+            data class RelatedDocument(
+                val id: DocumentId
+            )
         }
     }
 }

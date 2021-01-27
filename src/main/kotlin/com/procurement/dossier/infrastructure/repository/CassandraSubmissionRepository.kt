@@ -185,7 +185,21 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                             id = requirement.id
                         )
                     },
-                    value = requirementResponse.value
+                    value = requirementResponse.value,
+                    evidences = requirementResponse.evidences
+                        .map { evidence ->
+                            SubmissionDataEntity.RequirementResponse.Evidence(
+                                id = evidence.id,
+                                description = evidence.description,
+                                title = evidence.title,
+                                relatedDocument = evidence.relatedDocument
+                                    ?.let { relatedDocument ->
+                                        SubmissionDataEntity.RequirementResponse.Evidence.RelatedDocument(
+                                            id = relatedDocument.id
+                                        )
+                                    }
+                            )
+                        }
                 )
             },
             documents = documents.map { document ->
@@ -498,7 +512,21 @@ class CassandraSubmissionRepository(private val session: Session) : SubmissionRe
                         id = requirement.id
                     )
                 },
-                value = requirementResponse.value
+                value = requirementResponse.value,
+                evidences = requirementResponse.evidences
+                    .map { evidence ->
+                        Submission.RequirementResponse.Evidence(
+                            id = evidence.id,
+                            description = evidence.description,
+                            title = evidence.title,
+                            relatedDocument = evidence.relatedDocument
+                                ?.let { relatedDocument ->
+                                    Submission.RequirementResponse.Evidence.RelatedDocument(
+                                        id = relatedDocument.id
+                                    )
+                                }
+                        )
+                    }
             )
         }.orEmpty(),
         documents = submissionEntity.documents?.map { document ->

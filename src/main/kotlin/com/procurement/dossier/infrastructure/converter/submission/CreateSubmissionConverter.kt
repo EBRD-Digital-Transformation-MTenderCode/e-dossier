@@ -219,6 +219,18 @@ private fun CreateSubmissionRequest.Submission.RequirementResponse.convert() =
                 id = relatedCandidate.id,
                 name = relatedCandidate.name
             )
+        },
+        evidences = evidences?.map { evidence ->
+            CreateSubmissionParams.Submission.RequirementResponse.Evidence(
+                id = evidence.id,
+                description = evidence.description,
+                title = evidence.title,
+                relatedDocument = evidence.relatedDocument?.let { relatedDocument ->
+                    CreateSubmissionParams.Submission.RequirementResponse.Evidence.RelatedDocument(
+                        id = relatedDocument.id
+                    )
+                }
+            )
         }
     )
 
