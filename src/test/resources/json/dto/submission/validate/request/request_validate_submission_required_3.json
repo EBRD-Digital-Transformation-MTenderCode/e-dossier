@@ -39,5 +39,15 @@
         "scale": "micro"
       }
     }
-  ]
+  ],
+  "mdm": {
+    "registrationSchemes": [
+      {
+        "country": "string",
+        "schemes": [
+          "string"
+        ]
+      }
+    ]
+  }
 }
