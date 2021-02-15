@@ -73,5 +73,15 @@
         "id": "string"
       }
     }
-  ]
+  ],
+  "mdm": {
+    "registrationSchemes": [
+      {
+        "country": "string",
+        "schemes": [
+          "string"
+        ]
+      }
+    ]
+  }
 }

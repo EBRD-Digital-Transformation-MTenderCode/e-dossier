@@ -12,7 +12,9 @@ data class ValidateSubmissionRequest(
     @param:JsonProperty("documents") @field:JsonProperty("documents") val documents: List<Document>?,
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @param:JsonProperty("requirementResponses") @field:JsonProperty("requirementResponses") val requirementResponses: List<RequirementResponse>?
+    @param:JsonProperty("requirementResponses") @field:JsonProperty("requirementResponses") val requirementResponses: List<RequirementResponse>?,
+
+    @param:JsonProperty("mdm") @field:JsonProperty("mdm") val mdm: Mdm
 ) {
     data class Candidate(
         @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
@@ -262,5 +264,15 @@ data class ValidateSubmissionRequest(
                 @param:JsonProperty("id") @field:JsonProperty("id") val id: String
             )
         }
+    }
+
+    data class Mdm(
+        @param:JsonProperty("registrationSchemes") @field:JsonProperty("registrationSchemes") val registrationSchemes: List<RegistrationScheme>
+    ) {
+        data class RegistrationScheme(
+            @param:JsonProperty("country") @field:JsonProperty("country") val country: String,
+            @param:JsonProperty("schemes") @field:JsonProperty("schemes") val schemes: List<String>
+
+        )
     }
 }

@@ -30,7 +30,8 @@ class ValidateSubmissionParams private constructor(
     val id: String,
     val candidates: List<Candidate>,
     val documents: List<Document>,
-    val requirementResponses: List<RequirementResponse>
+    val requirementResponses: List<RequirementResponse>,
+    val mdm: Mdm
 ) {
     companion object {
         private const val DOCUMENTS_ATTRIBUTE_NAME = "documents"
@@ -40,7 +41,8 @@ class ValidateSubmissionParams private constructor(
             id: String,
             candidates: List<Candidate>,
             documents: List<Document>?,
-            requirementResponses: List<RequirementResponse>?
+            requirementResponses: List<RequirementResponse>?,
+            mdm: Mdm
         ): Result<ValidateSubmissionParams, DataErrors> {
             documents.validate(notEmptyRule(DOCUMENTS_ATTRIBUTE_NAME))
                 .orForwardFail { return it }
@@ -59,7 +61,8 @@ class ValidateSubmissionParams private constructor(
                 id = id,
                 candidates = candidates,
                 documents = documents ?: emptyList(),
-                requirementResponses = requirementResponses ?: emptyList()
+                requirementResponses = requirementResponses ?: emptyList(),
+                mdm = mdm
             ).asSuccess()
         }
     }
@@ -576,6 +579,39 @@ class ValidateSubmissionParams private constructor(
             data class RelatedDocument(
                 val id: DocumentId
             )
+        }
+    }
+
+    class Mdm private constructor(
+        val registrationSchemes: List<RegistrationScheme>
+    ) {
+        companion object{
+            private const val REGISTRATION_SCHEMES_ATTRIBUTE_NAME = "mdm.registrationSchemes"
+
+
+            fun tryCreate(registrationSchemes: List<RegistrationScheme>): Result<Mdm, DataErrors>{
+                registrationSchemes.validate(notEmptyRule(REGISTRATION_SCHEMES_ATTRIBUTE_NAME))
+                    .orForwardFail { return it }
+
+                return Mdm(registrationSchemes).asSuccess()
+            }
+        }
+
+        class RegistrationScheme private constructor(
+            val country: String,
+            val schemes: List<String>
+        ) {
+            companion object {
+                private const val SCHEMES_ATTRIBUTE_NAME = "mdm.registrationSchemes.schemes"
+
+
+                fun tryCreate(country: String, schemes: List<String>): Result<RegistrationScheme, DataErrors> {
+                    schemes.validate(notEmptyRule(SCHEMES_ATTRIBUTE_NAME))
+                        .orForwardFail { return it }
+
+                    return RegistrationScheme(country, schemes).asSuccess()
+                }
+            }
         }
     }
 }

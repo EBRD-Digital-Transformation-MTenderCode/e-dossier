@@ -875,6 +875,32 @@ class SubmissionService(
         checkEvidenceDocuments(params)
             .doOnError { return ValidationResult.error(it) }
 
+        checkCandidateScheme(params)
+            .doOnError { return ValidationResult.error(it) }
+
+        return ValidationResult.ok()
+    }
+
+    private fun checkCandidateScheme(params: ValidateSubmissionParams): ValidationResult<ValidationErrors.SchemeNotFound> {
+        val registrationSchemesByCountry = params.mdm.registrationSchemes.associateBy(
+            keySelector = { it.country },
+            valueTransform = { it.schemes.toSet() }
+        )
+
+        params.candidates.forEach { candidate ->
+            val candidateCountry = candidate.address.addressDetails.country.id
+            val registrationSchemes = registrationSchemesByCountry[candidateCountry].orEmpty()
+            val identifierScheme = candidate.identifier.scheme
+            if (identifierScheme !in registrationSchemes)
+                return ValidationResult.error(
+                    ValidationErrors.SchemeNotFound(
+                        identifierScheme = identifierScheme,
+                        country = candidateCountry,
+                        candidateId = candidate.id
+                    )
+                )
+
+        }
         return ValidationResult.ok()
     }
 

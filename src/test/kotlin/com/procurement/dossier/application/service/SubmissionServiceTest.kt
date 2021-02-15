@@ -1181,15 +1181,91 @@ internal class SubmissionServiceTest {
             assertEquals(expectedErrorMessage, actual.description)
         }
 
+        @Test
+        fun missingRegistrationSchemeThatMatchesIdentifierScheme_fail() {
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+
+            val businessFunctionFirst = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+
+            val person = createPerson(listOf(businessFunctionFirst))
+            val candidate = createCandidate(id = UUID.randomUUID(), persones = listOf(person))
+            val document = createDocument(id = "document_1")
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id1", document.id)
+            val mdmWithUnmatchingScheme = createMdm(country = "country.id", scheme = "unmatching.scheme")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidate),
+                documents = listOf(document),
+                requirementResponses = listOf(requirementResponse),
+                mdm = mdmWithUnmatchingScheme
+            )
+
+
+            val actual = submissionService.validateSubmission(params).error
+
+            val expectedError = "VR.COM-5.7.9"
+            val expectedErrorMessage = "Identifier scheme '${candidate.identifier.scheme}' of candidate '${candidate.id}' not found in mdm registration schemes for country '${candidate.address.addressDetails.country.id}'."
+
+            assertEquals(expectedError, actual.code)
+            assertEquals(expectedErrorMessage, actual.description)
+        }
+
+        @Test
+        fun missingRegistrationSchemeByCandidateCountry_fail() {
+            val businessFunctionDocumentFirst = createBusinessFunctionDocument("bf_document_1")
+            val businessFunctionDocumentSecond = createBusinessFunctionDocument("bf_document_2")
+
+            val businessFunctionFirst = createBusinessFunction(
+                id = "bf1", documents = listOf(businessFunctionDocumentFirst, businessFunctionDocumentSecond)
+            )
+
+            val person = createPerson(listOf(businessFunctionFirst))
+            val candidate = createCandidate(id = UUID.randomUUID(), persones = listOf(person))
+            val document = createDocument(id = "document_1")
+            val requirementResponse = createRequirementResponse("candidate.id", "requirement.id1", document.id)
+            val mdmWithoutCandidateCountry = createMdm(country = "some.country", scheme = "identifier.scheme")
+
+            val params = createValidateSubmissionParams(
+                candidates = listOf(candidate),
+                documents = listOf(document),
+                requirementResponses = listOf(requirementResponse),
+                mdm = mdmWithoutCandidateCountry
+            )
+
+
+            val actual = submissionService.validateSubmission(params).error
+
+            val expectedError = "VR.COM-5.7.9"
+            val expectedErrorMessage = "Identifier scheme '${candidate.identifier.scheme}' of candidate '${candidate.id}' not found in mdm registration schemes for country '${candidate.address.addressDetails.country.id}'."
+
+            assertEquals(expectedError, actual.code)
+            assertEquals(expectedErrorMessage, actual.description)
+        }
+
         private fun createValidateSubmissionParams(
             documents: List<ValidateSubmissionParams.Document>,
             candidates: List<ValidateSubmissionParams.Candidate>,
-            requirementResponses: List<ValidateSubmissionParams.RequirementResponse>
+            requirementResponses: List<ValidateSubmissionParams.RequirementResponse>,
+            mdm: ValidateSubmissionParams.Mdm = createMdm(country = "country.id", scheme = ("identifier.scheme"))
         ) = ValidateSubmissionParams.tryCreate(
             id = UUID.randomUUID().toString(),
             documents = documents,
             candidates = candidates,
-            requirementResponses = requirementResponses
+            requirementResponses = requirementResponses,
+            mdm = mdm
+        ).get
+
+
+        private fun createMdm(country: String, scheme: String) = ValidateSubmissionParams.Mdm.tryCreate(
+            listOf(
+                ValidateSubmissionParams.Mdm.RegistrationScheme.tryCreate(
+                    country = country,
+                    schemes = listOf(scheme)
+                ).get
+            )
         ).get
 
         private fun createCandidate(
