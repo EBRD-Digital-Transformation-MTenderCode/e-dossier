@@ -165,4 +165,9 @@ sealed class ValidationErrors(
         numberError = "5.7.8",
         description = "Document(s) by id(s) '${documentIds.joinToString()}' stored in evidences has not been received."
     )
+
+    class SchemeNotFound(identifierScheme: String, country: String, candidateId: String): ValidationErrors(
+        numberError = "5.7.9",
+        description = "Identifier scheme '$identifierScheme' of candidate '$candidateId' not found in mdm registration schemes for country '$country'."
+    )
 }

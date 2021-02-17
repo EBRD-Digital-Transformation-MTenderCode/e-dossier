@@ -11,8 +11,18 @@ fun ValidateSubmissionRequest.convert(): Result<ValidateSubmissionParams, DataEr
         documents = documents?.mapResult { it.convert() }?.orForwardFail { fail -> return fail },
         candidates = candidates.mapResult { it.convert() }.orForwardFail { fail -> return fail },
         requirementResponses = requirementResponses?.mapResult { it.convert() }?.orForwardFail { fail -> return fail },
-        id = id
+        id = id,
+        mdm = mdm.convert().orForwardFail { fail -> return fail }
     )
+
+private fun ValidateSubmissionRequest.Mdm.convert(): Result<ValidateSubmissionParams.Mdm, DataErrors> {
+    val registrationSchemes = registrationSchemes.mapResult { it.convert() }.orForwardFail { fail -> return fail }
+    return ValidateSubmissionParams.Mdm.tryCreate(registrationSchemes = registrationSchemes)
+}
+
+private fun ValidateSubmissionRequest.Mdm.RegistrationScheme.convert(): Result<ValidateSubmissionParams.Mdm.RegistrationScheme, DataErrors> =
+    ValidateSubmissionParams.Mdm.RegistrationScheme.tryCreate(country = country, schemes = schemes)
+
 
 private fun ValidateSubmissionRequest.RequirementResponse.convert() =
     ValidateSubmissionParams.RequirementResponse.tryCreate(
