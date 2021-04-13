@@ -170,4 +170,14 @@ sealed class ValidationErrors(
         numberError = "5.7.9",
         description = "Identifier scheme '$identifierScheme' of candidate '$candidateId' not found in mdm registration schemes for country '$country'."
     )
+
+    sealed class CheckPresenceCandidateInOneSubmission(numberError: String, description: String)
+        : ValidationErrors(numberError, description) {
+
+            class DuplicateCandidate(candidateId: String): CheckPresenceCandidateInOneSubmission(
+                numberError = "5.20.1",
+                description = "Candidate '$candidateId' contains duplicate."
+            )
+
+    }
 }
