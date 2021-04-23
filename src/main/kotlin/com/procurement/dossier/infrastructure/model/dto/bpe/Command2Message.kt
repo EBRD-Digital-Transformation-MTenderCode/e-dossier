@@ -30,6 +30,7 @@ import java.util.*
 enum class Command2Type(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
     CHECK_ACCESS_TO_SUBMISSION("checkAccessToSubmission"),
     CHECK_PERIOD_2("checkPeriod"),
+    CHECK_PRESENCE_CANDIDATE_IN_ONE_SUBMISSION("checkPresenceCandidateInOneSubmission"),
     CREATE_SUBMISSION("createSubmission"),
     FINALIZE_SUBMISSIONS("finalizeSubmissions"),
     FIND_SUBMISSIONS("findSubmissions"),

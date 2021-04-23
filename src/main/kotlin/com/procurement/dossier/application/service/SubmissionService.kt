@@ -1,6 +1,7 @@
 package com.procurement.dossier.application.service
 
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
+import com.procurement.dossier.application.model.data.submission.check.CheckPresenceCandidateInOneSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionResult
 import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsParams
@@ -52,7 +53,7 @@ class SubmissionService(
         val submissionsToWithdraw = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
             .orForwardFail { return it }
             .asSequence()
-            .filter { submission ->  submission.status == SubmissionStatus.PENDING }
+            .filter { submission -> submission.status == SubmissionStatus.PENDING }
             .filter { submission -> isSubmittedByReceivedCandidates(submission, receivedCandidates) }
             .map { submission -> submission.copy(status = SubmissionStatus.WITHDRAWN) }
             .toList()
@@ -112,7 +113,7 @@ class SubmissionService(
     }
 
     fun checkMissingSubmission(available: Collection<SubmissionId>, received: Collection<SubmissionId>)
-    : Result<Collection<SubmissionId>, SubmissionNotFoundFor.FinalizeSubmission> {
+        : Result<Collection<SubmissionId>, SubmissionNotFoundFor.FinalizeSubmission> {
         val missingSubmissions = received.getUnknownElements(received)
         return if (missingSubmissions.isNotEmpty())
             failure(SubmissionNotFoundFor.FinalizeSubmission(missingSubmissions))
@@ -1206,5 +1207,15 @@ class SubmissionService(
                 }
             )
         ).asSuccess()
+    }
+
+    fun checkPresenceCandidateInOneSubmission(params: CheckPresenceCandidateInOneSubmissionParams): ValidationResult<Fail> {
+        val duplicateCandidate = params.submissions.details.flatMap { it.candidates }.getDuplicate { it.id }
+        return if (duplicateCandidate != null)
+            ValidationResult.error(
+                ValidationErrors.CheckPresenceCandidateInOneSubmission.DuplicateCandidate(
+                    duplicateCandidate.id
+                )
+            ) else ValidationResult.ok()
     }
 }
