@@ -1,0 +1,14 @@
+{
+  "submissions": {
+    "details": [
+      {
+        "id": "string",
+        "candidates": [
+          {
+            "id": "string"
+          }
+        ]
+      }
+    ]
+  }
+}
