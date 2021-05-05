@@ -180,4 +180,19 @@ sealed class ValidationErrors(
             )
 
     }
+
+    sealed class PersonesProcessing(numberError: String, description: String)
+        : ValidationErrors(numberError, description) {
+
+        class ValidSubmissionNotFound(cpid: Cpid, ocid: Ocid): PersonesProcessing(
+            numberError = "5.22.1",
+            description = "Submission by cpid '$cpid' and ocid '$ocid' in valid status not found."
+        )
+
+        class CandidateNotFound(candidateId: String): PersonesProcessing(
+            numberError = "5.22.2",
+            description = "Candidate by id '$candidateId' not found."
+        )
+
+    }
 }
