@@ -23,4 +23,5 @@ enum class ErrorType constructor(val code: String, val message: String) {
     PERIOD_NOT_FOUND("10.81", "Period not found."),
     EXTENSION_RULE_NOT_FOUND("10.82", "Extension rule not found."),
     MISSING_ATTRIBUTE("10.83", "Request is missing a required attribute."),
+    INVALID_ROLE("10.84", "Invalid role."),
 }
