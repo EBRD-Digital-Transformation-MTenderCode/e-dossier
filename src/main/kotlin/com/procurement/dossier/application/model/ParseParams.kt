@@ -12,10 +12,12 @@ import com.procurement.dossier.domain.model.document.DocumentId
 import com.procurement.dossier.domain.model.document.tryDocumentId
 import com.procurement.dossier.domain.model.enums.BusinessFunctionType
 import com.procurement.dossier.domain.model.enums.DocumentType
+import com.procurement.dossier.domain.model.enums.PartyRole
 import com.procurement.dossier.domain.model.enums.PersonTitle
 import com.procurement.dossier.domain.model.enums.Scale
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.enums.SupplierType
+import com.procurement.dossier.domain.model.person.PersonId
 import com.procurement.dossier.domain.model.qualification.QualificationId
 import com.procurement.dossier.domain.model.qualification.QualificationStatus
 import com.procurement.dossier.domain.model.requirement.RequirementId
@@ -152,6 +154,16 @@ fun parseQualificationId(
     return id.asSuccess()
 }
 
+fun parsePersonId(value: String, attributeName: String): Result<PersonId, DataErrors.Validation.DataFormatMismatch> =
+    PersonId.tryCreate(value)
+        .mapError {
+            DataErrors.Validation.DataFormatMismatch(
+                name = attributeName,
+                actualValue = value,
+                expectedFormat = "string"
+            )
+        }
+
 fun parsePersonTitle(
     value: String, allowedEnums: Set<PersonTitle>, attributeName: String
 ): Result<PersonTitle, DataErrors> =
@@ -191,6 +203,11 @@ fun parseOperationType(
     value: String, allowedEnums: Set<Operation>, attributeName: String = "operationType"
 ): Result<Operation, DataErrors> =
     parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = Operation)
+
+fun parseRole(
+    value: String, allowedEnums: Set<PartyRole>, attributeName: String
+): Result<PartyRole, DataErrors> =
+    parseEnum(value = value, allowedEnums = allowedEnums, attributeName = attributeName, target = PartyRole)
 
 private fun <T> parseEnum(
     value: String, allowedEnums: Set<T>, attributeName: String, target: EnumElementProvider<T>
