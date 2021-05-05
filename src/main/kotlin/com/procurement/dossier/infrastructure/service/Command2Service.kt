@@ -5,6 +5,7 @@ import com.procurement.dossier.application.service.Logger
 import com.procurement.dossier.infrastructure.dto.ApiResponse2
 import com.procurement.dossier.infrastructure.handler.historical.submission.CreateSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.historical.submission.FinalizeSubmissionsHandler
+import com.procurement.dossier.infrastructure.handler.historical.submission.PersonesProcessingHandler
 import com.procurement.dossier.infrastructure.handler.historical.submission.SetStateForSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.query.FindSubmissionsHandler
 import com.procurement.dossier.infrastructure.handler.query.GetOrganizationsHandler
@@ -40,7 +41,8 @@ class Command2Service(
     private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
     private val getSubmissionsByQualificationIdsHandler: GetSubmissionsByQualificationIdsHandler,
     private val finalizeSubmissionsHandler: FinalizeSubmissionsHandler,
-    private val findSubmissionsHandler: FindSubmissionsHandler
+    private val findSubmissionsHandler: FindSubmissionsHandler,
+    private val personesProcessingHandler: PersonesProcessingHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -77,6 +79,7 @@ class Command2Service(
             Command2Type.FIND_SUBMISSIONS -> findSubmissionsHandler.handle(node = request)
             Command2Type.GET_SUBMISSIONS_BY_QUALIFICATION_IDS -> getSubmissionsByQualificationIdsHandler.handle(node = request)
             Command2Type.FINALIZE_SUBMISSIONS -> finalizeSubmissionsHandler.handle(node = request)
+            Command2Type.PERSONES_PROCESSING -> personesProcessingHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
