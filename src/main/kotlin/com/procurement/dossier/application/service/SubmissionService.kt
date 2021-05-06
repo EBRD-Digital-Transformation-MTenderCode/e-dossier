@@ -1,5 +1,8 @@
 package com.procurement.dossier.application.service
 
+import com.procurement.dossier.application.exception.ErrorException
+import com.procurement.dossier.application.exception.ErrorType
+import com.procurement.dossier.application.model.PersonesProcessingParams
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.check.CheckPresenceCandidateInOneSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
@@ -24,6 +27,7 @@ import com.procurement.dossier.domain.fail.error.ValidationErrors
 import com.procurement.dossier.domain.fail.error.ValidationErrors.EntityNotFound
 import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionNotFoundFor
 import com.procurement.dossier.domain.fail.error.ValidationErrors.SubmissionsNotFoundFor
+import com.procurement.dossier.domain.model.enums.PartyRole
 import com.procurement.dossier.domain.model.enums.SubmissionStatus
 import com.procurement.dossier.domain.model.qualification.QualificationStatus
 import com.procurement.dossier.domain.model.submission.Submission
@@ -39,6 +43,7 @@ import com.procurement.dossier.domain.util.extension.getDuplicate
 import com.procurement.dossier.domain.util.extension.getUnknownElements
 import com.procurement.dossier.domain.util.extension.toSetBy
 import com.procurement.dossier.infrastructure.converter.submission.toCreateSubmissionResult
+import com.procurement.dossier.infrastructure.model.dto.response.PersonesProcessingResponse
 import org.springframework.stereotype.Service
 
 @Service
@@ -394,7 +399,7 @@ class SubmissionService(
         return SetStateForSubmissionResult(id = updatedSubmission.id, status = updatedSubmission.status).asSuccess()
     }
 
-    fun checkAccessToSubmission(params: CheckAccessToSubmissionParams): ValidationResult<Fail> {
+    fun checkAccessToSubmission(params: CheckAccessToSubmissionParams): ValidationResult<Fail>  {
         val credentials = submissionRepository.getSubmissionCredentials(
             cpid = params.cpid, ocid = params.ocid, id = params.submissionId
         ).doReturn { incident -> return ValidationResult.error(incident) }
@@ -1218,4 +1223,263 @@ class SubmissionService(
                 )
             ) else ValidationResult.ok()
     }
+
+    fun personesProcessing(params: PersonesProcessingParams): Result<PersonesProcessingResponse, Fail> {
+        when(params.role){
+            PartyRole.INVITED_CANDIDATE -> {
+                val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+                    .orForwardFail { fail -> return fail }
+                    .filter { it.status == SubmissionStatus.VALID }
+
+                if (submissions.isEmpty())
+                    return ValidationErrors.PersonesProcessing.ValidSubmissionNotFound(params.cpid, params.ocid)
+                        .asFailure()
+
+                val receivedParty = params.parties.first()
+                val submission = submissions.firstOrNull {
+                    it.candidates.map { it.id }.contains(receivedParty.id)
+                } ?: return ValidationErrors.PersonesProcessing.CandidateNotFound(receivedParty.id)
+                    .asFailure()
+
+                val candidateToUpdate = submission.candidates.firstOrNull { it.id == receivedParty.id }!!
+                val updatedPersones = getUpdatedPersones(receivedParty, candidateToUpdate)
+                val updatedCandidate = candidateToUpdate.copy(persones = updatedPersones)
+                val updatedCandidates = submission.candidates.map { candidate ->
+                    if (candidate.id == candidateToUpdate.id)
+                        updatedCandidate
+                    else candidate
+                }
+                val updatedSubmission = submission.copy(candidates = updatedCandidates)
+                submissionRepository.saveSubmission(params.cpid, params.ocid, updatedSubmission)
+                    .doOnFail { return it.asFailure() }
+
+                return updatedCandidate.toPersonesProcessingResponse().asSuccess()
+            }
+            PartyRole.BUYER,
+            PartyRole.PROCURING_ENTITY,
+            PartyRole.CLIENT,
+            PartyRole.CENTRAL_PURCHASING_BODY,
+            PartyRole.AUTHOR,
+            PartyRole.CANDIDATE,
+            PartyRole.ENQUIRER,
+            PartyRole.FUNDER,
+            PartyRole.INVITED_TENDERER,
+            PartyRole.PAYEE,
+            PartyRole.PAYER,
+            PartyRole.REVIEW_BODY,
+            PartyRole.SUPPLIER,
+            PartyRole.TENDERER -> throw ErrorException(ErrorType.INVALID_ROLE)
+        }
+    }
+
+    private fun getUpdatedPersones(
+        receivedParty: PersonesProcessingParams.Party,
+        candidate: Submission.Candidate
+    ): List<Submission.Candidate.Person> =
+        updateStrategy(
+            receivedElements = receivedParty.persones,
+            keyExtractorForReceivedElement = { it.id },
+            availableElements = candidate.persones,
+            keyExtractorForAvailableElement = { it.id },
+            updateBlock = { received -> this.updateBy(received) },
+            createBlock = { received -> received.toDomain() }
+        )
+
+    private fun Submission.Candidate.Person.updateBy(
+        receivedPerson: PersonesProcessingParams.Party.Persone
+    ): Submission.Candidate.Person {
+        val updatedBusinessFunctions = updateStrategy(
+            receivedElements = receivedPerson.businessFunctions,
+            keyExtractorForReceivedElement = { it.id },
+            availableElements = businessFunctions,
+            keyExtractorForAvailableElement = { it.id },
+            updateBlock = { received -> this.updateBy(received) },
+            createBlock = { received -> received.toDomain() }
+        )
+
+        return this.copy(
+            title = receivedPerson.title,
+            name = receivedPerson.name,
+            identifier = receivedPerson.identifier.let { identifier ->
+                Submission.Candidate.Person.Identifier(
+                    id = identifier.id,
+                    scheme = identifier.scheme,
+                    uri = identifier.uri ?: this.identifier.uri
+                )
+            },
+            businessFunctions = updatedBusinessFunctions
+        )
+    }
+
+    private fun Submission.Candidate.Person.BusinessFunction.updateBy(receivedBusinessFunction: PersonesProcessingParams.Party.Persone.BusinessFunction): Submission.Candidate.Person.BusinessFunction {
+        val updatedDocuments = updateStrategy(
+            receivedElements = receivedBusinessFunction.documents.orEmpty(),
+            keyExtractorForReceivedElement = { it.id },
+            availableElements = documents,
+            keyExtractorForAvailableElement = { it.id },
+            updateBlock = { received -> this.updateBy(received) },
+            createBlock = { received -> received.toDomain() }
+        )
+
+        return this.copy(
+            type = receivedBusinessFunction.type,
+            jobTitle = receivedBusinessFunction.jobTitle,
+            period = receivedBusinessFunction.period.let {
+                Submission.Candidate.Person.BusinessFunction.Period(it.startDate)
+            },
+            documents = updatedDocuments
+        )
+    }
+
+    private fun Submission.Candidate.Person.BusinessFunction.Document.updateBy(receivedDocument: PersonesProcessingParams.Party.Persone.BusinessFunction.Document) = this.copy(
+        documentType = receivedDocument.documentType,
+        description = receivedDocument.description ?: this.description,
+        title = receivedDocument.title
+    )
+
+    private fun PersonesProcessingParams.Party.Persone.toDomain() =
+        Submission.Candidate.Person(
+            id = id.value,
+            name = name,
+            title = title,
+            identifier = Submission.Candidate.Person.Identifier(
+                id = identifier.id,
+                scheme = identifier.scheme,
+                uri = identifier.uri
+            ),
+            businessFunctions = businessFunctions.map { businessFunction -> businessFunction.toDomain() }
+        )
+
+    private fun PersonesProcessingParams.Party.Persone.BusinessFunction.Document.toDomain() =
+        Submission.Candidate.Person.BusinessFunction.Document(
+            id = id,
+            title = title,
+            documentType = documentType,
+            description = description
+        )
+
+    private fun PersonesProcessingParams.Party.Persone.BusinessFunction.toDomain() =
+        Submission.Candidate.Person.BusinessFunction(
+            id = id,
+            period = period.let { Submission.Candidate.Person.BusinessFunction.Period(startDate = it.startDate) },
+            jobTitle = jobTitle,
+            type = type,
+            documents = documents?.map { document ->
+                document.toDomain()
+            }.orEmpty()
+        )
+
+    private fun  Submission.Candidate.toPersonesProcessingResponse() = PersonesProcessingResponse(
+        parties = listOf(
+            PersonesProcessingResponse.Party(
+                id = id,
+                name = name,
+                identifier = identifier
+                    .let { identifier ->
+                        PersonesProcessingResponse.Party.Identifier(
+                            scheme = identifier.scheme,
+                            id = identifier.id,
+                            legalName = identifier.legalName,
+                            uri = identifier.uri
+                        )
+                    },
+                additionalIdentifiers = additionalIdentifiers
+                    .map { additionalIdentifier ->
+                        PersonesProcessingResponse.Party.AdditionalIdentifier(
+                            scheme = additionalIdentifier.scheme,
+                            id = additionalIdentifier.id,
+                            legalName = additionalIdentifier.legalName,
+                            uri = additionalIdentifier.uri
+                        )
+                    },
+                address = address
+                    .let { address ->
+                        PersonesProcessingResponse.Party.Address(
+                            streetAddress = address.streetAddress,
+                            postalCode = address.postalCode,
+                            addressDetails = address.addressDetails
+                                .let { addressDetails ->
+                                    PersonesProcessingResponse.Party.Address.AddressDetails(
+                                        country = addressDetails.country
+                                            .let { country ->
+                                                PersonesProcessingResponse.Party.Address.AddressDetails.Country(
+                                                    scheme = country.scheme,
+                                                    id = country.id,
+                                                    description = country.description,
+                                                    uri = country.uri
+                                                )
+                                            },
+                                        region = addressDetails.region
+                                            .let { region ->
+                                                PersonesProcessingResponse.Party.Address.AddressDetails.Region(
+                                                    scheme = region.scheme,
+                                                    id = region.id,
+                                                    description = region.description,
+                                                    uri = region.uri
+                                                )
+                                            },
+                                        locality = addressDetails.locality
+                                            .let { locality ->
+                                                PersonesProcessingResponse.Party.Address.AddressDetails.Locality(
+                                                    scheme = locality.scheme,
+                                                    id = locality.id,
+                                                    description = locality.description,
+                                                    uri = locality.uri
+                                                )
+                                            }
+                                    )
+                                }
+                        )
+                    },
+                contactPoint = contactPoint
+                    .let { contactPoint ->
+                        PersonesProcessingResponse.Party.ContactPoint(
+                            name = contactPoint.name,
+                            email = contactPoint.email,
+                            telephone = contactPoint.telephone,
+                            faxNumber = contactPoint.faxNumber,
+                            url = contactPoint.url
+                        )
+                    },
+                persones = persones.map { person ->
+                    PersonesProcessingResponse.Party.Persone(
+                        id = person.id,
+                        title = person.title,
+                        name = person.name,
+                        identifier = person.identifier
+                            .let { identifier ->
+                                PersonesProcessingResponse.Party.Persone.Identifier(
+                                    id = identifier.id,
+                                    scheme = identifier.scheme,
+                                    uri = identifier.uri
+                                )
+                            },
+                        businessFunctions = person.businessFunctions
+                            .map { businessFunctions ->
+                                PersonesProcessingResponse.Party.Persone.BusinessFunction(
+                                    id = businessFunctions.id,
+                                    jobTitle = businessFunctions.jobTitle,
+                                    type = businessFunctions.type,
+                                    period = businessFunctions.period
+                                        .let { period ->
+                                            PersonesProcessingResponse.Party.Persone.BusinessFunction.Period(
+                                                startDate = period.startDate
+                                            )
+                                        },
+                                    documents = businessFunctions.documents
+                                        .map { document ->
+                                            PersonesProcessingResponse.Party.Persone.BusinessFunction.Document(
+                                                id = document.id,
+                                                title = document.title,
+                                                description = document.description,
+                                                documentType = document.documentType
+                                            )
+                                        }
+                                )
+                            }
+                    )
+                }
+            ))
+    )
+
 }
