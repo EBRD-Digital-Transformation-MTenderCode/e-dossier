@@ -1278,7 +1278,7 @@ class SubmissionService(
     ): List<Submission.Candidate.Person> =
         updateStrategy(
             receivedElements = receivedParty.persones,
-            keyExtractorForReceivedElement = { it.id },
+            keyExtractorForReceivedElement = { it.id.value },
             availableElements = candidate.persones,
             keyExtractorForAvailableElement = { it.id },
             updateBlock = { received -> this.updateBy(received) },
