@@ -94,13 +94,7 @@ val allowedBusinessFunctionType = BusinessFunctionType.allowedElements
     .filter {
         when (it) {
             BusinessFunctionType.AUTHORITY,
-            BusinessFunctionType.CHAIRMAN,
-            BusinessFunctionType.CONTACT_POINT,
-            BusinessFunctionType.PRICE_EVALUATOR,
-            BusinessFunctionType.PRICE_OPENER,
-            BusinessFunctionType.PROCUREMENT_OFFICER,
-            BusinessFunctionType.TECHNICAL_EVALUATOR,
-            BusinessFunctionType.TECHNICAL_OPENER -> true
+            BusinessFunctionType.CONTACT_POINT -> true
         }
     }
     .toSet()
