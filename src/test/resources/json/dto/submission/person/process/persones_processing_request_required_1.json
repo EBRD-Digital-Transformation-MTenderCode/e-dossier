@@ -1,0 +1,38 @@
+{
+  "cpid": "ocds-b3wdp1-MD-1580458690892",
+  "ocid": "ocds-b3wdp1-MD-1580458690892-EV-1580458791896",
+  "role": "invitedCandidate",
+  "parties": [
+    {
+      "id": "string",
+      "persones": [
+        {
+          "id": "string",
+          "name": "string",
+          "title": "Mr.",
+          "identifier": {
+            "scheme": "string",
+            "id": "string"
+          },
+          "businessFunctions": [
+            {
+              "id": "string",
+              "type": "authority",
+              "jobTitle": "string",
+              "period": {
+                "startDate": "2021-05-05T08:01:54Z"
+              },
+              "documents": [
+                {
+                  "id": "string",
+                  "documentType": "regulatoryDocument",
+                  "title": "string"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

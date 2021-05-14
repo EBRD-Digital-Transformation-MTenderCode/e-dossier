@@ -1,0 +1,75 @@
+{
+  "parties": [
+    {
+      "id": "string",
+      "name": "string",
+      "identifier": {
+        "id": "string",
+        "legalName": "string",
+        "scheme": "string"
+      },
+      "additionalIdentifiers": [
+        {
+          "id": "string",
+          "legalName": "string",
+          "scheme": "string"
+        }
+      ],
+      "address": {
+        "streetAddress": "string",
+        "addressDetails": {
+          "country": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string",
+            "uri": "string"
+          },
+          "region": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string",
+            "uri": "string"
+          },
+          "locality": {
+            "id": "string",
+            "description": "string",
+            "scheme": "string"
+          }
+        }
+      },
+      "contactPoint": {
+        "name": "string",
+        "email": "string",
+        "telephone": "string"
+      },
+      "persones": [
+        {
+          "id": "string",
+          "title": "Mr.",
+          "name": "string",
+          "identifier": {
+            "scheme": "string",
+            "id": "string"
+          },
+          "businessFunctions": [
+            {
+              "id": "string",
+              "type": "authority",
+              "jobTitle": "string",
+              "period": {
+                "startDate": "2021-05-05T08:01:54Z"
+              },
+              "documents": [
+                {
+                  "id": "string",
+                  "documentType": "regulatoryDocument",
+                  "title": "string"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -7,13 +7,7 @@ import com.procurement.dossier.domain.EnumElementProvider
 enum class BusinessFunctionType(@JsonValue override val key: String) : EnumElementProvider.Key {
 
     AUTHORITY("authority"),
-    CHAIRMAN("chairman"),
-    PROCUREMENT_OFFICER("procurementOfficer"),
-    CONTACT_POINT("contactPoint"),
-    TECHNICAL_EVALUATOR("technicalEvaluator"),
-    TECHNICAL_OPENER("technicalOpener"),
-    PRICE_OPENER("priceOpener"),
-    PRICE_EVALUATOR("priceEvaluator");
+    CONTACT_POINT("contactPoint");
 
     override fun toString(): String = key
 

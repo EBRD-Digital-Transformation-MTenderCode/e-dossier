@@ -229,12 +229,6 @@ class ValidateSubmissionParams private constructor(
                             when (value) {
                                 BusinessFunctionType.AUTHORITY,
                                 BusinessFunctionType.CONTACT_POINT -> true
-                                BusinessFunctionType.CHAIRMAN,
-                                BusinessFunctionType.PRICE_EVALUATOR,
-                                BusinessFunctionType.PRICE_OPENER,
-                                BusinessFunctionType.PROCUREMENT_OFFICER,
-                                BusinessFunctionType.TECHNICAL_EVALUATOR,
-                                BusinessFunctionType.TECHNICAL_OPENER -> false
                             }
                         }.toSet()
 
