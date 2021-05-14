@@ -640,7 +640,7 @@ class SubmissionRepositoryIT {
                             businessFunctions = listOf(
                                 Submission.Candidate.Person.BusinessFunction(
                                     id = "businessFunction.id",
-                                    type = BusinessFunctionType.CHAIRMAN,
+                                    type = BusinessFunctionType.CONTACT_POINT,
                                     documents = listOf(
                                         Submission.Candidate.Person.BusinessFunction.Document(
                                             documentType = DocumentType.REGULATORY_DOCUMENT,

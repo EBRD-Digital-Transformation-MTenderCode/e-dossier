@@ -38,6 +38,7 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
     GET_SUBMISSION_PERIOD_END_DATE("getSubmissionPeriodEndDate"),
     GET_SUBMISSION_STATE_BY_IDS("getSubmissionStateByIds"),
     GET_SUBMISSIONS_BY_QUALIFICATION_IDS("getSubmissionsByQualificationIds"),
+    PERSONES_PROCESSING("personesProcessing"),
     SET_STATE_FOR_SUBMISSION("setStateForSubmission"),
     VALIDATE_REQUIREMENT_RESPONSE("validateRequirementResponse"),
     VALIDATE_SUBMISSION("validateSubmission"),
