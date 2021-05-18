@@ -3,6 +3,7 @@ package com.procurement.dossier.application.service
 import com.procurement.dossier.application.exception.ErrorException
 import com.procurement.dossier.application.exception.ErrorType
 import com.procurement.dossier.application.model.PersonesProcessingParams
+import com.procurement.dossier.application.model.data.errors.GetInvitedCandidatesOwnersErrors
 import com.procurement.dossier.application.model.data.submission.check.CheckAccessToSubmissionParams
 import com.procurement.dossier.application.model.data.submission.check.CheckPresenceCandidateInOneSubmissionParams
 import com.procurement.dossier.application.model.data.submission.create.CreateSubmissionParams
@@ -11,8 +12,11 @@ import com.procurement.dossier.application.model.data.submission.finalize.Finali
 import com.procurement.dossier.application.model.data.submission.finalize.FinalizeSubmissionsResult
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsParams
 import com.procurement.dossier.application.model.data.submission.find.FindSubmissionsResult
+import com.procurement.dossier.application.model.data.submission.get.GetInvitedCandidatesOwnersParams
+import com.procurement.dossier.application.model.data.submission.get.GetInvitedCandidatesOwnersResult
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsParams
 import com.procurement.dossier.application.model.data.submission.get.GetSubmissionsByQualificationIdsResult
+import com.procurement.dossier.application.model.data.submission.get.fromDomain
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsParams
 import com.procurement.dossier.application.model.data.submission.organization.GetOrganizationsResult
 import com.procurement.dossier.application.model.data.submission.state.get.GetSubmissionStateByIdsParams
@@ -431,6 +435,19 @@ class SubmissionService(
             return ValidationErrors.OrganizationsNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
 
         return organizations.asSuccess()
+    }
+
+    fun getInvitedCandidatesOwners(params: GetInvitedCandidatesOwnersParams): Result<GetInvitedCandidatesOwnersResult, Fail> {
+        val submissions = submissionRepository.findBy(cpid = params.cpid, ocid = params.ocid)
+            .orForwardFail { return it }
+
+        if (submissions.isEmpty())
+            return GetInvitedCandidatesOwnersErrors.SubmissionNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
+
+        return submissions
+            .map { submission -> GetInvitedCandidatesOwnersResult.Candidate.fromDomain(submission) }
+            .let { GetInvitedCandidatesOwnersResult(it) }
+            .asSuccess()
     }
 
     private fun Submission.Candidate.toGetOrganizationsResult() =

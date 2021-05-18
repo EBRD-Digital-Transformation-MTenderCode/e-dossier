@@ -8,6 +8,7 @@ import com.procurement.dossier.infrastructure.handler.historical.submission.Fina
 import com.procurement.dossier.infrastructure.handler.historical.submission.PersonesProcessingHandler
 import com.procurement.dossier.infrastructure.handler.historical.submission.SetStateForSubmissionHandler
 import com.procurement.dossier.infrastructure.handler.query.FindSubmissionsHandler
+import com.procurement.dossier.infrastructure.handler.query.GetInvitedCandidatesOwnersHandler
 import com.procurement.dossier.infrastructure.handler.query.GetOrganizationsHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionPeriodEndDateHandler
 import com.procurement.dossier.infrastructure.handler.query.GetSubmissionStateByIdsHandler
@@ -28,21 +29,22 @@ import org.springframework.stereotype.Service
 @Service
 class Command2Service(
     private val logger: Logger,
-    private val validationRequirementResponseHandler: ValidateRequirementResponseHandler,
-    private val validateSubmissionHandler: ValidateSubmissionHandler,
-    private val createSubmissionHandler: CreateSubmissionHandler,
+    private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler,
     private val checkPeriod2Handler: CheckPeriod2Handler,
     private val checkPresenceCandidateInOneSubmissionHandler: CheckPresenceCandidateInOneSubmissionHandler,
-    private val getSubmissionStateByIdsHandler: GetSubmissionStateByIdsHandler,
-    private val setStateForSubmissionHandler: SetStateForSubmissionHandler,
-    private val checkAccessToSubmissionHandler: CheckAccessToSubmissionHandler,
-    private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler,
-    private val getOrganizationsHandler: GetOrganizationsHandler,
-    private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
-    private val getSubmissionsByQualificationIdsHandler: GetSubmissionsByQualificationIdsHandler,
+    private val createSubmissionHandler: CreateSubmissionHandler,
     private val finalizeSubmissionsHandler: FinalizeSubmissionsHandler,
     private val findSubmissionsHandler: FindSubmissionsHandler,
-    private val personesProcessingHandler: PersonesProcessingHandler
+    private val getInvitedCandidatesOwnersHandler: GetInvitedCandidatesOwnersHandler,
+    private val getOrganizationsHandler: GetOrganizationsHandler,
+    private val getSubmissionPeriodEndDateHandler: GetSubmissionPeriodEndDateHandler,
+    private val getSubmissionStateByIdsHandler: GetSubmissionStateByIdsHandler,
+    private val getSubmissionsByQualificationIdsHandler: GetSubmissionsByQualificationIdsHandler,
+    private val personesProcessingHandler: PersonesProcessingHandler,
+    private val setStateForSubmissionHandler: SetStateForSubmissionHandler,
+    private val validateSubmissionHandler: ValidateSubmissionHandler,
+    private val validationRequirementResponseHandler: ValidateRequirementResponseHandler,
+    private val verifySubmissionPeriodEndHandler: VerifySubmissionPeriodEndHandler
 ) {
 
     fun execute(request: JsonNode): ApiResponse2 {
@@ -65,21 +67,22 @@ class Command2Service(
             .get
 
         val response: ApiResponse2 = when (action) {
-            Command2Type.VALIDATE_REQUIREMENT_RESPONSE -> validationRequirementResponseHandler.handle(node = request)
-            Command2Type.VALIDATE_SUBMISSION -> validateSubmissionHandler.handle(node = request)
-            Command2Type.CREATE_SUBMISSION -> createSubmissionHandler.handle(node = request)
+            Command2Type.CHECK_ACCESS_TO_SUBMISSION -> checkAccessToSubmissionHandler.handle(node = request)
             Command2Type.CHECK_PERIOD_2 -> checkPeriod2Handler.handle(node = request)
             Command2Type.CHECK_PRESENCE_CANDIDATE_IN_ONE_SUBMISSION -> checkPresenceCandidateInOneSubmissionHandler.handle(node = request)
-            Command2Type.GET_SUBMISSION_STATE_BY_IDS -> getSubmissionStateByIdsHandler.handle(node = request)
-            Command2Type.SET_STATE_FOR_SUBMISSION -> setStateForSubmissionHandler.handle(node = request)
-            Command2Type.CHECK_ACCESS_TO_SUBMISSION -> checkAccessToSubmissionHandler.handle(node = request)
-            Command2Type.VERIFY_SUBMISSION_PERIOD_END -> verifySubmissionPeriodEndHandler.handle(node = request)
-            Command2Type.GET_ORGANIZATIONS -> getOrganizationsHandler.handle(node = request)
-            Command2Type.GET_SUBMISSION_PERIOD_END_DATE -> getSubmissionPeriodEndDateHandler.handle(node = request)
-            Command2Type.FIND_SUBMISSIONS -> findSubmissionsHandler.handle(node = request)
-            Command2Type.GET_SUBMISSIONS_BY_QUALIFICATION_IDS -> getSubmissionsByQualificationIdsHandler.handle(node = request)
+            Command2Type.CREATE_SUBMISSION -> createSubmissionHandler.handle(node = request)
             Command2Type.FINALIZE_SUBMISSIONS -> finalizeSubmissionsHandler.handle(node = request)
+            Command2Type.FIND_SUBMISSIONS -> findSubmissionsHandler.handle(node = request)
+            Command2Type.GET_INVITED_CANDIDATES_OWNERS -> getInvitedCandidatesOwnersHandler.handle(node = request)
+            Command2Type.GET_ORGANIZATIONS -> getOrganizationsHandler.handle(node = request)
+            Command2Type.GET_SUBMISSIONS_BY_QUALIFICATION_IDS -> getSubmissionsByQualificationIdsHandler.handle(node = request)
+            Command2Type.GET_SUBMISSION_PERIOD_END_DATE -> getSubmissionPeriodEndDateHandler.handle(node = request)
+            Command2Type.GET_SUBMISSION_STATE_BY_IDS -> getSubmissionStateByIdsHandler.handle(node = request)
             Command2Type.PERSONES_PROCESSING -> personesProcessingHandler.handle(node = request)
+            Command2Type.SET_STATE_FOR_SUBMISSION -> setStateForSubmissionHandler.handle(node = request)
+            Command2Type.VALIDATE_REQUIREMENT_RESPONSE -> validationRequirementResponseHandler.handle(node = request)
+            Command2Type.VALIDATE_SUBMISSION -> validateSubmissionHandler.handle(node = request)
+            Command2Type.VERIFY_SUBMISSION_PERIOD_END -> verifySubmissionPeriodEndHandler.handle(node = request)
         }
 
         logger.info("DataOfResponse: '$response'.")
