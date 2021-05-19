@@ -445,6 +445,7 @@ class SubmissionService(
             return GetInvitedCandidatesOwnersErrors.SubmissionNotFound(cpid = params.cpid, ocid = params.ocid).asFailure()
 
         return submissions
+            .filter { submission -> submission.status == SubmissionStatus.VALID }
             .map { submission -> GetInvitedCandidatesOwnersResult.Candidate.fromDomain(submission) }
             .let { GetInvitedCandidatesOwnersResult(it) }
             .asSuccess()
