@@ -35,6 +35,7 @@ enum class Command2Type(@JsonValue override val key: String) : Action, EnumEleme
     FINALIZE_SUBMISSIONS("finalizeSubmissions"),
     FIND_SUBMISSIONS("findSubmissions"),
     GET_ORGANIZATIONS("getOrganizations"),
+    GET_INVITED_CANDIDATES_OWNERS("getInvitedCandidatesOwners"),
     GET_SUBMISSION_PERIOD_END_DATE("getSubmissionPeriodEndDate"),
     GET_SUBMISSION_STATE_BY_IDS("getSubmissionStateByIds"),
     GET_SUBMISSIONS_BY_QUALIFICATION_IDS("getSubmissionsByQualificationIds"),

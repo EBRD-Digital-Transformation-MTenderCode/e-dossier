@@ -1,0 +1,13 @@
+{
+  "candidates": [
+    {
+      "owner": "string",
+      "organizations": [
+        {
+          "id": "string",
+          "name": "string"
+        }
+      ]
+    }
+  ]
+}
